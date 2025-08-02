@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应商管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button class="p-2 text-gray-600">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </button>
+            <h1 class="text-xl font-bold text-gray-900">供应商管理</h1>
+            <button class="p-2 text-gray-600" onclick="addSupplier()">
+                <i class="fas fa-plus text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-4">
+        <!-- 搜索和筛选 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex space-x-3 mb-3">
+                <div class="flex-1 relative">
+                    <input type="text" placeholder="搜索供应商名称、联系人..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <button class="p-2 border border-gray-200 rounded-xl">
+                    <i class="fas fa-filter text-gray-400"></i>
+                </button>
+            </div>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm">全部</button>
+                <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm">茶叶原料</button>
+                <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm">包装材料</button>
+                <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm">生产设备</button>
+            </div>
+        </div>
+
+        <!-- 供应商统计 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">供应商概况</h3>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-xl font-bold text-blue-600">28</div>
+                    <div class="text-xs text-gray-500">总数</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl font-bold text-green-600">18</div>
+                    <div class="text-xs text-gray-500">活跃</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl font-bold text-orange-600">6</div>
+                    <div class="text-xs text-gray-500">待审核</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl font-bold text-red-600">4</div>
+                    <div class="text-xs text-gray-500">已停用</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 供应商列表 -->
+        <div class="space-y-3">
+            <!-- 优质供应商 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow cursor-pointer hover:bg-gray-50 transition-colors" onclick="window.open('supplier-detail.html', '_blank')">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-leaf text-green-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-gray-900">安溪茶叶合作社</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">A+级</span>
+                                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">优质</span>
+                                <i class="fas fa-chevron-right text-gray-400 ml-2"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-2">
+                            联系人：李经理 | 电话：138****5678
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-gray-500">茶叶原料</span>
+                                <span class="text-xs text-gray-500">合作3年</span>
+                                <span class="text-xs text-green-600">¥45.6万/年</span>
+                            </div>
+                            <div class="flex space-x-2" onclick="event.stopPropagation()">
+                                <button class="p-1 text-blue-500">
+                                    <i class="fas fa-phone text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-ellipsis-v text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-box text-blue-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-gray-900">福建包装材料厂</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">A级</span>
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">活跃</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-2">
+                            联系人：王总 | 电话：139****7890
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-gray-500">包装材料</span>
+                                <span class="text-xs text-gray-500">合作2年</span>
+                                <span class="text-xs text-green-600">¥28.3万/年</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="p-1 text-blue-500">
+                                    <i class="fas fa-phone text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-ellipsis-v text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-cogs text-purple-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-gray-900">泉州机械设备公司</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">B+级</span>
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">活跃</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-2">
+                            联系人：陈工 | 电话：137****4567
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-gray-500">生产设备</span>
+                                <span class="text-xs text-gray-500">合作1年</span>
+                                <span class="text-xs text-green-600">¥15.8万/年</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="p-1 text-blue-500">
+                                    <i class="fas fa-phone text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-ellipsis-v text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 待审核供应商 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow border-l-4 border-orange-400">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-orange-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-gray-900">厦门茶具用品店</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">待审核</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-2">
+                            联系人：张老板 | 电话：135****2468
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-gray-500">茶具用品</span>
+                                <span class="text-xs text-gray-500">申请时间：2024-01-10</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-green-500 text-white rounded-lg text-xs">通过</button>
+                                <button class="px-3 py-1 bg-red-500 text-white rounded-lg text-xs">拒绝</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已停用供应商 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow opacity-60">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-ban text-gray-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-gray-900">龙岩茶叶加工厂</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">已停用</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mb-2">
+                            联系人：刘厂长 | 电话：136****1357
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-xs text-gray-500">茶叶加工</span>
+                                <span class="text-xs text-gray-500">停用时间：2023-12-15</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-blue-500 text-white rounded-lg text-xs">重新启用</button>
+                                <button class="p-1 text-gray-500">
+                                    <i class="fas fa-ellipsis-v text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">快捷操作</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="flex items-center justify-center space-x-2 p-3 bg-blue-50 rounded-xl">
+                    <i class="fas fa-plus text-blue-600"></i>
+                    <span class="text-blue-600 font-medium">添加供应商</span>
+                </button>
+                <button class="flex items-center justify-center space-x-2 p-3 bg-green-50 rounded-xl">
+                    <i class="fas fa-file-import text-green-600"></i>
+                    <span class="text-green-600 font-medium">批量导入</span>
+                </button>
+                <button class="flex items-center justify-center space-x-2 p-3 bg-purple-50 rounded-xl">
+                    <i class="fas fa-chart-bar text-purple-600"></i>
+                    <span class="text-purple-600 font-medium">供应商分析</span>
+                </button>
+                <button class="flex items-center justify-center space-x-2 p-3 bg-orange-50 rounded-xl">
+                    <i class="fas fa-file-export text-orange-600"></i>
+                    <span class="text-orange-600 font-medium">导出数据</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-6"></div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function addSupplier() {
+            window.location.href = 'add-supplier.html';
+        }
+
+        function editSupplier(id) {
+            alert('编辑供应商: ' + id);
+        }
+
+        function deleteSupplier(id) {
+            if (confirm('确定要删除这个供应商吗？')) {
+                alert('供应商已删除: ' + id);
+            }
+        }
+
+        function viewSupplierDetail(id) {
+            alert('查看供应商详情: ' + id);
+        }
+    </script>
+</body>
+</html>

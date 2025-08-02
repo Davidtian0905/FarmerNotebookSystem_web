@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应商详情 - 茶农手账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .status-bar {
+            height: 44px;
+            background: #000;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .phone-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="phone-container">
+        <!-- iOS状态栏 -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>茶农手账</span>
+            <div class="flex items-center space-x-1">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-three-quarters text-xs"></i>
+            </div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <div class="gradient-bg text-white p-4">
+            <div class="flex items-center justify-between">
+                <button onclick="history.back()" class="p-2">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-lg font-semibold">供应商详情</h1>
+                <button class="p-2">
+                    <i class="fas fa-edit text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4 pb-20">
+            <!-- 供应商基本信息 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-start space-x-4">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-leaf text-green-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-xl font-bold text-gray-900">安溪茶叶合作社</h2>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">A+级</span>
+                                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">优质</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <i class="fas fa-user w-4 mr-2"></i>
+                                <span>联系人：陈经理</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-phone w-4 mr-2"></i>
+                                <span>159****8888</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt w-4 mr-2"></i>
+                                <span>福建省泉州市安溪县</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar w-4 mr-2"></i>
+                                <span>合作时间：5年</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-tags w-4 mr-2"></i>
+                                <span>主营：铁观音、乌龙茶原料</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 采购统计 -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-red-600">¥156.8万</div>
+                    <div class="text-xs text-gray-500 mt-1">累计采购</div>
+                </div>
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-blue-600">89</div>
+                    <div class="text-xs text-gray-500 mt-1">采购次数</div>
+                </div>
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-green-600">¥176</div>
+                    <div class="text-xs text-gray-500 mt-1">平均单价</div>
+                </div>
+            </div>
+
+ 
+
+            <!-- 月度采购趋势 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">月度采购趋势</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-blue-500 text-white rounded-lg text-xs">近6月</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs">近1年</button>
+                    </div>
+                </div>
+                <div class="h-48">
+                    <canvas id="supplierTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 供应商品分析 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">供应商品分析</h3>
+                </div>
+                <div class="h-48">
+                    <canvas id="supplierProductChart"></canvas>
+                </div>
+            </div>
+
+           <!-- 供应商评级 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">供应商评级</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">产品质量</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-24 h-2 bg-gray-200 rounded-full">
+                                <div class="w-20 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-medium">4.8</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">交付及时性</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-24 h-2 bg-gray-200 rounded-full">
+                                <div class="w-22 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-medium">4.6</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">价格合理性</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-24 h-2 bg-gray-200 rounded-full">
+                                <div class="w-18 h-2 bg-yellow-500 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-medium">4.2</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">服务态度</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-24 h-2 bg-gray-200 rounded-full">
+                                <div class="w-20 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-medium">4.7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 快捷操作 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">快捷操作</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <button class="flex flex-col items-center p-3 bg-blue-50 rounded-xl">
+                        <i class="fas fa-phone text-blue-600 text-xl mb-2"></i>
+                        <span class="text-xs text-blue-600">拨打电话</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-green-50 rounded-xl">
+                        <i class="fab fa-weixin text-green-600 text-xl mb-2"></i>
+                        <span class="text-xs text-green-600">微信联系</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-purple-50 rounded-xl">
+                        <i class="fas fa-plus text-purple-600 text-xl mb-2"></i>
+                        <span class="text-xs text-purple-600">新建采购</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-orange-50 rounded-xl">
+                        <i class="fas fa-star text-orange-600 text-xl mb-2"></i>
+                        <span class="text-xs text-orange-600">评价供应商</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 最近采购记录 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">全部采购记录</h3>
+                </div>
+                <div class="space-y-3">
+                    <!-- 采购记录1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-leaf text-green-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">铁观音原料</div>
+                                <div class="text-sm text-gray-500">2024-01-12 10:30</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-red-600">-¥15,600</div>
+                            <div class="text-sm text-gray-500">50斤</div>
+                        </div>
+                    </div>
+
+                    <!-- 采购记录2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-seedling text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">乌龙茶原料</div>
+                                <div class="text-sm text-gray-500">2024-01-08 14:15</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-red-600">-¥8,800</div>
+                            <div class="text-sm text-gray-500">30斤</div>
+                        </div>
+                    </div>
+
+                    <!-- 采购记录3 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-spa text-purple-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">特级铁观音</div>
+                                <div class="text-sm text-gray-500">2024-01-03 09:45</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-red-600">-¥22,400</div>
+                            <div class="text-sm text-gray-500">20斤</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 月度采购趋势图
+        const trendCtx = document.getElementById('supplierTrendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['8月', '9月', '10月', '11月', '12月', '1月'],
+                datasets: [{
+                    label: '采购金额',
+                    data: [25000, 32000, 18000, 41000, 28000, 35000],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 1000) + 'k';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 供应商品分析饼图
+        const productCtx = document.getElementById('supplierProductChart').getContext('2d');
+        new Chart(productCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['铁观音原料', '乌龙茶原料', '特级铁观音', '绿茶原料', '其他'],
+                datasets: [{
+                    data: [40, 25, 20, 10, 5],
+                    backgroundColor: [
+                        '#10b981',
+                        '#3b82f6',
+                        '#8b5cf6',
+                        '#f59e0b',
+                        '#6b7280'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

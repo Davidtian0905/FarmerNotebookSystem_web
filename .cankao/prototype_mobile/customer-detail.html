@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户详情 - 茶农手账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .status-bar {
+            height: 44px;
+            background: #000;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .phone-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="phone-container">
+        <!-- iOS状态栏 -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>茶农手账</span>
+            <div class="flex items-center space-x-1">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-three-quarters text-xs"></i>
+            </div>
+        </div>
+
+        <!-- 顶部导航 -->
+        <div class="gradient-bg text-white p-4">
+            <div class="flex items-center justify-between">
+                <button onclick="history.back()" class="p-2">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-lg font-semibold">客户详情</h1>
+                <button class="p-2">
+                    <i class="fas fa-edit text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4 pb-20">
+            <!-- 客户基本信息 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-start space-x-4">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-crown text-yellow-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-xl font-bold text-gray-900">福建茶叶批发商</h2>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">VIP</span>
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">高价值</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <i class="fas fa-user w-4 mr-2"></i>
+                                <span>联系人：林总</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-phone w-4 mr-2"></i>
+                                <span>138****5678</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt w-4 mr-2"></i>
+                                <span>福建省福州市</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar w-4 mr-2"></i>
+                                <span>合作时间：3年</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 交易统计 -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-blue-600">¥285.6万</div>
+                    <div class="text-xs text-gray-500 mt-1">累计消费</div>
+                </div>
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-green-600">156</div>
+                    <div class="text-xs text-gray-500 mt-1">交易次数</div>
+                </div>
+                <div class="bg-white rounded-xl p-3 card-shadow text-center">
+                    <div class="text-1g font-bold text-orange-600">¥18,300</div>
+                    <div class="text-xs text-gray-500 mt-1">平均单价</div>
+                </div>
+            </div>
+
+            <!-- 月度消费趋势 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">月度消费趋势</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-blue-500 text-white rounded-lg text-xs">近6月</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs">近1年</button>
+                    </div>
+                </div>
+                <div class="h-48">
+                    <canvas id="customerTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 购买商品分析 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">购买商品分析</h3>
+                </div>
+                <div class="h-48">
+                    <canvas id="customerProductChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">快捷操作</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <button class="flex flex-col items-center p-3 bg-blue-50 rounded-xl">
+                        <i class="fas fa-phone text-blue-600 text-xl mb-2"></i>
+                        <span class="text-xs text-blue-600">拨打电话</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-green-50 rounded-xl">
+                        <i class="fab fa-weixin text-green-600 text-xl mb-2"></i>
+                        <span class="text-xs text-green-600">微信联系</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-purple-50 rounded-xl">
+                        <i class="fas fa-plus text-purple-600 text-xl mb-2"></i>
+                        <span class="text-xs text-purple-600">新建订单</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 bg-orange-50 rounded-xl">
+                        <i class="fas fa-chart-line text-orange-600 text-xl mb-2"></i>
+                        <span class="text-xs text-orange-600">查看分析</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 最近交易记录 -->
+            <div class="bg-white rounded-2xl p-4 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">全部交易记录</h3>
+                </div>
+                <div class="space-y-3">
+                    <!-- 交易记录1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-leaf text-green-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">红茶礼盒</div>
+                                <div class="text-sm text-gray-500">2024-01-14 14:30</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-green-600">+¥28,500</div>
+                            <div class="text-sm text-gray-500">15件</div>
+                        </div>
+                    </div>
+
+                    <!-- 交易记录2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-box text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">乌龙茶散装</div>
+                                <div class="text-sm text-gray-500">2024-01-10 09:15</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-green-600">+¥12,800</div>
+                            <div class="text-sm text-gray-500">20斤</div>
+                        </div>
+                    </div>
+
+                    <!-- 交易记录3 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-gift text-purple-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">铁观音精装</div>
+                                <div class="text-sm text-gray-500">2024-01-05 16:45</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-green-600">+¥35,600</div>
+                            <div class="text-sm text-gray-500">8件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 月度消费趋势图
+        const trendCtx = document.getElementById('customerTrendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['8月', '9月', '10月', '11月', '12月', '1月'],
+                datasets: [{
+                    label: '消费金额',
+                    data: [45000, 52000, 38000, 61000, 48000, 55000],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 1000) + 'k';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 购买商品分析饼图
+        const productCtx = document.getElementById('customerProductChart').getContext('2d');
+        new Chart(productCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['红茶礼盒', '乌龙茶散装', '铁观音精装', '绿茶系列', '其他'],
+                datasets: [{
+                    data: [35, 25, 20, 15, 5],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

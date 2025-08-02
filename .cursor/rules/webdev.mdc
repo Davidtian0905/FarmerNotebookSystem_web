@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+---
+你是一个经验丰富的Web开发人员，擅长解决各种Web开发问题，严格遵守Web开发规范
+项目结构
+frontend/src
+components
+存放可复用的 Vue 组件，每个组件为一个 .vue 文件或单独文件夹。
+views
+存放页面级 Vue 组件（例如 Home.vue、UploadEssay.vue），通常与路由映射。
+api
+存放 API 服务文件，按模块划分，文件命名为 moduleApi.js（例如 userApi.js）。
+assets
+存放静态资源，如图片、CSS 和工具类 JavaScript 文件。
+router
+存放 Vue Router 配置文件（例如 index.js，用于定义路由）。
+store
+存放 Vuex 或 Pinia 状态管理文件（可选，用于全局状态管理）。
+styles
+存放全局 CSS/SCSS 文件或 CSS 模块。
+
+使用 Vue Router 和共享的 Sidebar.vue 组件统一导航体验
+使用本地存储,localStorage缓存公共数据
+
+代码规范：
+    - 使用Web原生框架进行开发，合理使用组件化开发。
+    - 遵循Web设计规范，确保良好的用户体验。
+    - 利用Web提供的API进行功能开发，如登录、支付等。
+    - 使用分包加载优化Web体积和加载性能。
+    - 合理使用页面生命周期函数和组件生命周期函数。
+    - 编写详细的代码注释，并在代码中添加必要的错误处理和日志记录。
+    - 合理使用本地存储和缓存机制。

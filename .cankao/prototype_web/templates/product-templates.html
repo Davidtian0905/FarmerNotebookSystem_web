@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品模板管理 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .template-card {
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .template-card:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .template-card.selected {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .template-preview {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .material-tag {
+            background: #e0f2fe;
+            color: #0284c7;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="../records/sales-form.html" class="hover:text-gray-900">销售记录</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">商品模板</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <span>入库出库</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="../warehouse/inbound-records.html" class="nav-sublink">入库记录</a></li>
+                        <li><a href="../warehouse/outbound-records.html" class="nav-sublink active">出库记录</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">商品模板管理</h2>
+                <p class="text-gray-600 mt-1">管理自定义商品模板，快速创建销售记录</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="../warehouse/outbound-records.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回列表
+                </a>
+            </div>
+        </div>
+
+        <!-- 搜索和筛选 -->
+        <div class="card mb-6">
+            <div class="p-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索模板名称..." 
+                                   class="form-input pl-10" id="searchInput">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <i class="fas fa-refresh mr-2"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模板列表 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templatesGrid">
+            <!-- 模板卡片 1 -->
+            <div class="template-card rounded-xl p-6 bg-white shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 mb-1">红茶礼盒套装</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-blue-600 p-1" onclick="editTemplate(1)">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-red-600 p-1" onclick="deleteTemplate(1)">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="template-preview">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-leaf text-red-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">红茶礼盒套装</p>
+                            <p class="text-xs text-gray-500">售价: ¥128.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-600 mb-2">物料组合:</p>
+                        <div class="flex flex-wrap">
+                            <span class="material-tag">成品红茶 200g</span>
+                            <span class="material-tag">礼品袋 1个</span>
+                            <span class="material-tag">罐子 2个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>创建时间: 2024-01-15</span>
+                        <span>使用次数: 12次</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mt-4">
+                    <button class="flex-1 btn btn-primary btn-sm" onclick="useTemplate(1)">
+                        <i class="fas fa-play mr-1"></i>
+                        使用模板
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewTemplate(1)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 模板卡片 2 -->
+            <div class="template-card rounded-xl p-6 bg-white shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 mb-1">绿茶精品包装</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-blue-600 p-1" onclick="editTemplate(2)">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-red-600 p-1" onclick="deleteTemplate(2)">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="template-preview">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-leaf text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">绿茶精品包装</p>
+                            <p class="text-xs text-gray-500">售价: ¥98.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-600 mb-2">物料组合:</p>
+                        <div class="flex flex-wrap">
+                            <span class="material-tag">成品绿茶 150g</span>
+                            <span class="material-tag">包装盒 1个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>创建时间: 2024-01-10</span>
+                        <span>使用次数: 8次</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mt-4">
+                    <button class="flex-1 btn btn-primary btn-sm" onclick="useTemplate(2)">
+                        <i class="fas fa-play mr-1"></i>
+                        使用模板
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewTemplate(2)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 模板卡片 3 -->
+            <div class="template-card rounded-xl p-6 bg-white shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 mb-1">白茶礼品装</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-blue-600 p-1" onclick="editTemplate(3)">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-red-600 p-1" onclick="deleteTemplate(3)">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="template-preview">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-leaf text-gray-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">白茶礼品装</p>
+                            <p class="text-xs text-gray-500">售价: ¥158.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-600 mb-2">物料组合:</p>
+                        <div class="flex flex-wrap">
+                            <span class="material-tag">成品白茶 100g</span>
+                            <span class="material-tag">礼品袋 1个</span>
+                            <span class="material-tag">罐子 1个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>创建时间: 2024-01-20</span>
+                        <span>使用次数: 0次</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mt-4">
+                    <button class="flex-1 btn btn-primary btn-sm" onclick="useTemplate(3)">
+                        <i class="fas fa-play mr-1"></i>
+                        使用模板
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewTemplate(3)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 空状态 -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-box-open text-3xl text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">暂无商品模板</h3>
+            <p class="text-gray-600 mb-6">创建您的第一个商品模板，快速生成销售记录</p>
+            <button class="btn btn-primary" onclick="createNewTemplate()">
+                <i class="fas fa-plus mr-2"></i>
+                创建模板
+            </button>
+        </div>
+    </main>
+
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">确认删除</h3>
+                    <p class="text-sm text-gray-600">此操作无法撤销</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-6">确定要删除这个商品模板吗？删除后将无法恢复。</p>
+            <div class="flex space-x-3">
+                <button class="flex-1 btn btn-secondary" onclick="closeDeleteModal()">
+                    取消
+                </button>
+                <button class="flex-1 btn btn-danger" onclick="confirmDelete()">
+                    确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../shared/js/components.js"></script>
+    <script src="../shared/js/main.js"></script>
+    <script>
+        let currentDeleteId = null;
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function() {
+            filterTemplates();
+        });
+
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            filterTemplates();
+        });
+
+        function filterTemplates() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const templates = document.querySelectorAll('.template-card');
+            
+            templates.forEach(template => {
+                const title = template.querySelector('h3').textContent.toLowerCase();
+                const status = template.querySelector('.status-badge').textContent;
+                
+                const matchesSearch = title.includes(searchTerm);
+                
+                if (matchesSearch && matchesStatus) {
+                    template.style.display = 'block';
+                } else {
+                    template.style.display = 'none';
+                }
+            });
+            
+            // 检查是否所有模板都被隐藏
+            const visibleTemplates = document.querySelectorAll('.template-card[style="display: block"]');
+            const emptyState = document.getElementById('emptyState');
+            const templatesGrid = document.getElementById('templatesGrid');
+            
+            if (visibleTemplates.length === 0) {
+                templatesGrid.style.display = 'none';
+                emptyState.classList.remove('hidden');
+            } else {
+                templatesGrid.style.display = 'grid';
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            filterTemplates();
+        }
+
+        // 模板操作函数
+        function createNewTemplate() {
+            // 跳转到模板编辑页面
+            window.location.href = 'template-edit.html';
+        }
+
+        function editTemplate(id) {
+            // 跳转到模板编辑页面
+            window.location.href = `template-edit.html?id=${id}`;
+        }
+
+        function deleteTemplate(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentDeleteId = null;
+        }
+
+        function confirmDelete() {
+            if (currentDeleteId) {
+                // 这里应该调用API删除模板
+                console.log('删除模板:', currentDeleteId);
+                
+                // 模拟删除操作
+                const templateCard = document.querySelector(`[onclick="deleteTemplate(${currentDeleteId})"]`).closest('.template-card');
+                templateCard.remove();
+                
+                closeDeleteModal();
+                
+                // 显示成功消息
+                showNotification('模板删除成功', 'success');
+            }
+        }
+
+        function useTemplate(id) {
+            // 跳转到销售表单页面，并传递模板ID
+            window.location.href = `../records/sales-form.html?template=${id}`;
+        }
+
+        function previewTemplate(id) {
+            // 显示模板预览
+            showNotification('模板预览功能开发中...', 'info');
+        }
+
+
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 通知函数
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', function(e) {
+            const userMenu = document.getElementById('userMenu');
+            const addMenu = document.getElementById('addMenu');
+
+            if (!e.target.closest('button') || !e.target.closest('button').onclick) {
+                userMenu.classList.add('hidden');
+                addMenu.classList.add('hidden');
+            }
+        });
+
+
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化搜索功能
+            filterTemplates();
+        });
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+    </script>
+</body>
+</html>

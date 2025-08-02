@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户分析 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analysis-card {
+            transition: all 0.2s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .customer-rank {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            color: #10b981;
+        }
+        
+        .trend-down {
+            color: #ef4444;
+        }
+        
+        .trend-stable {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+                
+                <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav class="flex items-center text-sm text-gray-600">
+                    <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                    <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                    <a href="customer-list.html" class="hover:text-gray-900">客户管理</a>
+                    <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                    <span class="text-gray-900">客户分析</span>
+                </nav>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索客户..." 
+                        class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                
+                <div class="relative">
+                    <button class="btn-icon relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+                </div>
+                
+                <div class="relative">
+                    <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                             alt="用户头像" class="w-8 h-8 rounded-full">
+                        <span class="text-sm font-medium text-gray-700">张茶农</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+                    
+                    <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                        <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog mr-2"></i>设置
+                        </a>
+                        <hr class="my-2">
+                        <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="customer-list.html" class="nav-sublink">客户列表</a></li>
+                        <li><a href="customer-analysis.html" class="nav-sublink active">客户分析</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">客户分析</h2>
+                <p class="text-gray-600 mt-1">深度分析客户行为和价值，优化客户关系</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="customer-list.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回客户列表
+                </a>
+
+            </div>
+        </div>
+
+        <!-- 客户概览统计 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-green-600 mb-2">156</h3>
+                <p class="text-sm text-gray-600 mb-2">总客户数</p>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-yellow-600 mb-2">89</h3>
+                <p class="text-sm text-gray-600 mb-2">活跃客户</p>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-purple-600 mb-2">23</h3>
+                <p class="text-sm text-gray-600 mb-2">新增客户</p>
+                <div class="flex items-center justify-center text-sm">
+                </div>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-red-600 mb-2">12</h3>
+                <p class="text-sm text-gray-600 mb-2">流失客户</p>
+            </div>
+        </div>
+
+        <!-- 主要分析内容 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧内容 -->
+            <div class="space-y-8">
+                <!-- 客户销售额排名 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">客户购买金额排名</h3>
+                        <p class="text-sm text-gray-600">按交易金额分析客户价值</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="customerSalesChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- 客户地域分布 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">客户地域分布</h3>
+                        <p class="text-sm text-gray-600">主要客户来源地区</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="customerRegionChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧内容 -->
+            <div class="space-y-8">
+               <!-- 购买频次分析 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">客户购买频次</h3>
+                        <p class="text-sm text-gray-600">客户购买频次统计</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="customerFrequencyChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+
+                <!-- 渠道分析 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">渠道分析</h3>
+                        <p class="text-sm text-gray-600">客户获取渠道分布</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="channelAnalysisChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 客户销售额数据
+        const customerSalesData = {
+            labels: [
+                '李茶庄', '王茶叶店', '张批发商', '陈茶业', '刘茶叶商行',
+                '赵茶庄', '孙茶叶店', '周批发商', '吴茶业', '郑茶叶商行'
+            ],
+            data: [25680, 18450, 16920, 15200, 13800, 12500, 11200, 9800, 8500, 7200]
+        };
+
+        // 渠道分析数据
+        const channelData = {
+            labels: ['线下门店', '微信小程序', '淘宝店铺', '拼多多', '抖音直播', '朋友圈', '其他'],
+            data: [35, 25, 15, 12, 8, 3, 2],
+            backgroundColor: [
+                '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', 
+                '#EF4444', '#06B6D4', '#84CC16'
+            ]
+        };
+
+        // 购买频次数据（按频次从高到低排序）
+        const frequencyData = {
+            labels: [
+                '李茶庄', '张批发商', '陈茶业', '赵茶庄', '王茶叶店',
+                '孙茶叶店', '刘茶叶商行', '周批发商', '吴茶业', '郑茶叶商行'
+            ],
+            data: [28, 22, 18, 16, 15, 14, 12, 10, 8, 6]
+        };
+
+        // 地域分布数据
+        const regionData = {
+            labels: ['福建省', '浙江省', '广东省', '其他地区'],
+            data: [45, 38, 32, 41],
+            backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B']
+        };
+
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 客户销售额排名图（条形图）
+            const salesCtx = document.getElementById('customerSalesChart').getContext('2d');
+            new Chart(salesCtx, {
+                type: 'bar',
+                data: {
+                    labels: customerSalesData.labels,
+                    datasets: [{
+                        label: '销售额',
+                        data: customerSalesData.data,
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+                            '#06B6D4', '#84CC16', '#F97316', '#8B5CF6', '#10B981'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + (value / 1000).toFixed(1) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 渠道分析图
+            const channelCtx = document.getElementById('channelAnalysisChart').getContext('2d');
+            new Chart(channelCtx, {
+                type: 'pie',
+                data: {
+                    labels: channelData.labels,
+                    datasets: [{
+                        data: channelData.data,
+                        backgroundColor: channelData.backgroundColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                lineWidth: 0,
+                                                pointStyle: 'circle'
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${percentage}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 购买频次分析图
+            const frequencyCtx = document.getElementById('customerFrequencyChart').getContext('2d');
+            new Chart(frequencyCtx, {
+                type: 'bar',
+                data: {
+                    labels: frequencyData.labels,
+                    datasets: [{
+                        label: '购买频次',
+                        data: frequencyData.data,
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+                            '#06B6D4', '#84CC16', '#F97316', '#8B5CF6', '#10B981'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '次';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 地域分布饼图
+            const regionCtx = document.getElementById('customerRegionChart').getContext('2d');
+            new Chart(regionCtx, {
+                type: 'pie',
+                data: {
+                    labels: regionData.labels,
+                    datasets: [{
+                        data: regionData.data,
+                        backgroundColor: regionData.backgroundColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                lineWidth: 0,
+                                                pointStyle: 'circle'
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value}位客户 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 客户行为趋势图
+            const trendCtx = document.getElementById('customerTrendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '新增客户',
+                        data: [12, 19, 15, 25, 22, 18],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: '活跃客户',
+                        data: [65, 72, 68, 78, 85, 89],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 初始化导航组状态
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

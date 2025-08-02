@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应商分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部切页导航 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex">
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('assets')">资产页</button>
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('customer')">客户分析</button>
+            <button class="flex-1 py-4 text-center font-medium tab-active" onclick="showTab('supplier')">供应商分析</button>
+        </div>
+    </div>
+
+
+
+        <!-- 供应商总览 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">供应商总览</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">28</div>
+                    <div class="text-sm text-gray-500">总供应商数</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">18</div>
+                    <div class="text-sm text-gray-500">活跃供应商</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600">¥186.5万</div>
+                    <div class="text-sm text-gray-500">总采购金额</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600">95.2%</div>
+                    <div class="text-sm text-gray-500">按时交付率</div>
+                </div>
+            </div>
+        </div>
+
+    <div class="p-4 space-y-6">
+        <!-- 时间筛选 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex space-x-2">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm">本月</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">本季度</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">本年</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">自定义</button>
+            </div>
+        </div>
+
+        <!-- 成本分析 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">成本分析</h3>
+            <div class="h-48">
+                <canvas id="costAnalysisChart"></canvas>
+            </div>
+        </div>
+
+ 
+
+        <!-- 采购金额趋势 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">采购金额趋势</h3>
+            <div class="h-48">
+                <canvas id="purchaseTrendChart"></canvas>
+            </div>
+        </div>
+
+
+           <!-- 供应商销售额排名 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">供应商采购金额排名</h3>
+            </div>
+            <div class="h-64">
+                <canvas id="supplierPurchaseChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 供应商类型分布 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">供应商类型分布</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span class="text-gray-600">茶叶原料供应商</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium">12家</span>
+                        <span class="text-sm text-gray-500">43%</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span class="text-gray-600">包装材料供应商</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium">8家</span>
+                        <span class="text-sm text-gray-500">29%</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        <span class="text-gray-600">生产设备供应商</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium">5家</span>
+                        <span class="text-sm text-gray-500">18%</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 bg-orange-500 rounded-full"></div>
+                        <span class="text-gray-600">其他供应商</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium">3家</span>
+                        <span class="text-sm text-gray-500">10%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 供应商评级 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">供应商评级</h3>
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-xl cursor-pointer hover:bg-green-100 transition-colors" onclick="window.open('supplier-detail.html', '_blank')">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">安溪茶叶合作社</div>
+                        <div class="text-sm text-gray-500">评级：A+级 | 合作时长：3年</div>
+                        <div class="flex items-center space-x-4 mt-1">
+                            <span class="text-xs text-green-600">质量：98%</span>
+                            <span class="text-xs text-blue-600">交付：96%</span>
+                            <span class="text-xs text-purple-600">服务：95%</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-gray-900">¥45.6万</div>
+                        <div class="text-sm text-gray-500">年采购额</div>
+                        <i class="fas fa-chevron-right text-gray-400 ml-2"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-box text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">福建包装材料厂</div>
+                        <div class="text-sm text-gray-500">评级：A级 | 合作时长：2年</div>
+                        <div class="flex items-center space-x-4 mt-1">
+                            <span class="text-xs text-green-600">质量：94%</span>
+                            <span class="text-xs text-blue-600">交付：98%</span>
+                            <span class="text-xs text-purple-600">服务：92%</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-gray-900">¥28.3万</div>
+                        <div class="text-sm text-gray-500">年采购额</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 p-3 bg-yellow-50 rounded-xl">
+                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-cogs text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">泉州机械设备公司</div>
+                        <div class="text-sm text-gray-500">评级：B+级 | 合作时长：1年</div>
+                        <div class="flex items-center space-x-4 mt-1">
+                            <span class="text-xs text-green-600">质量：89%</span>
+                            <span class="text-xs text-blue-600">交付：91%</span>
+                            <span class="text-xs text-purple-600">服务：88%</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-gray-900">¥15.8万</div>
+                        <div class="text-sm text-gray-500">年采购额</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 供应商风险评估 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">风险评估</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                        <div>
+                            <div class="font-medium text-gray-900">高风险供应商</div>
+                            <div class="text-sm text-gray-500">2家供应商需要关注</div>
+                        </div>
+                    </div>
+                    <button class="text-red-500 text-sm">查看详情</button>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-clock text-yellow-500"></i>
+                        <div>
+                            <div class="font-medium text-gray-900">交付延迟</div>
+                            <div class="text-sm text-gray-500">3家供应商本月有延迟</div>
+                        </div>
+                    </div>
+                    <button class="text-yellow-600 text-sm">查看详情</button>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                        <div>
+                            <div class="font-medium text-gray-900">优质供应商</div>
+                            <div class="text-sm text-gray-500">15家供应商表现优秀</div>
+                        </div>
+                    </div>
+                    <button class="text-green-600 text-sm">查看详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-6"></div>
+
+    <script>
+        // 切页功能
+        function showTab(tabName) {
+            if (tabName === 'assets') {
+                window.location.href = 'assets.html';
+            } else if (tabName === 'customer') {
+                window.location.href = 'customer-analysis.html';
+            }
+            // supplier tab保持在当前页面
+        }
+
+        // 供应商采购金额排名图表
+        const supplierPurchaseCtx = document.getElementById('supplierPurchaseChart').getContext('2d');
+        new Chart(supplierPurchaseCtx, {
+            type: 'bar',
+            data: {
+                labels: ['安溪茶叶合作社', '福建包装材料厂', '泉州机械设备公司', '厦门物流公司', '漳州农资供应商'],
+                datasets: [{
+                    label: '采购金额',
+                    data: [45.6, 28.3, 15.8, 12.4, 8.9],
+                    backgroundColor: [
+                        '#10B981',
+                        '#3B82F6',
+                        '#8B5CF6',
+                        '#F59E0B',
+                        '#EF4444'
+                    ],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + value + '万';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+
+        // 采购金额趋势图表
+        const trendCtx = document.getElementById('purchaseTrendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [{
+                    label: '采购金额',
+                    data: [28.5, 32.1, 29.8, 35.2, 31.6, 38.9],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + value + '万';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 成本分析图表
+        const costCtx = document.getElementById('costAnalysisChart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'bar',
+            data: {
+                labels: ['茶叶原料', '包装材料', '生产设备', '运输费用', '其他'],
+                datasets: [{
+                    label: '成本占比',
+                    data: [65, 18, 12, 3, 2],
+                    backgroundColor: [
+                        '#10B981',
+                        '#3B82F6',
+                        '#8B5CF6',
+                        '#F59E0B',
+                        '#EF4444'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

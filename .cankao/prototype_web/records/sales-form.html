@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>销售记录 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .customer-card {
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .customer-card:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .customer-card.selected {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .product-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .discount-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="outbound-records.html" class="hover:text-gray-900">入库出库</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">销售记录</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <span>入库出库</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="../warehouse/inbound-records.html" class="nav-sublink">入库记录</a></li>
+                        <li><a href="../warehouse/outbound-records.html" class="nav-sublink active">出库记录</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">销售记录</h2>
+                <p class="text-gray-600 mt-1">添加新的茶叶销售记录</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="../warehouse/outbound-records.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回列表
+                </a>
+            </div>
+        </div>
+
+        
+        <form id="salesForm" class="space-y-6">
+            <!-- 基本信息 -->
+            </div>
+            <!-- 快捷选择 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">快捷选择</h3>
+                </div>
+                <div class="p-6">
+                    <div class="flex gap-4">
+                        <button type="button" class="flex items-center space-x-3 px-6 py-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors whitespace-nowrap">    
+                            <i class="fas fa-search text-blue-600"></i>
+                            <span class="text-blue-600 font-medium">选择自定义商品模板</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品名称 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">商品名称 *</h3>
+                </div>
+                <div class="p-6">
+                    <div class="form-group">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="productName" 
+                                name="productName" 
+                                class="form-input pr-10"
+                                placeholder="请输入或搜索商品名称"
+                                required
+                            >
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 物料组合 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">物料组合</h3>
+                </div>
+                <div class="p-6">
+                    <!-- 物料组合说明 -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-medium mb-1">物料组合说明：</p>
+                                <p>选择构成此商品的各种物料，系统将自动计算成本并扣减库存</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 物料列表 -->
+                    <div class="overflow-x-auto" id="materialsList">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="text-left p-3 border-b border-gray-200 font-medium text-gray-700">物料</th>
+                                    <th class="text-center p-3 border-b border-gray-200 font-medium text-gray-700">数量</th>
+                                    <th class="text-center p-3 border-b border-gray-200 font-medium text-gray-700">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="p-3">
+                                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateMaterial(this, 0)">
+                                            <option value="成品红茶">成品红茶</option>
+                                            <option value="成品绿茶">成品绿茶</option>
+                                            <option value="成品白茶">成品白茶</option>
+                                            <option value="礼品袋">礼品袋</option>
+                                            <option value="罐子">罐子</option>
+                                            <option value="包装盒">包装盒</option>
+                                        </select>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <input type="number" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20 text-center" value="200" min="1" onchange="updateQuantity(this, 0)">
+                                            <span class="text-sm text-gray-500" id="unit-0">g</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <button type="button" class="text-red-500 hover:text-red-700 p-1" onclick="removeMaterialItem(0)">
+                                            <i class="fas fa-trash text-sm"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="p-3">
+                                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateMaterial(this, 1)">
+                                            <option value="礼品袋">礼品袋</option>
+                                            <option value="成品红茶">成品红茶</option>
+                                            <option value="成品绿茶">成品绿茶</option>
+                                            <option value="成品白茶">成品白茶</option>
+                                            <option value="罐子">罐子</option>
+                                            <option value="包装盒">包装盒</option>
+                                        </select>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <input type="number" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20 text-center" value="1" min="1" onchange="updateQuantity(this, 1)">
+                                            <span class="text-sm text-gray-500" id="unit-1">个</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <button type="button" class="text-red-500 hover:text-red-700 p-1" onclick="removeMaterialItem(1)">
+                                            <i class="fas fa-trash text-sm"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="p-3">
+                                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateMaterial(this, 2)">
+                                            <option value="罐子">罐子</option>
+                                            <option value="成品红茶">成品红茶</option>
+                                            <option value="成品绿茶">成品绿茶</option>
+                                            <option value="成品白茶">成品白茶</option>
+                                            <option value="礼品袋">礼品袋</option>
+                                            <option value="包装盒">包装盒</option>
+                                        </select>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <input type="number" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20 text-center" value="2" min="1" onchange="updateQuantity(this, 2)">
+                                            <span class="text-sm text-gray-500" id="unit-2">个</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <button type="button" class="text-red-500 hover:text-red-700 p-1" onclick="removeMaterialItem(2)">
+                                            <i class="fas fa-trash text-sm"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 添加物料按钮 -->
+                    <button type="button" class="w-full mt-4 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors" onclick="addMaterialItem()">
+                        <i class="fas fa-plus mr-2"></i>添加物料
+                    </button>
+                </div>
+            </div>
+
+            <!-- 成本汇总 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">成本汇总</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">物料总成本</span>
+                            <span class="font-semibold text-gray-900" id="totalMaterialCost">¥0.00</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">物流成本</span>
+                            <div class="relative w-32">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
+                                <input type="number" placeholder="0.00" step="0.01" id="logisticsCostInput"
+                                       class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg text-right"
+                                       oninput="updateCostSummary()">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">利润率</span>
+                            <div class="relative w-32">
+                                <input type="number" placeholder="25" step="0.1" id="profitMarginInput"
+                                       class="w-full pr-8 pl-4 py-2 border border-gray-300 rounded-lg text-right"
+                                       oninput="updateCostSummary()">
+                                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4 mt-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700">预计售价</span>
+                                <span class="font-bold text-blue-600" id="suggestedPrice">¥0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 价格信息 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">价格定价</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="totalAmount" class="form-label">销售总额</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
+                                <input 
+                                    type="number" 
+                                    id="totalAmount" 
+                                    name="totalAmount" 
+                                    class="form-input pl-8 bg-gray-50 text-gray-500"
+                                    placeholder="0.00"
+                                    step="0.01"
+                                >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="expectedProfit" class="form-label">预计利润</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500">¥</span>
+                                <input 
+                                    type="number" 
+                                    id="expectedProfit" 
+                                    name="expectedProfit" 
+                                    class="form-input pl-8 bg-green-50 border-green-300 text-green-600"
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    readonly
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 客户信息 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">客户信息</h3>
+                </div>
+                <div class="p-6">
+                    <div class="form-group mb-4">
+                        <label for="customerSelect" class="form-label">选择客户</label>
+                        <select id="customerSelect" name="customerSelect" class="form-input">
+                            <option value="">请选择客户</option>
+                            <option value="福建茶叶批发商">福建茶叶批发商</option>
+                            <option value="安溪茶业公司">安溪茶业公司</option>
+                            <option value="泉州茶叶市场">泉州茶叶市场</option>
+                            <option value="厦门茶文化馆">厦门茶文化馆</option>
+                            <option value="漳州茶叶经销商">漳州茶叶经销商</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">联系人</label>
+                            <input type="text" class="form-input bg-gray-50" placeholder="自动填充" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">联系电话</label>
+                            <input type="text" class="form-input bg-gray-50" placeholder="自动填充" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">地址信息</label>
+                            <input type="text" class="form-input" placeholder="自动填充" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他信息 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">其他信息</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="form-group">
+                        <label for="salesChannel" class="form-label">销售渠道</label>
+                        <select id="salesChannel" name="salesChannel" class="form-input">
+                            <option value="线下门店">线下门店</option>
+                            <option value="微信小程序">微信小程序</option>
+                            <option value="淘宝店铺">淘宝店铺</option>
+                            <option value="拼多多">拼多多</option>
+                            <option value="抖音直播">抖音直播</option>
+                            <option value="朋友圈">朋友圈</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes" class="form-label">备注说明</label>
+                        <textarea id="notes" name="notes" class="form-input h-24 resize-none" placeholder="请输入备注信息..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">订单标签</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">紧急订单</button>
+                            <button type="button" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">VIP客户</button>
+                            <button type="button" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">老客户</button>
+                            <button type="button" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">批发订单</button>
+                            <button type="button" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">预定订单</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品图片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">商品图片</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-6 gap-3">
+                        <!-- 上传区域 -->
+                        <div class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50 cursor-pointer">
+                            <i class="fas fa-camera text-lg text-gray-400 mb-1"></i>
+                            <span class="text-xs text-gray-500">添加图片</span>
+                        </div>
+                        <!-- 示例图片 -->
+                        <div class="aspect-square bg-green-100 rounded-lg flex items-center justify-center relative">
+                            <i class="fas fa-leaf text-xl text-green-600"></i>
+                            <button type="button" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50">
+                            <i class="fas fa-plus text-lg text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-500">
+                        最多上传5张图片，支持JPG、PNG格式，单张不超过2MB
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='flow-records.html'">
+                    <i class="fas fa-save mr-2"></i>
+                    保存为模板
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check mr-2"></i>
+                    确认销售
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="../shared/js/components.js"></script>
+    <script src="../shared/js/main.js"></script>
+    <script>
+        // 物料管理相关函数
+        let materialIndex = 3; // 当前物料索引
+
+        function addMaterialItem() {
+            const tbody = document.querySelector('#materialsList tbody');
+            const newRow = document.createElement('tr');
+            newRow.className = 'border-b border-gray-100 hover:bg-gray-50';
+            newRow.innerHTML = `
+                <td class="p-3">
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateMaterial(this, ${materialIndex})">
+                        <option value="成品红茶">成品红茶</option>
+                        <option value="成品绿茶">成品绿茶</option>
+                        <option value="成品白茶">成品白茶</option>
+                        <option value="礼品袋">礼品袋</option>
+                        <option value="罐子">罐子</option>
+                        <option value="包装盒">包装盒</option>
+                    </select>
+                </td>
+                <td class="p-3 text-center">
+                    <div class="flex items-center justify-center space-x-2">
+                        <input type="number" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20 text-center" value="1" min="1" onchange="updateQuantity(this, ${materialIndex})">
+                        <span class="text-sm text-gray-500" id="unit-${materialIndex}">个</span>
+                    </div>
+                </td>
+                <td class="p-3 text-center">
+                    <button type="button" class="text-red-500 hover:text-red-700 p-1" onclick="removeMaterialItem(${materialIndex})">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+            materialIndex++;
+            updateCostSummary();
+        }
+
+        function removeMaterialItem(index) {
+            const rows = document.querySelectorAll('#materialsList tbody tr');
+            if (rows.length > 1) {
+                rows[index].remove();
+                updateCostSummary();
+            }
+        }
+
+        function updateMaterial(select, index) {
+            // 根据选择的物料更新单位
+            const unitSpan = document.getElementById(`unit-${index}`);
+            const material = select.value;
+            
+            if (material.includes('红茶') || material.includes('绿茶') || material.includes('白茶')) {
+                unitSpan.textContent = 'g';
+            } else {
+                unitSpan.textContent = '个';
+            }
+            
+            updateCostSummary();
+        }
+
+        function updateQuantity(input, index) {
+            updateCostSummary();
+        }
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function updateCostSummary() {
+            // 模拟计算成本汇总
+            const logisticsCost = parseFloat(document.getElementById('logisticsCostInput').value) || 0;
+            const profitMargin = parseFloat(document.getElementById('profitMarginInput').value) || 25;
+            
+            // 模拟物料总成本计算
+            const materialCost = 150.00; // 这里应该根据实际选择的物料计算
+            document.getElementById('totalMaterialCost').textContent = `¥${materialCost.toFixed(2)}`;
+            
+            // 计算预计售价
+            const totalCost = materialCost + logisticsCost;
+            const suggestedPrice = totalCost * (1 + profitMargin / 100);
+            document.getElementById('suggestedPrice').textContent = `¥${suggestedPrice.toFixed(2)}`;
+            
+            // 更新预计利润
+            const expectedProfit = suggestedPrice - totalCost;
+            document.getElementById('expectedProfit').value = expectedProfit.toFixed(2);
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCostSummary();
+        });
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+
+    </script>
+</body>
+</html>

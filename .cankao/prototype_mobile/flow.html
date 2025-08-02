@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流水页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部标题 -->
+    <div class="bg-white border-b border-gray-200 p-4">
+        <h1 class="text-xl font-bold text-gray-900 text-center">流水记录</h1>
+    </div>
+
+    <!-- 筛选器 -->
+    <div class="p-4">
+        <div class="flex bg-gray-100 rounded-xl p-1">
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">今天</button>
+            <button class="flex-1 py-2 px-3 rounded-lg bg-white text-sm font-medium text-gray-900 shadow-sm">本月</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">本年</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">自定义</button>
+        </div>
+    </div>
+
+
+    <!-- 流水列表 -->
+    <div class="px-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">流水明细</h3>
+            </div>
+            
+            <!-- 日期分组 -->
+            <div class="divide-y divide-gray-100">
+                <!-- 07-16 -->
+                <div>
+                    <div class="px-4 py-2 bg-gray-50">
+                        <span class="text-sm font-medium text-gray-600">07-16 星期二</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售红茶礼盒</div>
+                                    <div class="text-sm text-gray-500">收入 • 5件</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥1,200.00</div>
+                                <div class="text-xs text-gray-500">08:28</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">采购包装材料</div>
+                                    <div class="text-sm text-gray-500">支出 • 100个</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥160.44</div>
+                                <div class="text-xs text-gray-500">08:21</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 07-15 -->
+                <div>
+                    <div class="px-4 py-2 bg-gray-50">
+                        <span class="text-sm font-medium text-gray-600">07-15 星期一</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售绿茶散装</div>
+                                    <div class="text-sm text-gray-500">收入 • 10斤</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥800.00</div>
+                                <div class="text-xs text-gray-500">15:30</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-truck text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">物流运输费</div>
+                                    <div class="text-sm text-gray-500">支出 • 运费</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥120.00</div>
+                                <div class="text-xs text-gray-500">14:20</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 07-14 -->
+                <div>
+                    <div class="px-4 py-2 bg-gray-50">
+                        <span class="text-sm font-medium text-gray-600">07-14 星期日</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-seedling text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">采购茶叶原料</div>
+                                    <div class="text-sm text-gray-500">支出 • 50斤</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥2,500.00</div>
+                                <div class="text-xs text-gray-500">10:15</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售乌龙茶</div>
+                                    <div class="text-sm text-gray-500">收入 • 8件</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥1,600.00</div>
+                                <div class="text-xs text-gray-500">09:45</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="flex">
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-chart-bar text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">资产</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-list text-green-500 text-xl mb-1 block"></i>
+                <span class="text-xs text-green-500 font-medium">流水</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <i class="fas fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs text-gray-400">记录</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-boxes text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">商品</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-user text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">我的</span>
+            </div>
+        </div>
+    </div>
+
+ 

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流水明细 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .filter-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .record-item {
+            transition: all 0.2s ease;
+        }
+        
+        .record-item:hover {
+            background-color: #f8fafc;
+            transform: translateX(4px);
+        }
+        
+        .income-badge {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .expense-badge {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .date-divider {
+            background: #f1f5f9;
+            border-left: 4px solid #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="#" class="hover:text-gray-900">记录管理</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">流水明细</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    placeholder="搜索记录..." 
+                    class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="flow-records.html" class="nav-link active">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/import-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">流水明细</h2>
+                <p class="text-gray-600 mt-1">查看和管理所有收支记录</p>
+            </div>
+        </div>
+
+        <!-- 筛选器 -->
+        <div class="filter-card rounded-2xl p-6 mb-6">
+            <form class="grid grid-cols-1 md:grid-cols-5 gap-4" data-filter-for="recordsTable">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">时间范围</label>
+                    <select name="timeRange" class="form-input">
+                        <option value="">全部时间</option>
+                        <option value="today">今天</option>
+                        <option value="week" selected>本周</option>
+                        <option value="month">本月</option>
+                        <option value="quarter">本季度</option>
+                        <option value="year">本年</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">记录类型</label>
+                    <select name="type" class="form-input">
+                        <option value="">全部类型</option>
+                        <option value="income">收入</option>
+                        <option value="expense">支出</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">茶叶品种</label>
+                    <select name="teaType" class="form-input">
+                        <option value="">全部品种</option>
+                        <option value="tieguanyin">铁观音</option>
+                        <option value="longjing">龙井茶</option>
+                        <option value="puer">普洱茶</option>
+                        <option value="dahongpao">大红袍</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">金额范围</label>
+                    <select name="amountRange" class="form-input">
+                        <option value="">全部金额</option>
+                        <option value="0-100">¥0 - ¥100</option>
+                        <option value="100-500">¥100 - ¥500</option>
+                        <option value="500-1000">¥500 - ¥1000</option>
+                        <option value="1000+">¥1000以上</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-search mr-2"></i>
+                        筛选
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo mr-2"></i>
+                        重置
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card">
+                <div class="flex items-center justify-center h-full">
+                    <div>
+                        <p class="text-2xl font-bold text-green-600">¥8,520</p>
+                        <p class="text-sm font-medium text-gray-600">本周收入</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center justify-center h-full">
+                    <div>
+                        <p class="text-2xl font-bold text-red-600">¥3,240</p>
+                        <p class="text-sm font-medium text-gray-600">本周支出</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center justify-center h-full">
+                    <div>
+                        <p class="text-2xl font-bold text-purple-600">¥5,280</p>
+                        <p class="text-sm font-medium text-gray-600">净收益</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card">
+                <div class="flex items-center justify-center h-full">
+                    <div>
+                        <p class="text-2xl font-bold text-yellow-600">6</p>
+                        <p class="text-sm font-medium text-gray-600">本周新增记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 流水明细列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">流水明细</h3>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">收入</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">支出</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divide-y divide-gray-100">
+                <!-- 07-16 -->
+                <div>
+                    <div class="date-divider px-4 py-2">
+                        <span class="text-sm font-medium text-gray-600">07-16 星期二</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售红茶礼盒</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="income-badge text-xs px-2 py-1 rounded-full">收入</span>
+                                        <span class="ml-2">5件</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥1,200.00</div>
+                                <div class="text-xs text-gray-500">08:28</div>
+                            </div>
+                        </div>
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">采购包装材料</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="expense-badge text-xs px-2 py-1 rounded-full">支出</span>
+                                        <span class="ml-2">100个</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥160.44</div>
+                                <div class="text-xs text-gray-500">08:21</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 07-15 -->
+                <div>
+                    <div class="date-divider px-4 py-2">
+                        <span class="text-sm font-medium text-gray-600">07-15 星期一</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售绿茶散装</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="income-badge text-xs px-2 py-1 rounded-full">收入</span>
+                                        <span class="ml-2">10斤</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥2,500.00</div>
+                                <div class="text-xs text-gray-500">15:42</div>
+                            </div>
+                        </div>
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-truck text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">运费支出</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="expense-badge text-xs px-2 py-1 rounded-full">支出</span>
+                                        <span class="ml-2">快递费</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥85.00</div>
+                                <div class="text-xs text-gray-500">14:15</div>
+                            </div>
+                        </div>
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">销售铁观音礼盒</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="income-badge text-xs px-2 py-1 rounded-full">收入</span>
+                                        <span class="ml-2">3件</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-green-600">+¥1,680.00</div>
+                                <div class="text-xs text-gray-500">10:28</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 07-14 -->
+                <div>
+                    <div class="date-divider px-4 py-2">
+                        <span class="text-sm font-medium text-gray-600">07-14 星期日</span>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-shopping-basket text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">采购茶叶原料</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="expense-badge text-xs px-2 py-1 rounded-full">支出</span>
+                                        <span class="ml-2">50斤</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥2,800.00</div>
+                                <div class="text-xs text-gray-500">16:05</div>
+                            </div>
+                        </div>
+                        <div class="record-item flex items-center justify-between p-4 hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-bolt text-red-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">水电费支出</div>
+                                    <div class="text-sm text-gray-500">
+                                        <span class="expense-badge text-xs px-2 py-1 rounded-full">支出</span>
+                                        <span class="ml-2">7月份</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-red-600">-¥320.50</div>
+                                <div class="text-xs text-gray-500">09:40</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    显示 1-10 条，共 156 条记录
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="btn-icon text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="w-8 h-8 bg-green-500 text-white rounded-md flex items-center justify-center">1</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">2</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">3</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">4</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">5</button>
+                    <button class="btn-icon text-gray-600 hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换添加记录菜单
+        function toggleAddMenu() {
+            const menu = document.getElementById('addMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 添加缺失的导航组切换函数
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', function(e) {
+            const userMenu = document.getElementById('userMenu');
+            const addMenu = document.getElementById('addMenu');
+
+            // 用户菜单
+            if (!e.target.closest('button') || !e.target.closest('button').onclick || e.target.closest('button').onclick.toString().indexOf('toggleUserMenu') === -1) {
+                userMenu.classList.add('hidden');
+            }
+
+            // 添加记录菜单
+            if (!e.target.closest('button') || !e.target.closest('button').onclick || e.target.closest('button').onclick.toString().indexOf('toggleAddMenu') === -1) {
+                addMenu.classList.add('hidden');
+            }
+        });
+
+        // 筛选表单提交
+        document.querySelector('[data-filter-for="recordsTable"]').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const filters = {};
+
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    filters[key] = value;
+                }
+            }
+
+            console.log('应用筛选:', filters);
+            Message.success('筛选条件已应用');
+
+            // 这里可以添加实际的筛选逻辑
+        });
+
+        // 重置筛选
+        document.querySelector('[data-filter-for="recordsTable"]').addEventListener('reset', function(e) {
+            setTimeout(() => {
+                console.log('重置筛选');
+                Message.info('筛选条件已重置');
+
+                // 这里可以添加实际的重置逻辑
+            }, 0);
+        });
+
+    </script>
+</body>
+</html>

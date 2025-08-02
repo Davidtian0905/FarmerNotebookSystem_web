@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加供应商 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .upload-area.dragover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .rating-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        
+        .star-rating label {
+            font-size: 24px;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input[type="radio"]:checked ~ label {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="supplier-list.html" class="hover:text-gray-900">供应商管理</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">添加供应商</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="supplier-list.html" class="nav-sublink">供应商列表</a></li>
+                        <li><a href="supplier-analysis.html" class="nav-sublink">供应商分析</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">添加供应商</h2>
+                <p class="text-gray-600 mt-1">录入新供应商的详细信息</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="supplier-list.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回列表
+                </a>
+            </div>
+        </div>
+
+        <form id="supplierForm" class="w-full">
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    基本信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label required">供应商名称</label>
+                        <input type="text" class="form-input" name="supplierName" required placeholder="请输入供应商名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">供应商类型</label>
+                        <select class="form-input" name="supplierType" required>
+                            <option value="">请选择供应商类型</option>
+                            <option value="种植基地">茶叶种植基地</option>
+                            <option value="加工厂">茶叶加工厂</option>
+                            <option value="包装商">包装材料商</option>
+                            <option value="物流商">物流服务商</option>
+                            <option value="设备商">设备供应商</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">联系人</label>
+                        <input type="text" class="form-input" name="contactPerson" required placeholder="请输入联系人姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">联系电话</label>
+                        <input type="tel" class="form-input" name="contactPhone" required placeholder="请输入联系电话">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">邮箱地址</label>
+                        <input type="email" class="form-input" name="email" placeholder="请输入邮箱地址">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">传真号码</label>
+                        <input type="text" class="form-input" name="fax" placeholder="请输入传真号码">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label required">详细地址</label>
+                    <input type="text" class="form-input" name="address" required placeholder="请输入详细地址">
+                </div>
+            </div>
+
+            <!-- 业务信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-briefcase mr-2 text-green-600"></i>
+                    业务信息
+                </h3>
+                <div class="form-group">
+                    <label class="form-label required">主营产品</label>
+                    <input type="text" class="form-input" name="address" required placeholder="请描述供应商主营产品">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">合作模式</label>
+                        <select class="form-input" name="cooperationMode">
+                            <option value="">请选择合作模式</option>
+                            <option value="长期合作">长期合作</option>
+                            <option value="项目合作">项目合作</option>
+                            <option value="临时采购">临时采购</option>
+                            <option value="战略合作">战略合作</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">付款方式</label>
+                        <select class="form-input" name="paymentMethod">
+                            <option value="">请选择付款方式</option>
+                            <option value="现金">现金</option>
+                            <option value="银行转账">银行转账</option>
+                            <option value="支票">支票</option>
+                            <option value="月结">月结</option>
+                            <option value="季结">季结</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">信用等级</label>
+                        <select class="form-input" name="creditLevel">
+                            <option value="">请选择信用等级</option>
+                            <option value="AAA">AAA级</option>
+                            <option value="AA">AA级</option>
+                            <option value="A">A级</option>
+                            <option value="B">B级</option>
+                            <option value="C">C级</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">账期（天）</label>
+                        <input type="text" class="form-input" name="product-item" required placeholder="0">
+                    </div>
+                    </div>
+
+                </div>
+                
+
+            <!-- 财务信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-university mr-2 text-purple-600"></i>
+                    财务信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">开户银行</label>
+                        <input type="text" class="form-input" name="bankName" placeholder="请输入开户银行">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">银行账号</label>
+                        <input type="text" class="form-input" name="bankAccount" placeholder="请输入银行账号">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">税号</label>
+                        <input type="text" class="form-input" name="taxNumber" placeholder="请输入税号">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">注册资本</label>
+                        <input type="number" class="form-input" name="registeredCapital" placeholder="请输入注册资本（万元）">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 附件上传 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-paperclip mr-2 text-orange-600"></i>
+                    相关附件
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">营业执照</label>
+                        <div class="upload-area" onclick="document.getElementById('businessLicense').click()">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600">点击上传营业执照</p>
+                            <p class="text-sm text-gray-500 mt-1">支持 JPG、PNG、PDF 格式</p>
+                            <input type="file" id="businessLicense" name="businessLicense" class="hidden" accept=".jpg,.jpeg,.png,.pdf">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">资质证书</label>
+                        <div class="upload-area" onclick="document.getElementById('certificates').click()">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600">点击上传资质证书</p>
+                            <p class="text-sm text-gray-500 mt-1">支持 JPG、PNG、PDF 格式</p>
+                            <input type="file" id="certificates" name="certificates" class="hidden" accept=".jpg,.jpeg,.png,.pdf" multiple>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 备注信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-sticky-note mr-2 text-indigo-600"></i>
+                    备注信息
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">备注说明</label>
+                    <textarea class="form-input" name="remarks" rows="4" placeholder="请输入备注信息，如特殊要求、合作历史等..."></textarea>
+                </div>
+
+            <div class="form-group">
+                <label class="form-label">状态</label>
+                <div class="flex space-x-6">
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="active" class="mr-2" checked>
+                        <span>启用</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="inactive" class="mr-2">
+                        <span>停用</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="pending" class="mr-2">
+                        <span>待审核</span>
+                    </label>
+                </div>
+            </div>
+        </div>    
+
+
+            <!-- 提交按钮 -->
+            <div class="flex justify-end space-x-4 mt-8">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>
+                    确认添加
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function saveDraft() {
+            Message.info('草稿已保存');
+        }
+
+        function resetForm() {
+            if (confirm('确定要重置表单吗？所有已填写的信息将被清空。')) {
+                document.getElementById('supplierForm').reset();
+                Message.info('表单已重置');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('supplierForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 验证必填字段
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('border-red-500');
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                Message.error('请填写所有必填字段');
+                return;
+            }
+            
+            Message.info('正在添加供应商...');
+            
+            // 模拟提交
+            setTimeout(() => {
+                Message.success('供应商添加成功！');
+                setTimeout(() => {
+                    window.location.href = 'supplier-list.html';
+                }, 1500);
+            }, 2000);
+        });
+
+        // 文件上传处理
+        document.getElementById('businessLicense').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                const uploadArea = e.target.parentElement;
+                uploadArea.innerHTML = `
+                    <i class="fas fa-file-check text-green-600 text-3xl mb-2"></i>
+                    <p class="text-green-600">已选择：${fileName}</p>
+                    <p class="text-sm text-gray-500 mt-1">点击重新选择</p>
+                `;
+            }
+        });
+
+        document.getElementById('certificates').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const fileCount = e.target.files.length;
+                const uploadArea = e.target.parentElement;
+                uploadArea.innerHTML = `
+                    <i class="fas fa-file-check text-green-600 text-3xl mb-2"></i>
+                    <p class="text-green-600">已选择 ${fileCount} 个文件</p>
+                    <p class="text-sm text-gray-500 mt-1">点击重新选择</p>
+                `;
+            }
+        });
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

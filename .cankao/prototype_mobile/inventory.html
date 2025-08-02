@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .low-stock {
+            border-left: 4px solid #EF4444;
+        }
+        .normal-stock {
+            border-left: 4px solid #10B981;
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">库存管理</h1>
+
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 搜索按钮 -->
+                <button class="p-2 text-gray-600">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+
+                <!-- 添加按钮 -->
+                <button class="p-2 text-gray-600">
+                    <i class="fas fa-plus text-xl"></i>
+                </button>
+
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 库存总览 -->
+    <div class="p-4">
+        <div class="gradient-bg rounded-2xl p-6 text-white card-shadow">
+            <h2 class="text-lg font-semibold mb-4">库存总览</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-lg font-bold">156</div>
+                    <div class="text-sm opacity-90">总商品数</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-bold">¥45,680</div>
+                    <div class="text-sm opacity-90">库存价值</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-bold">8</div>
+                    <div class="text-sm opacity-90">低库存预警</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 筛选器 -->
+    <div class="px-4 mb-4">
+        <div class="flex bg-gray-100 rounded-xl p-1">
+            <button class="flex-1 py-2 px-3 rounded-lg bg-white text-sm font-medium text-gray-900 shadow-sm">全部</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">物料</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">商品</button>
+        </div>
+    </div>
+
+    <!-- 库存预警 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-medium">库存预警</h3>
+                <a href="inventory.html" class="text-sm text-green-600 hover:text-green-700 flex items-center">
+                    查看全部 <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                </a>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">龙井茶（明前特级）</h4>
+                        <p class="text-xs text-gray-500">库存不足：剩余 0.5kg，低于最低库存 2kg</p>
+                    </div>
+                    <button class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
+                        补充库存
+                    </button>
+                </div>
+
+                <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation text-yellow-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">碧螺春（特级）</h4>
+                        <p class="text-xs text-gray-500">库存偏低：剩余 1.2kg，接近最低库存 1kg</p>
+                    </div>
+                    <button class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200">
+                        补充库存
+                    </button>
+                </div>
+
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">包装盒（小号）</h4>
+                        <p class="text-xs text-gray-500">库存提醒：剩余 25个，建议补充</p>
+                    </div>
+                    <button class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                        补充库存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品列表 -->
+    <div class="px-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">商品库存</h3>
+                    <button class="text-sm text-blue-600">
+                        <i class="fas fa-search mr-1"></i>搜索
+                    </button>
+                </div>
+            </div>
+            
+            <div class="divide-y divide-gray-100">
+                <!-- 低库存商品 -->
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 low-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-leaf text-red-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">红茶原料</div>
+                            <div class="text-sm text-red-600">库存不足 • 单价: ¥50/斤</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-red-600">5斤</div>
+                        <div class="text-xs text-gray-500">预警线: 10斤</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 low-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-box text-red-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">礼品包装盒</div>
+                            <div class="text-sm text-red-600">库存不足 • 单价: ¥8/个</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-red-600">15个</div>
+                        <div class="text-xs text-gray-500">预警线: 50个</div>
+                    </div>
+                </div>
+
+                <!-- 正常库存商品 -->
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 normal-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-seedling text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">绿茶原料</div>
+                            <div class="text-sm text-gray-500">库存充足 • 单价: ¥60/斤</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">85斤</div>
+                        <div class="text-xs text-gray-500">预警线: 20斤</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 normal-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-leaf text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">乌龙茶成品</div>
+                            <div class="text-sm text-gray-500">库存充足 • 单价: ¥200/件</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">32件</div>
+                        <div class="text-xs text-gray-500">预警线: 10件</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 normal-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-gift text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">红茶礼盒装</div>
+                            <div class="text-sm text-gray-500">库存充足 • 单价: ¥240/盒</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">28盒</div>
+                        <div class="text-xs text-gray-500">预警线: 15盒</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 low-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-tags text-red-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">产品标签</div>
+                            <div class="text-sm text-red-600">库存不足 • 单价: ¥0.5/张</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-red-600">120张</div>
+                        <div class="text-xs text-gray-500">预警线: 500张</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 normal-stock">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-bottle-water text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">茶叶罐装</div>
+                            <div class="text-sm text-gray-500">库存充足 • 单价: ¥15/个</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">180个</div>
+                        <div class="text-xs text-gray-500">预警线: 50个</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 仓库物料列表 -->
+    <div class="px-4 mt-6">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">仓库物料</h3>
+                    <button class="text-sm text-blue-600">
+                        <i class="fas fa-plus mr-1"></i>添加物料
+                    </button>
+                </div>
+            </div>
+
+            <div class="divide-y divide-gray-100">
+                <!-- 茶叶原料 -->
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-leaf text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">铁观音原料</div>
+                            <div class="text-sm text-gray-500">优质茶叶 • 单价: ¥120/kg</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">45.5kg</div>
+                        <div class="text-xs text-green-600">库存充足</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-seedling text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">大红袍原料</div>
+                            <div class="text-sm text-gray-500">精品茶叶 • 单价: ¥180/kg</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">23.2kg</div>
+                        <div class="text-xs text-green-600">库存充足</div>
+                    </div>
+                </div>
+
+                <!-- 包装材料 -->
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-box text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">茶叶罐（大号）</div>
+                            <div class="text-sm text-gray-500">金属包装 • 单价: ¥15/个</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">156个</div>
+                        <div class="text-xs text-green-600">库存充足</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-gift text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">礼品袋</div>
+                            <div class="text-sm text-gray-500">精美包装 • 单价: ¥3/个</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">89个</div>
+                        <div class="text-xs text-green-600">库存充足</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成品商品列表 -->
+    <div class="px-4 mt-6">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">成品商品</h3>
+                    <button class="text-sm text-blue-600">
+                        <i class="fas fa-plus mr-1"></i>添加商品
+                    </button>
+                </div>
+            </div>
+
+            <div class="divide-y divide-gray-100">
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-mug-hot text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">铁观音礼盒装</div>
+                            <div class="text-sm text-gray-500">500g装 • 售价: ¥298/盒</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">32盒</div>
+                        <div class="text-xs text-green-600">热销商品</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-coffee text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">大红袍散装</div>
+                            <div class="text-sm text-gray-500">250g装 • 售价: ¥168/袋</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">18袋</div>
+                        <div class="text-xs text-green-600">库存充足</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="flex">
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-chart-bar text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">资产</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-list text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">流水</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <i class="fas fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs text-gray-400">记录</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-boxes text-purple-500 text-xl mb-1 block"></i>
+                <span class="text-xs text-purple-500 font-medium">商品</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-user text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

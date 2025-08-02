@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资产总览 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .asset-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .pie-chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .trend-up {
+            color: #10B981;
+        }
+        
+        .trend-down {
+            color: #EF4444;
+        }
+        
+        .asset-item {
+            transition: all 0.2s ease;
+        }
+        
+        .asset-item:hover {
+            background-color: #f8fafc;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="#" class="hover:text-gray-900">资产总览</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">资产总览</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    placeholder="搜索..." 
+                    class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="assets-overview.html" class="nav-link active">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/import-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/points-recharge.html" class="nav-link">
+                        <i class="nav-icon fas fa-crown"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">资产总览</h2>
+                <p class="text-gray-600 mt-1">查看您的财务状况和资产分布</p>
+            </div>
+        </div>
+
+        <!-- 资产总览卡片 -->
+        <div class="asset-card rounded-2xl p-8 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="opacity-90">截至今日的资产统计</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="text-3xl font-bold mb-2">¥128,560</div>
+                    <div class="opacity-90 mb-2">总收入</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold mb-2">¥89,240</div>
+                    <div class="opacity-90 mb-2">总支出</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold mb-2">¥39,320</div>
+                    <div class="opacity-90 mb-2">净资产</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button class="px-3 py-1 text-sm font-medium bg-white text-gray-900 rounded-md shadow-sm">总统计</button>
+                    <button class="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900">本周</button>
+                    <button class="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900">本月</button>
+                    <button class="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900">本年</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- 净资产趋势 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">净资产趋势</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">近12个月</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="assetTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 收支趋势 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">收支趋势</h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">收入</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">支出</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 收入结构和资产分布 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- 收入结构 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">收入结构分析</h3>
+                </div>
+                <div class="pie-chart-container mb-4">
+                    <canvas id="incomeStructureChart"></canvas>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-600">铁观音销售</span>
+                        </div>
+                        <span class="text-sm font-medium">¥45,680 (35.5%)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-600">龙井茶销售</span>
+                        </div>
+                        <span class="text-sm font-medium">¥32,140 (25.0%)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-600">普洱茶销售</span>
+                        </div>
+                        <span class="text-sm font-medium">¥28,920 (22.5%)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-600">其他茶类</span>
+                        </div>
+                        <span class="text-sm font-medium">¥21,820 (17.0%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成本结构分析 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">成本结构分析</h3>
+                </div>
+                <div class="card-body">
+                    <div class="flex items-center justify-center mb-4">
+                        <canvas id="costChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">茶叶原料</span>
+                            </div>
+                            <span class="text-sm font-medium">¥52,340 (58.6%)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">包装材料</span>
+                            </div>
+                            <span class="text-sm font-medium">¥18,960 (21.2%)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">运输费用</span>
+                            </div>
+                            <span class="text-sm font-medium">¥12,450 (13.9%)</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-gray-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">其他费用</span>
+                            </div>
+                            <span class="text-sm font-medium">¥5,490 (6.3%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+        
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+        
+
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 净资产趋势图表
+            const assetTrendCtx = document.getElementById('assetTrendChart').getContext('2d');
+            new Chart(assetTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                    datasets: [{
+                        label: '净资产',
+                        data: [25000, 27500, 29800, 32100, 34500, 36200, 37800, 38900, 39100, 39000, 39200, 39320],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 收支对比图表
+            const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+            new Chart(incomeExpenseCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '收入',
+                        data: [12000, 15000, 13500, 16800, 14200, 18500],
+                        backgroundColor: '#10B981'
+                    }, {
+                        label: '支出',
+                        data: [8000, 9500, 8800, 11200, 9800, 12300],
+                        backgroundColor: '#EF4444'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 收入结构饼图
+            const incomeStructureCtx = document.getElementById('incomeStructureChart').getContext('2d');
+            new Chart(incomeStructureCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['铁观音销售', '龙井茶销售', '普洱茶销售', '其他茶类'],
+                    datasets: [{
+                        data: [35.5, 25.0, 22.5, 17.0],
+                        backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 成本结构分析饼图
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            new Chart(costCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['茶叶原料', '包装材料', '运输费用', '其他费用'],
+                    datasets: [{
+                        data: [58.6, 21.2, 13.9, 6.3],
+                        backgroundColor: ['#EF4444', '#EAB308', '#6366F1', '#6B7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        });
+    </script>
+</body>
+</html>

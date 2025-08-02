@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分充值</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .wechat-green {
+            background-color: #07c160;
+        }
+        .wechat-green:hover {
+            background-color: #06ad56;
+        }
+        .selected-package {
+            border: 2px solid #07c160;
+            background-color: #f0f9ff;
+        }
+        .package-item {
+            transition: all 0.3s ease;
+        }
+        .package-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">积分充值</h1>
+
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 返回按钮 -->
+                <button onclick="window.location.href='vip-upgrade.html'" class="p-2 text-gray-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 当前积分状态 -->
+    <div class="p-4">
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-coins text-yellow-600 text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">当前积分</h2>
+                <div class="text-4xl font-bold text-yellow-600 mb-2">85</div>
+                <p class="text-sm text-gray-500">积分可用于AI语音记账功能</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 充值套餐 -->
+    <div class="px-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">选择充值套餐</h3>
+                <p class="text-sm text-gray-500 mt-1">1积分 = 1次AI语音记账</p>
+            </div>
+            
+            <div class="p-4 space-y-3">
+                <!-- 套餐选项 -->
+                <div class="package-item bg-white border-2 border-gray-200 rounded-xl p-4 cursor-pointer" onclick="selectPackage(this, 100, 9.9)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">100积分</div>
+                                <div class="text-sm text-gray-500">适合轻度使用</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-900">¥9.9</div>
+                            <div class="text-xs text-gray-500">0.099元/积分</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="package-item bg-white border-2 border-gray-200 rounded-xl p-4 cursor-pointer selected-package" onclick="selectPackage(this, 300, 25.9)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">300积分</div>
+                                <div class="text-sm text-green-600 font-medium">推荐套餐</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-900">¥25.9</div>
+                            <div class="text-xs text-gray-500">0.086元/积分</div>
+                            <div class="text-xs text-red-500">省¥3.8</div>
+                        </div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">热门</span>
+                    </div>
+                </div>
+
+                <div class="package-item bg-white border-2 border-gray-200 rounded-xl p-4 cursor-pointer" onclick="selectPackage(this, 500, 39.9)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">500积分</div>
+                                <div class="text-sm text-gray-500">适合重度使用</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-900">¥39.9</div>
+                            <div class="text-xs text-gray-500">0.080元/积分</div>
+                            <div class="text-xs text-red-500">省¥9.6</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="package-item bg-white border-2 border-gray-200 rounded-xl p-4 cursor-pointer" onclick="selectPackage(this, 1000, 69.9)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">1000积分</div>
+                                <div class="text-sm text-purple-600 font-medium">超值套餐</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-900">¥69.9</div>
+                            <div class="text-xs text-gray-500">0.070元/积分</div>
+                            <div class="text-xs text-red-500">省¥29.1</div>
+                        </div>
+                    </div>
+                    <div class="absolute top-2 right-2">
+                        <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">最划算</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 支付方式 -->
+    <div class="px-4 mt-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">支付方式</h3>
+            </div>
+            
+            <div class="p-4 space-y-3">
+                <div class="flex items-center justify-between p-3 border-2 border-green-200 bg-green-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                            <i class="fab fa-weixin text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">微信支付</div>
+                            <div class="text-sm text-gray-500">安全便捷</div>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <i class="fab fa-alipay text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">支付宝</div>
+                            <div class="text-sm text-gray-500">快速支付</div>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单详情 -->
+    <div class="px-4 mt-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">订单详情</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">充值积分</span>
+                        <span class="font-medium" id="selected-points">300积分</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">支付金额</span>
+                        <span class="font-medium text-red-500" id="selected-price">¥25.9</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">充值后积分</span>
+                        <span class="font-medium text-green-600" id="total-points">385积分</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 立即支付按钮 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <button class="w-full wechat-green text-white py-4 rounded-xl font-semibold text-lg" onclick="proceedPayment()">
+            <i class="fab fa-weixin mr-2"></i>
+            立即支付 <span id="pay-amount">¥25.9</span>
+        </button>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        let selectedPoints = 300;
+        let selectedPrice = 25.9;
+        let currentPoints = 85;
+
+        function selectPackage(element, points, price) {
+            // 移除所有选中状态
+            document.querySelectorAll('.package-item').forEach(item => {
+                item.classList.remove('selected-package');
+            });
+            
+            // 添加选中状态
+            element.classList.add('selected-package');
+            
+            // 更新选中的套餐信息
+            selectedPoints = points;
+            selectedPrice = price;
+            
+            // 更新订单详情
+            document.getElementById('selected-points').textContent = points + '积分';
+            document.getElementById('selected-price').textContent = '¥' + price;
+            document.getElementById('total-points').textContent = (currentPoints + points) + '积分';
+            document.getElementById('pay-amount').textContent = '¥' + price;
+        }
+
+        function proceedPayment() {
+            // 模拟支付流程
+            if (confirm(`确认支付 ¥${selectedPrice} 购买 ${selectedPoints} 积分吗？`)) {
+                alert('正在跳转到微信支付...');
+                // 这里可以集成真实的支付接口
+            }
+        }
+
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

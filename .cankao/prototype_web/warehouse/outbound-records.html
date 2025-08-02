@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出库记录 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .warehouse-card {
+            transition: all 0.2s ease;
+        }
+        
+        .warehouse-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-badge {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-shipped { background: #dbeafe; color: #1e40af; }
+        
+        .quick-action-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="#" class="hover:text-gray-900">入库出库</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">出库记录</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    placeholder="搜索出库记录..." 
+                    class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <span>入库出库</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="../warehouse/inbound-records.html" class="nav-sublink">入库记录</a></li>
+                        <li><a href="../warehouse/outbound-records.html" class="nav-sublink active">出库记录</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/import-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">出库记录</h2>
+                <p class="text-gray-600 mt-1">管理所有商品出库记录和销售操作</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <button class="btn btn-primary" onclick="window.location.href='../records/sales-form.html'">
+                        <i class="fas fa-plus mr-2"></i>
+                        新增出库
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作区 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="warehouse-card card text-center">
+                <div class="p-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-microphone text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">AI语音记账</h3>
+                    <p class="text-sm text-gray-600 mb-4">语音快速录入入库信息</p>
+                    <button class="quick-action-btn w-full" onclick="window.location.href='../records/voice-recording.html'">
+                        开始录音
+                    </button>
+                </div>
+            </div>
+
+            <div class="warehouse-card card text-center">
+                <div class="p-6">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">OCR识别</h3>
+                    <p class="text-sm text-gray-600 mb-4">智能识别录入</p>
+                    <button class="quick-action-btn w-full" onclick="window.location.href=''">
+                        拍照识别
+                    </button>
+                </div>
+            </div>
+
+            <div class="warehouse-card card text-center">
+                <div class="p-6">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cog text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">自定义商品模板</h3>
+                    <p class="text-sm text-gray-600 mb-4">管理商品模板等</p>
+                    <button class="quick-action-btn w-full" onclick="window.location.href='../templates/product-templates.html'">
+                        自定义模板
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选器 -->
+        <div class="card mb-6">
+            <div class="p-4">
+                <form class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">时间范围</label>
+                        <select class="form-input">
+                            <option>今天</option>
+                            <option>本周</option>
+                            <option>本月</option>
+                            <option>自定义</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">商品类型</label>
+                        <select class="form-input">
+                            <option>全部</option>
+                            <option>铁观音</option>
+                            <option>龙井茶</option>
+                            <option>普洱茶</option>
+                            <option>大红袍</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">仓库</label>
+                        <select class="form-input">
+                            <option>全部仓库</option>
+                            <option>主仓库</option>
+                            <option>副仓库</option>
+                            <option>临时仓库</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">客户</label>
+                        <select class="form-input">
+                            <option>全部客户</option>
+                            <option>李茶庄</option>
+                            <option>王茶叶店</option>
+                            <option>张批发商</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                        <select class="form-input">
+                            <option>全部状态</option>
+                            <option>已完成</option>
+                            <option>待发货</option>
+                            <option>已发货</option>
+                            <option>已取消</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="fas fa-search mr-2"></i>
+                            筛选
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 出库记录列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">出库记录列表</h3>
+                <div class="flex items-center space-x-2">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fas fa-filter mr-2"></i>
+                        高级筛选
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出库单号</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品信息</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单价</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总金额</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">客户</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">仓库</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出库时间</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">OUT202407160001</div>
+                                <div class="text-sm text-gray-500">订单: ORD20240716001</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">铁观音</div>
+                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">20斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥240/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥4,800</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">李茶庄</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">主仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-16</div>
+                                <div class="text-sm text-gray-500">10:30</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-shipped">已发货</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                                <button class="text-green-600 hover:text-green-900 mr-3">跟踪</button>
+                                <button class="text-red-600 hover:text-red-900">退货</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">OUT202407160002</div>
+                                <div class="text-sm text-gray-500">订单: ORD20240716002</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">龙井茶</div>
+                                        <div class="text-sm text-gray-500">一级 · 绿茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">15斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥180/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥2,700</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">王茶叶店</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">主仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-16</div>
+                                <div class="text-sm text-gray-500">15:20</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-pending">待发货</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                                <button class="text-green-600 hover:text-green-900 mr-3">发货</button>
+                                <button class="text-red-600 hover:text-red-900">取消</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">OUT202407150003</div>
+                                <div class="text-sm text-gray-500">订单: ORD20240715003</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">大红袍</div>
+                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">10斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥320/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥3,200</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">张批发商</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">副仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-15</div>
+                                <div class="text-sm text-gray-500">16:45</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-completed">已完成</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                                <button class="text-green-600 hover:text-green-900 mr-3">评价</button>
+                                <button class="text-purple-600 hover:text-purple-900">复购</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    显示 1-10 条，共 89 条记录
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="btn-icon text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="w-8 h-8 bg-green-500 text-white rounded-md flex items-center justify-center">1</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">2</button>
+                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">3</button>
+                    <button class="btn-icon text-gray-600 hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换添加菜单
+        function toggleAddMenu() {
+            const menu = document.getElementById('addMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 显示自定义设置
+        function showCustomSettings() {
+            const options = [
+                { name: '自定义物料', url: 'custom-material.html', icon: 'fas fa-cog', color: 'orange' },
+                { name: '自定义模块', url: 'custom-module.html', icon: 'fas fa-puzzle-piece', color: 'green' },
+                { name: '自定义仓库', url: 'custom-warehouse.html', icon: 'fas fa-warehouse', color: 'indigo' },
+                { name: '记录单模板', url: 'record-template.html', icon: 'fas fa-file-alt', color: 'red' }
+            ];
+
+            let optionsHtml = options.map(option => `
+                <a href="${option.url}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                    <i class="${option.icon} mr-3 text-${option.color}-600"></i>${option.name}
+                </a>
+            `).join('');
+
+            Modal.show(`<div class="space-y-2">${optionsHtml}</div>`, {
+                title: '自定义设置',
+                width: '300px'
+            });
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', function(e) {
+            const userMenu = document.getElementById('userMenu');
+            const addMenu = document.getElementById('addMenu');
+
+            if (!e.target.closest('button') || !e.target.closest('button').onclick) {
+                userMenu.classList.add('hidden');
+                addMenu.classList.add('hidden');
+            }
+        });
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+    </script>
+</body>
+</html>
+        </div>

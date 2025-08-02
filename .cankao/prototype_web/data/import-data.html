@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据导入 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .import-card {
+            transition: all 0.2s ease;
+        }
+        
+        .import-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="export-data.html" class="hover:text-gray-900">数据管理</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">数据导入</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu" style="display: block;">
+                        <li><a href="import-data.html" class="nav-sublink active">数据导入</a></li>
+                        <li><a href="export-data.html" class="nav-sublink">数据导出</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">数据导入</h2>
+                <p class="text-gray-600 mt-1">从外部文件导入数据到系统</p>
+            </div>
+        </div>
+
+        <!-- 导入说明 -->
+        <div class="card mb-6">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">导入说明</h3>
+                        <p class="text-sm text-gray-600">请按照模板格式准备数据文件，确保数据格式正确</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        支持Excel (.xlsx)和CSV (.csv)格式
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        文件大小不超过10MB
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        请先下载模板文件
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导入选项 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 流水明细导入 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-stream text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">流水明细导入</h4>
+                            <p class="text-sm text-gray-600">导入收支流水记录</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">流水记录模板.xlsx</a></p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
+                             onclick="document.getElementById('recordsFile').click()"
+                             ondrop="handleDrop(event, 'records')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">点击选择文件或拖拽到此处</p>
+                            <p class="text-xs text-gray-500">支持 .xlsx, .csv 格式</p>
+                            <input type="file" id="recordsFile" class="hidden" accept=".xlsx,.csv" onchange="handleFileImport('records', this)">
+                        </div>
+                        <div id="recordsProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>导入进度</span>
+                                <span id="recordsProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="recordsProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-full" onclick="importData('records')">
+                            <i class="fas fa-upload mr-2"></i>
+                            开始导入
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 库存数据导入 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-boxes text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">库存数据导入</h4>
+                            <p class="text-sm text-gray-600">导入商品库存信息</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">库存数据模板.xlsx</a></p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
+                             onclick="document.getElementById('inventoryFile').click()"
+                             ondrop="handleDrop(event, 'inventory')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">点击选择文件或拖拽到此处</p>
+                            <p class="text-xs text-gray-500">支持 .xlsx, .csv 格式</p>
+                            <input type="file" id="inventoryFile" class="hidden" accept=".xlsx,.csv" onchange="handleFileImport('inventory', this)">
+                        </div>
+                        <div id="inventoryProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>导入进度</span>
+                                <span id="inventoryProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="inventoryProgressBar" class="bg-green-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-full" onclick="importData('inventory')">
+                            <i class="fas fa-upload mr-2"></i>
+                            开始导入
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 客户数据导入 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-users text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">客户数据导入</h4>
+                            <p class="text-sm text-gray-600">导入客户信息数据</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">客户数据模板.xlsx</a></p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
+                             onclick="document.getElementById('customersFile').click()"
+                             ondrop="handleDrop(event, 'customers')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">点击选择文件或拖拽到此处</p>
+                            <p class="text-xs text-gray-500">支持 .xlsx, .csv 格式</p>
+                            <input type="file" id="customersFile" class="hidden" accept=".xlsx,.csv" onchange="handleFileImport('customers', this)">
+                        </div>
+                        <div id="customersProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>导入进度</span>
+                                <span id="customersProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="customersProgressBar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-full" onclick="importData('customers')">
+                            <i class="fas fa-upload mr-2"></i>
+                            开始导入
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 供应商数据导入 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-truck text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">供应商数据导入</h4>
+                            <p class="text-sm text-gray-600">导入供应商信息数据</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">供应商数据模板.xlsx</a></p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
+                             onclick="document.getElementById('suppliersFile').click()"
+                             ondrop="handleDrop(event, 'suppliers')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">点击选择文件或拖拽到此处</p>
+                            <p class="text-xs text-gray-500">支持 .xlsx, .csv 格式</p>
+                            <input type="file" id="suppliersFile" class="hidden" accept=".xlsx,.csv" onchange="handleFileImport('suppliers', this)">
+                        </div>
+                        <div id="suppliersProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>导入进度</span>
+                                <span id="suppliersProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="suppliersProgressBar" class="bg-orange-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-full" onclick="importData('suppliers')">
+                            <i class="fas fa-upload mr-2"></i>
+                            开始导入
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 完整数据恢复 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-database text-red-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">完整数据恢复</h4>
+                            <p class="text-sm text-gray-600">从备份文件恢复所有数据</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持格式：备份文件 (.backup)</p>
+                            <p class="text-red-600">⚠️ 恢复操作将覆盖现有数据，请谨慎操作</p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer border-orange-300" 
+                             onclick="document.getElementById('backupFile').click()"
+                             ondrop="handleDrop(event, 'backup')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">选择备份文件</p>
+                            <p class="text-xs text-gray-500">支持 .backup 格式</p>
+                            <input type="file" id="backupFile" class="hidden" accept=".backup" onchange="handleFileImport('backup', this)">
+                        </div>
+                        <div id="backupProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>恢复进度</span>
+                                <span id="backupProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="backupProgressBar" class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline border-red-300 text-red-600 hover:bg-red-50 w-full" onclick="restoreData()">
+                            <i class="fas fa-undo mr-2"></i>
+                            恢复数据
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量导入 -->
+            <div class="card import-card">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-layer-group text-indigo-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">批量导入</h4>
+                            <p class="text-sm text-gray-600">一次性导入多种类型数据</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-sm text-gray-600">
+                            <p>支持同时导入多种数据类型</p>
+                            <p>请将不同数据类型的文件打包为ZIP格式</p>
+                        </div>
+                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
+                             onclick="document.getElementById('batchFile').click()"
+                             ondrop="handleDrop(event, 'batch')"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <p class="text-gray-600 mb-1">选择ZIP文件</p>
+                            <p class="text-xs text-gray-500">支持 .zip 格式</p>
+                            <input type="file" id="batchFile" class="hidden" accept=".zip" onchange="handleFileImport('batch', this)">
+                        </div>
+                        <div id="batchProgress" class="hidden">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span>批量导入进度</span>
+                                <span id="batchProgressText">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="batchProgressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-full" onclick="importData('batch')">
+                            <i class="fas fa-upload mr-2"></i>
+                            开始批量导入
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导入历史 -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3 class="card-title">导入历史</h3>
+                <p class="text-sm text-gray-600">查看最近的数据导入记录</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">导入时间</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">数据类型</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">文件名</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">记录数</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">状态</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-16 14:30</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">流水明细</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">流水记录_20240716.xlsx</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">156条</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    成功
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">查看详情</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-15 09:15</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">库存数据</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">库存清单.csv</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">12种</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    成功
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">查看详情</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-14 16:45</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">客户数据</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">客户信息.xlsx</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">89位</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    失败
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">查看错误</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 处理拖拽上传
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(event, type) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById(type + 'File');
+                fileInput.files = files;
+                handleFileImport(type, fileInput);
+            }
+        }
+
+        // 处理文件导入
+        function handleFileImport(type, input) {
+            const file = input.files[0];
+            if (file) {
+                Message.info(`已选择文件：${file.name}`);
+            }
+        }
+
+        // 导入数据
+        function importData(type) {
+            const fileInput = document.getElementById(type + 'File');
+            if (!fileInput.files[0]) {
+                Message.error('请先选择要导入的文件');
+                return;
+            }
+
+            const progressDiv = document.getElementById(type + 'Progress');
+            const progressBar = document.getElementById(type + 'ProgressBar');
+            const progressText = document.getElementById(type + 'ProgressText');
+
+            progressDiv.classList.remove('hidden');
+            Message.info(`正在导入${type}数据...`);
+
+            // 模拟导入进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressDiv.classList.add('hidden');
+                        Message.success(`${type}数据导入成功！`);
+                        fileInput.value = '';
+                    }, 500);
+                }
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        // 恢复数据
+        function restoreData() {
+            const fileInput = document.getElementById('backupFile');
+            if (!fileInput.files[0]) {
+                Message.error('请先选择备份文件');
+                return;
+            }
+
+            if (confirm('恢复操作将覆盖现有数据，确定要继续吗？')) {
+                const progressDiv = document.getElementById('backupProgress');
+                const progressBar = document.getElementById('backupProgressBar');
+                const progressText = document.getElementById('backupProgressText');
+
+                progressDiv.classList.remove('hidden');
+                Message.info('正在恢复数据...');
+
+                // 模拟恢复进度
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            progressDiv.classList.add('hidden');
+                            Message.success('数据恢复成功！');
+                            fileInput.value = '';
+                        }, 500);
+                    }
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = Math.round(progress) + '%';
+                }, 300);
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 

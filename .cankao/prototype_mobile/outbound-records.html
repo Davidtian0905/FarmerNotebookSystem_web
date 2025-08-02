@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出库记录 - 茶农手账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .ai-button {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        }
+        .camera-button {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button class="p-2 text-gray-600">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </button>
+            <h1 class="text-xl font-bold text-gray-900">记录</h1>
+            <button class="p-2 text-gray-600">
+                <i class="fas fa-plus text-xl"></i>
+                <span class="text-sm ml-1">导入数据</span>
+            </button>
+        </div>
+        
+        <!-- 切页导航 -->
+        <div class="flex">
+            <button class="flex-1 py-4 text-center font-medium text-gray-600">入库</button>
+            <button class="flex-1 py-4 text-center font-medium tab-active">出库</button>
+        </div>
+    </div>
+
+    <!-- AI功能区 -->
+    <div class="p-4">
+        <div class="grid grid-cols-2 gap-4">
+            <!-- AI语音记账 -->
+            <button class="ai-button rounded-2xl p-6 text-white card-shadow">
+                <div class="text-center">
+                    <i class="fas fa-microphone text-3xl mb-3"></i>
+                    <div class="font-semibold">AI语音记账</div>
+                    <div class="text-sm opacity-90 mt-1">消耗1积分</div>
+                </div>
+            </button>
+            
+            <!-- 拍照识别 -->
+            <button class="camera-button rounded-2xl p-6 text-white card-shadow">
+                <div class="text-center">
+                    <i class="fas fa-camera text-3xl mb-3"></i>
+                    <div class="font-semibold">拍照识别</div>
+                    <div class="text-sm opacity-90 mt-1">OCR智能识别</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 快捷出库类型 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">快捷出库</h3>
+            <div class="grid grid-cols-4 gap-4">
+                <button class="flex flex-col items-center p-3 bg-red-50 rounded-xl hover:bg-red-100" onclick="goToOutboundForm('茶叶销售')">
+                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-leaf text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">茶叶销售</span>
+                </button>
+                
+                <button class="flex flex-col items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100" onclick="goToOutboundForm('礼品套装')">
+                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-gift text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">礼品套装</span>
+                </button>
+                
+                <button class="flex flex-col items-center p-3 bg-yellow-50 rounded-xl hover:bg-yellow-100" onclick="goToOutboundForm('试用样品')">
+                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-vial text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">试用样品</span>
+                </button>
+                
+                <button class="flex flex-col items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100" onclick="goToOutboundForm('自定义')">
+                    <div class="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-plus text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">自定义</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+      <!-- 自定义商品模板 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">自定义商品模板</h3>
+                <button class="text-blue-500 font-medium" onclick="addCustomProduct()">
+                    <i class="fas fa-plus mr-1"></i>添加
+                </button>
+            </div>
+            <div class="grid grid-cols-4 gap-4" id="customProductsGrid">
+                <!-- 默认商品 -->
+                <div class="flex flex-col items-center p-3 bg-green-50 rounded-xl hover:bg-green-100 relative" data-product="红茶礼盒">
+                    <button class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs" onclick="removeCustomProduct(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-leaf text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 text-center">红茶礼盒</span>
+                </div>
+                
+                <div class="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 relative" data-product="绿茶散装">
+                    <button class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs" onclick="removeCustomProduct(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-seedling text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 text-center">绿茶礼盒</span>
+                </div>
+                
+                <div class="flex flex-col items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 relative" data-product="白茶套装">
+                    <button class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs" onclick="removeCustomProduct(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-spa text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 text-center">白茶套装</span>
+                </div>
+                
+                <div class="flex flex-col items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 relative" data-product="乌龙茶">
+                    <button class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs" onclick="removeCustomProduct(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-coffee text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 text-center">乌龙茶套</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+            
+     
+
+    <!-- 最近记录 -->
+    <div class="px-4">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">最近记录</h3>
+            </div>
+            
+            <div class="divide-y divide-gray-100">
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-leaf text-red-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">红茶礼盒销售</div>
+                            <div class="text-sm text-gray-500">张先生 • 5盒</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">+¥1,500.00</div>
+                        <div class="text-xs text-gray-500">今天 15:20</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-gift text-orange-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">绿茶套装销售</div>
+                            <div class="text-sm text-gray-500">李女士 • 3套</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">+¥900.00</div>
+                        <div class="text-xs text-gray-500">今天 11:45</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-vial text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">试用装赠送</div>
+                            <div class="text-sm text-gray-500">王总 • 10份</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-600">¥0.00</div>
+                        <div class="text-xs text-gray-500">昨天 14:30</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-leaf text-purple-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">白茶散装销售</div>
+                            <div class="text-sm text-gray-500">陈老板 • 2斤</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-green-600">+¥800.00</div>
+                        <div class="text-xs text-gray-500">07-15 16:20</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="flex">
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-chart-bar text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">资产</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-list text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">流水</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <i class="fas fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs text-blue-500 font-medium">记录</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-boxes text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">商品</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-user text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        // 物料数据存储
+        let materialItems = [
+            { material: '成品红茶', quantity: 200, unit: 'g' },
+            { material: '礼品袋', quantity: 1, unit: '个' },
+            { material: '罐子', quantity: 2, unit: '个' }
+        ];
+
+        function goToInboundPage() {
+            window.location.href = 'record.html';
+        }
+
+        function goToOutboundForm(type) {
+            // 跳转到销售记录表单页面，并传递出库类型参数
+            window.location.href = 'sales-form.html?type=' + encodeURIComponent(type);
+        }
+
+        function voiceRecord() {
+            alert('语音记账功能');
+        }
+
+        function photoRecognition() {
+            alert('拍照识别功能');
+        }
+
+        // 物料管理函数
+        function updateMaterial(selectElement, index) {
+            materialItems[index].material = selectElement.value;
+        }
+
+        function updateQuantity(inputElement, index) {
+            materialItems[index].quantity = parseInt(inputElement.value) || 1;
+        }
+
+        function updateUnit(selectElement, index) {
+            materialItems[index].unit = selectElement.value;
+        }
+
+        function removeMaterialItem(index) {
+            if (materialItems.length > 1) {
+                materialItems.splice(index, 1);
+                renderMaterialsList();
+            } else {
+                alert('至少需要保留一个物料项');
+            }
+        }
+
+        function addMaterialItem() {
+            materialItems.push({
+                material: '成品红茶',
+                quantity: 1,
+                unit: 'g'
+            });
+            renderMaterialsList();
+        }
+
+        function renderMaterialsList() {
+            const materialsList = document.getElementById('materialsList');
+            const materialOptions = ['成品红茶', '成品绿茶', '成品白茶', '礼品袋', '罐子', '包装盒'];
+            const unitOptions = ['g', 'kg', '个', '盒', '包'];
+            
+            materialsList.innerHTML = materialItems.map((item, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="updateMaterial(this, ${index})">
+                            ${materialOptions.map(option => 
+                                `<option value="${option}" ${option === item.material ? 'selected' : ''}>${option}</option>`
+                            ).join('')}
+                        </select>
+                        <input type="number" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20" value="${item.quantity}" min="1" onchange="updateQuantity(this, ${index})">
+                        <select class="border border-gray-300 rounded-lg px-2 py-2 text-sm" onchange="updateUnit(this, ${index})">
+                            ${unitOptions.map(option => 
+                                `<option value="${option}" ${option === item.unit ? 'selected' : ''}>${option}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700" onclick="removeMaterialItem(${index})">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function showMaterialModal() {
+            alert('打开物料设置界面');
+        }
+
+        function saveMaterialTemplate() {
+            // 保存当前物料组合为模板
+            localStorage.setItem('materialTemplate', JSON.stringify(materialItems));
+            alert('物料模板已保存');
+        }
+
+        function createOutboundRecord() {
+            // 创建出库记录
+            const recordData = {
+                materials: materialItems,
+                timestamp: new Date().toISOString(),
+                type: 'outbound'
+            };
+            
+            // 这里可以保存到本地存储或发送到服务器
+            console.log('创建出库记录:', recordData);
+            alert('出库记录已创建');
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 尝试从本地存储加载模板
+            const savedTemplate = localStorage.getItem('materialTemplate');
+            if (savedTemplate) {
+                materialItems = JSON.parse(savedTemplate);
+                renderMaterialsList();
+            }
+        });
+    </script>
+</body>
+</html>

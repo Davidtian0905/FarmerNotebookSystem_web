@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .settings-nav {
+            border-right: 1px solid #e5e7eb;
+        }
+        
+        .settings-nav-item {
+            display: block;
+            padding: 12px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-nav-item:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .settings-nav-item.active {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="profile.html" class="hover:text-gray-900">个人中心</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">设置</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/import-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>                
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">设置</h2>
+                <p class="text-gray-600 mt-1">管理您的账户设置和偏好</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="profile.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回个人中心
+                </a>
+            </div>
+        </div>
+
+        <!-- 设置内容 -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- 设置导航 -->
+            <div class="lg:col-span-1">
+                <div class="card settings-nav">
+                    <nav class="space-y-1">
+                        <a href="#" class="settings-nav-item active" onclick="showSettingsTab('account')">
+                            <i class="fas fa-user mr-3"></i>
+                            账户信息
+                        </a>
+                        <a href="#" class="settings-nav-item" onclick="showSettingsTab('security')">
+                            <i class="fas fa-shield-alt mr-3"></i>
+                            安全设置
+                        </a>
+                        <a href="#" class="settings-nav-item" onclick="showSettingsTab('notification')">
+                            <i class="fas fa-bell mr-3"></i>
+                            通知设置
+                        </a>
+                        <a href="#" class="settings-nav-item" onclick="showSettingsTab('privacy')">
+                            <i class="fas fa-lock mr-3"></i>
+                            隐私设置
+                        </a>
+                        <a href="#" class="settings-nav-item" onclick="showSettingsTab('system')">
+                            <i class="fas fa-cog mr-3"></i>
+                            系统设置
+                        </a>
+                        <a href="#" class="settings-nav-item" onclick="showSettingsTab('about')">
+                            <i class="fas fa-info-circle mr-3"></i>
+                            关于
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 设置内容区 -->
+            <div class="lg:col-span-3">
+                <!-- 账户信息 -->
+                <div id="account-tab" class="settings-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">账户信息</h3>
+                            <p class="text-sm text-gray-600">管理您的基本账户信息</p>
+                        </div>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="form-group">
+                                    <label class="form-label">姓名 *</label>
+                                    <input type="text" class="form-input" value="张茶农" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">手机号码 *</label>
+                                    <input type="tel" class="form-input" value="13812345678" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">邮箱地址</label>
+                                    <input type="email" class="form-input" value="zhang@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">身份证号</label>
+                                    <input type="text" class="form-input" value="350****198*****1234" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">详细地址</label>
+                                <input type="text" class="form-input" value="福建省泉州市安溪县龙门镇茶园村123号">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">个人简介</label>
+                                <textarea class="form-input" rows="4" placeholder="介绍一下您的茶园和经营情况...">专业种植铁观音15年，拥有50亩优质茶园，年产量约5000斤，主要销售给批发商和茶叶店。</textarea>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" class="btn btn-secondary">取消</button>
+                                <button type="submit" class="btn btn-primary">保存更改</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 安全设置 -->
+                <div id="security-tab" class="settings-tab hidden">
+                    <div class="space-y-6">
+                        <!-- 修改密码 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">修改密码</h3>
+                                <p class="text-sm text-gray-600">定期更换密码以保护账户安全</p>
+                            </div>
+                            <form class="space-y-4">
+                                <div class="form-group">
+                                    <label class="form-label">当前密码 *</label>
+                                    <input type="password" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">新密码 *</label>
+                                    <input type="password" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">确认新密码 *</label>
+                                    <input type="password" class="form-input" required>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="btn btn-primary">更新密码</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 两步验证 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">两步验证</h3>
+                                <p class="text-sm text-gray-600">为您的账户添加额外的安全保护</p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <div class="font-medium text-gray-900">短信验证</div>
+                                        <div class="text-sm text-gray-500">通过短信接收验证码</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <div class="font-medium text-gray-900">邮箱验证</div>
+                                        <div class="text-sm text-gray-500">通过邮箱接收验证码</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 登录记录 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">最近登录记录</h3>
+                                <p class="text-sm text-gray-600">查看您的账户登录历史</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-desktop text-blue-600"></i>
+                                        <div>
+                                            <div class="font-medium text-gray-900">Windows Chrome</div>
+                                            <div class="text-sm text-gray-500">福建省泉州市 · 当前会话</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">2024-07-16 09:30</div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-mobile-alt text-green-600"></i>
+                                        <div>
+                                            <div class="font-medium text-gray-900">iPhone Safari</div>
+                                            <div class="text-sm text-gray-500">福建省泉州市</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">2024-07-15 20:15</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通知设置 -->
+                <div id="notification-tab" class="settings-tab hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">通知设置</h3>
+                            <p class="text-sm text-gray-600">管理您希望接收的通知类型</p>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-4">系统通知</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">库存预警</div>
+                                            <div class="text-sm text-gray-500">当商品库存不足时通知我</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">交易提醒</div>
+                                            <div class="text-sm text-gray-500">新的交易记录时通知我</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">客户消息</div>
+                                            <div class="text-sm text-gray-500">收到客户消息时通知我</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-4">营销通知</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">产品推荐</div>
+                                            <div class="text-sm text-gray-500">接收个性化产品推荐</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">活动通知</div>
+                                            <div class="text-sm text-gray-500">接收优惠活动信息</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 隐私设置 -->
+                <div id="privacy-tab" class="settings-tab hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">隐私设置</h3>
+                            <p class="text-sm text-gray-600">控制您的数据隐私和可见性</p>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">公开个人资料</div>
+                                    <div class="text-sm text-gray-500">允许其他用户查看您的基本信息</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">数据分析</div>
+                                    <div class="text-sm text-gray-500">允许系统分析您的使用数据以改善服务</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">第三方集成</div>
+                                    <div class="text-sm text-gray-500">允许第三方应用访问您的数据</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <hr class="my-6">
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-4 text-red-600">危险操作</h4>
+                                <div class="space-y-4">
+                                    <button class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50">
+                                        <i class="fas fa-download mr-2"></i>
+                                        导出我的数据
+                                    </button>
+                                    <button class="btn btn-outline text-red-600 border-red-300 hover:bg-red-50">
+                                        <i class="fas fa-trash mr-2"></i>
+                                        删除我的账户
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统设置 -->
+                <div id="system-tab" class="settings-tab hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">系统设置</h3>
+                            <p class="text-sm text-gray-600">自定义您的使用体验</p>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="form-group">
+                                <label class="form-label">语言设置</label>
+                                <select class="form-input">
+                                    <option value="zh-CN">简体中文</option>
+                                    <option value="zh-TW">繁体中文</option>
+                                    <option value="en-US">English</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">时区设置</label>
+                                <select class="form-input">
+                                    <option value="Asia/Shanghai">北京时间 (UTC+8)</option>
+                                    <option value="Asia/Hong_Kong">香港时间 (UTC+8)</option>
+                                    <option value="Asia/Taipei">台北时间 (UTC+8)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">货币单位</label>
+                                <select class="form-input">
+                                    <option value="CNY">人民币 (¥)</option>
+                                    <option value="HKD">港币 (HK$)</option>
+                                    <option value="TWD">新台币 (NT$)</option>
+                                    <option value="USD">美元 ($)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">深色模式</div>
+                                    <div class="text-sm text-gray-500">使用深色主题界面</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">自动保存</div>
+                                    <div class="text-sm text-gray-500">自动保存表单数据</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 关于 -->
+                <div id="about-tab" class="settings-tab hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">关于茶农手账</h3>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-leaf text-white text-3xl"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-gray-900 mb-2">茶农手账系统</h4>
+                                <p class="text-gray-600 mb-4">专为茶农打造的智能记账管理系统</p>
+                                <div class="text-sm text-gray-500">
+                                    <p>版本：v2.1.0</p>
+                                    <p>更新时间：2024年7月16日</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-users text-blue-600 text-2xl mb-2"></i>
+                                    <div class="font-medium text-gray-900">用户数量</div>
+                                    <div class="text-2xl font-bold text-blue-600">10,000+</div>
+                                </div>
+                                
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-chart-line text-green-600 text-2xl mb-2"></i>
+                                    <div class="font-medium text-gray-900">记录总数</div>
+                                    <div class="text-2xl font-bold text-green-600">1,000,000+</div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <a href="#" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-question-circle text-blue-600 mr-3"></i>
+                                    <span class="text-gray-900">帮助中心</span>
+                                    <i class="fas fa-external-link-alt text-gray-400 ml-auto"></i>
+                                </a>
+                                
+                                <a href="#" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-file-alt text-green-600 mr-3"></i>
+                                    <span class="text-gray-900">用户协议</span>
+                                    <i class="fas fa-external-link-alt text-gray-400 ml-auto"></i>
+                                </a>
+                                
+                                <a href="#" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-shield-alt text-purple-600 mr-3"></i>
+                                    <span class="text-gray-900">隐私政策</span>
+                                    <i class="fas fa-external-link-alt text-gray-400 ml-auto"></i>
+                                </a>
+                                
+                                <a href="#" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-envelope text-orange-600 mr-3"></i>
+                                    <span class="text-gray-900">联系我们</span>
+                                    <i class="fas fa-external-link-alt text-gray-400 ml-auto"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function showSettingsTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // 移除所有导航项的活动状态
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // 添加活动状态到对应的导航项
+            event.target.classList.add('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部切页导航 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex">
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('assets')">资产页</button>
+            <button class="flex-1 py-4 text-center font-medium tab-active" onclick="showTab('customer')">客户分析</button>
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('supplier')">供应商分析</button>
+        </div>
+    </div>
+
+        <!-- 客户总览 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">客户总览</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">156</div>
+                    <div class="text-sm text-gray-500">总客户数</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">89</div>
+                    <div class="text-sm text-gray-500">活跃客户</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600">23</div>
+                    <div class="text-sm text-gray-500">新增客户</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-red-600">12</div>
+                    <div class="text-sm text-gray-500">流失客户</div>
+                </div>
+            </div>
+        </div>
+
+    <div class="p-4 space-y-6">
+        <!-- 时间筛选 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex space-x-2">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm">本月</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">本季度</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">本年</button>
+                <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">自定义</button>
+            </div>
+        </div>
+
+
+        <!-- 客户销售额排名 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">客户销售额排名</h3>
+            </div>
+            <div class="h-64">
+                <canvas id="customerSalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 渠道分析 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">渠道分析</h3>
+            </div>
+            <div class="h-64">
+                <canvas id="channelAnalysisChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 客户购买频次 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">客户购买频次</h3>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm" onclick="updateFrequencyChart('month')">月</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg text-sm" onclick="updateFrequencyChart('day')">日</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg text-sm" onclick="updateFrequencyChart('year')">年</button>
+                </div>
+            </div>
+            <div class="h-64">
+                <canvas id="customerFrequencyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 地域分布 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">地域分布</h3>
+            </div>
+            <div class="h-64">
+                <canvas id="customerRegionChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+    <div class="h-6"></div>
+
+    <script>
+        // 切页功能
+        function showTab(tabName) {
+            if (tabName === 'assets') {
+                window.location.href = 'assets.html';
+            } else if (tabName === 'supplier') {
+                window.location.href = 'supplier-analysis.html';
+            }
+            // customer tab保持在当前页面
+        }
+
+        // 全局图表变量
+        let salesChart;
+        let frequencyChart;
+        let regionChart;
+        let channelChart;
+
+        // 购买频次数据
+        const frequencyData = {
+            month: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '泉州茶叶市场', '广州茶叶商行', '上海品茶轩'],
+                data: [15, 12, 10, 8, 6]
+            },
+            day: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '广州茶叶商行', '泉州茶叶市场', '上海品茶轩'],
+                data: [2, 1, 1, 1, 1]
+            },
+            year: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '泉州茶叶市场', '广州茶叶商行', '上海品茶轩'],
+                data: [156, 128, 98, 86, 72]
+            }
+        };
+
+        // 渠道分析数据
+        const channelData = {
+            labels: ['线下门店', '微信小程序', '淘宝店铺', '拼多多', '抖音直播', '朋友圈', '其他'],
+            data: [35, 25, 15, 12, 8, 3, 2],
+            backgroundColor: [
+                '#3B82F6',
+                '#10B981',
+                '#8B5CF6',
+                '#F59E0B',
+                '#EF4444',
+                '#06B6D4',
+                '#84CC16'
+            ]
+        };
+        const salesData = {
+            month: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '泉州茶叶市场', '广州茶叶商行', '上海品茶轩'],
+                data: [28500, 22800, 18600, 15200, 12800]
+            },
+            day: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '广州茶叶商行', '泉州茶叶市场', '上海品茶轩'],
+                data: [1200, 980, 850, 720, 650]
+            },
+            year: {
+                labels: ['福建茶叶批发商', '安溪茶业公司', '泉州茶叶市场', '广州茶叶商行', '上海品茶轩'],
+                data: [285600, 198400, 156800, 142300, 128900]
+            }
+        };
+
+        // 客户销售额排名图表
+        function initSalesChart() {
+            const ctx = document.getElementById('customerSalesChart').getContext('2d');
+            salesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: salesData.month.labels,
+                    datasets: [{
+                        label: '销售额',
+                        data: salesData.month.data,
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#8B5CF6',
+                            '#F59E0B',
+                            '#EF4444'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + (value / 1000).toFixed(1) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新销售额图表
+        function updateSalesChart(period) {
+            const data = salesData[period];
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.data;
+            
+            // 更新Y轴格式
+            if (period === 'year') {
+                salesChart.options.scales.x.ticks.callback = function(value) {
+                    return '¥' + (value / 10000).toFixed(1) + '万';
+                };
+            } else {
+                salesChart.options.scales.x.ticks.callback = function(value) {
+                    return '¥' + (value / 1000).toFixed(1) + 'k';
+                };
+            }
+            
+            salesChart.update();
+        }
+
+        // 客户购买频次图表
+        function initFrequencyChart() {
+            const ctx = document.getElementById('customerFrequencyChart').getContext('2d');
+            frequencyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: frequencyData.month.labels,
+                    datasets: [{
+                        label: '购买频次',
+                        data: frequencyData.month.data,
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#8B5CF6',
+                            '#F59E0B',
+                            '#EF4444'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '次';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新购买频次图表
+        function updateFrequencyChart(period) {
+            const data = frequencyData[period];
+            frequencyChart.data.labels = data.labels;
+            frequencyChart.data.datasets[0].data = data.data;
+            
+            // 更新X轴格式
+            frequencyChart.options.scales.x.ticks.callback = function(value) {
+                return value + '次';
+            };
+            
+            frequencyChart.update();
+        }
+
+        // 地域分布饼图
+        function initRegionChart() {
+            const ctx = document.getElementById('customerRegionChart').getContext('2d');
+            regionChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['福建省', '广东省', '浙江省', '上海市', '其他地区'],
+                    datasets: [{
+                        data: [68, 15, 12, 10, 5],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#8B5CF6',
+                            '#F59E0B',
+                            '#EF4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 渠道分析饼图
+        function initChannelChart() {
+            try {
+                const canvas = document.getElementById('channelAnalysisChart');
+                if (!canvas) {
+                    console.error('Canvas element channelAnalysisChart not found');
+                    return;
+                }
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('Failed to get 2D context for channelAnalysisChart');
+                    return;
+                }
+                
+                // 销毁现有图表（如果存在）
+                if (channelChart) {
+                    channelChart.destroy();
+                }
+                
+                channelChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: channelData.labels,
+                        datasets: [{
+                            data: channelData.data,
+                            backgroundColor: channelData.backgroundColor
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            return data.labels.map((label, i) => {
+                                                const value = data.datasets[0].data[i];
+                                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                return {
+                                                    text: `${label} (${percentage}%)`,
+                                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                                    strokeStyle: data.datasets[0].backgroundColor[i],
+                                                    lineWidth: 0,
+                                                    pointStyle: 'circle'
+                                                };
+                                            });
+                                        }
+                                        return [];
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${percentage}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Channel chart initialized successfully');
+            } catch (error) {
+                console.error('Error initializing channel chart:', error);
+            }
+        }
+
+        // 页面加载完成后初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing charts...');
+            
+            // 添加短暂延迟确保所有元素都已渲染
+            setTimeout(function() {
+                try {
+                    console.log('Starting chart initialization...');
+                    initSalesChart();
+                    console.log('Sales chart initialized');
+                    
+                    initFrequencyChart();
+                    console.log('Frequency chart initialized');
+                    
+                    initRegionChart();
+                    console.log('Region chart initialized');
+                    
+                    initChannelChart();
+                    console.log('All charts initialized successfully');
+                } catch (error) {
+                    console.error('Error during chart initialization:', error);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

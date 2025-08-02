@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据导出</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        .export-card {
+            transition: all 0.3s ease;
+        }
+        .export-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">数据导出</h1>
+
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 返回按钮 -->
+                <button onclick="window.location.href='data-management.html'" class="p-2 text-gray-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出说明 -->
+    <div class="p-4">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-green-500 text-lg mt-0.5"></i>
+                <div>
+                    <h3 class="font-semibold text-green-900 mb-2">导出说明</h3>
+                    <ul class="text-sm text-green-800 space-y-1">
+                        <li>• 支持Excel (.xlsx) 和CSV (.csv) 格式导出</li>
+                        <li>• 可选择时间范围和数据类型进行导出</li>
+                        <li>• 导出的数据包含完整的业务信息</li>
+                        <li>• 支持批量导出多种数据类型</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速导出 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                快速导出
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="quickExport('all')" class="export-card flex flex-col items-center p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl">
+                    <i class="fas fa-database text-2xl mb-2"></i>
+                    <span class="font-medium">全部数据</span>
+                    <span class="text-xs opacity-90 mt-1">所有记录</span>
+                </button>
+                
+                <button onclick="quickExport('month')" class="export-card flex flex-col items-center p-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl">
+                    <i class="fas fa-calendar-alt text-2xl mb-2"></i>
+                    <span class="font-medium">本月数据</span>
+                    <span class="text-xs opacity-90 mt-1">当月记录</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据类型选择 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-list-check text-blue-500 mr-2"></i>
+                选择导出数据
+            </h3>
+            <div class="space-y-3">
+                <!-- 入库记录 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-green-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">入库记录</div>
+                                <div class="text-sm text-gray-500">商品入库、采购记录</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">156条</span>
+                            <input type="checkbox" id="inbound" class="w-5 h-5 text-green-600 rounded" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 出库记录 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-red-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-up text-red-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">出库记录</div>
+                                <div class="text-sm text-gray-500">销售出库、客户订单</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">89条</span>
+                            <input type="checkbox" id="outbound" class="w-5 h-5 text-red-600 rounded" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 流水明细 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-blue-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-list text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">流水明细</div>
+                                <div class="text-sm text-gray-500">收支流水、资金记录</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">245条</span>
+                            <input type="checkbox" id="flow" class="w-5 h-5 text-blue-600 rounded" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 库存信息 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-purple-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-boxes text-purple-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">库存信息</div>
+                                <div class="text-sm text-gray-500">商品库存、盘点记录</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">67条</span>
+                            <input type="checkbox" id="inventory" class="w-5 h-5 text-purple-600 rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 供应商信息 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-orange-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-truck text-orange-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">供应商信息</div>
+                                <div class="text-sm text-gray-500">供应商档案、联系方式</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">12条</span>
+                            <input type="checkbox" id="suppliers" class="w-5 h-5 text-orange-600 rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客户信息 -->
+                <div class="export-card border border-gray-200 rounded-xl p-4 hover:border-indigo-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">客户信息</div>
+                                <div class="text-sm text-gray-500">客户档案、购买记录</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">34条</span>
+                            <input type="checkbox" id="customers" class="w-5 h-5 text-indigo-600 rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 时间范围选择 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-calendar-range text-blue-500 mr-2"></i>
+                时间范围
+            </h3>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="setTimeRange('week')" class="time-range-btn p-3 border border-gray-200 rounded-xl text-center hover:border-blue-300 hover:bg-blue-50">
+                    <div class="font-medium text-gray-900">最近一周</div>
+                    <div class="text-sm text-gray-500">7天内数据</div>
+                </button>
+                <button onclick="setTimeRange('month')" class="time-range-btn p-3 border border-blue-300 bg-blue-50 rounded-xl text-center">
+                    <div class="font-medium text-blue-900">最近一月</div>
+                    <div class="text-sm text-blue-600">30天内数据</div>
+                </button>
+                <button onclick="setTimeRange('quarter')" class="time-range-btn p-3 border border-gray-200 rounded-xl text-center hover:border-blue-300 hover:bg-blue-50">
+                    <div class="font-medium text-gray-900">最近三月</div>
+                    <div class="text-sm text-gray-500">90天内数据</div>
+                </button>
+                <button onclick="setTimeRange('year')" class="time-range-btn p-3 border border-gray-200 rounded-xl text-center hover:border-blue-300 hover:bg-blue-50">
+                    <div class="font-medium text-gray-900">最近一年</div>
+                    <div class="text-sm text-gray-500">365天内数据</div>
+                </button>
+            </div>
+            
+            <!-- 自定义时间范围 -->
+            <div class="border-t border-gray-100 pt-4">
+                <div class="text-sm font-medium text-gray-700 mb-3">自定义时间范围</div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">开始日期</label>
+                        <input type="date" id="startDate" class="w-full p-2 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">结束日期</label>
+                        <input type="date" id="endDate" class="w-full p-2 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出格式选择 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-file-export text-blue-500 mr-2"></i>
+                导出格式
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="export-format-option cursor-pointer">
+                    <input type="radio" name="format" value="xlsx" class="hidden" checked>
+                    <div class="format-card border-2 border-green-300 bg-green-50 rounded-xl p-4 text-center">
+                        <i class="fas fa-file-excel text-2xl text-green-600 mb-2"></i>
+                        <div class="font-medium text-green-900">Excel格式</div>
+                        <div class="text-sm text-green-600">.xlsx文件</div>
+                    </div>
+                </label>
+                
+                <label class="export-format-option cursor-pointer">
+                    <input type="radio" name="format" value="csv" class="hidden">
+                    <div class="format-card border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-300 hover:bg-blue-50">
+                        <i class="fas fa-file-csv text-2xl text-gray-600 mb-2"></i>
+                        <div class="font-medium text-gray-900">CSV格式</div>
+                        <div class="text-sm text-gray-500">.csv文件</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出按钮 -->
+    <div class="px-4 mb-4">
+        <button onclick="startExport()" class="w-full gradient-bg text-white py-4 rounded-xl font-semibold text-lg card-shadow">
+            <i class="fas fa-download mr-2"></i>
+            开始导出
+        </button>
+    </div>
+
+    <!-- 导出进度 -->
+    <div id="exportProgress" class="px-4 mb-4 hidden">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-gray-900">导出进度</h3>
+                <span id="progressPercent" class="text-sm text-gray-500">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                <div id="progressBar" class="progress-bar bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+            </div>
+            <div id="progressText" class="text-sm text-gray-600">准备导出...</div>
+        </div>
+    </div>
+
+    <!-- 导出历史 -->
+    <div class="px-4 mb-20">
+        <div class="bg-white rounded-xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-history text-gray-500 mr-2"></i>
+                    导出历史
+                </h3>
+            </div>
+            
+            <div class="divide-y divide-gray-100" id="exportHistory">
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-excel text-green-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">账本数据_2024年7月.xlsx</div>
+                            <div class="text-sm text-gray-500">包含入库、出库、流水记录</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">今天 16:20</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">重新下载</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-csv text-blue-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">客户信息导出.csv</div>
+                            <div class="text-sm text-gray-500">客户档案和购买记录</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">昨天 14:30</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">重新下载</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-excel text-purple-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">库存盘点_7月份.xlsx</div>
+                            <div class="text-sm text-gray-500">商品库存和盘点记录</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">07-15 09:45</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">重新下载</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        let selectedTimeRange = 'month';
+        let selectedFormat = 'xlsx';
+
+        // 设置时间范围
+        function setTimeRange(range) {
+            selectedTimeRange = range;
+            
+            // 更新按钮样式
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.className = 'time-range-btn p-3 border border-gray-200 rounded-xl text-center hover:border-blue-300 hover:bg-blue-50';
+            });
+            
+            event.target.closest('.time-range-btn').className = 'time-range-btn p-3 border border-blue-300 bg-blue-50 rounded-xl text-center';
+            
+            // 设置对应的日期
+            const endDate = new Date();
+            const startDate = new Date();
+            
+            switch(range) {
+                case 'week':
+                    startDate.setDate(endDate.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(endDate.getMonth() - 1);
+                    break;
+                case 'quarter':
+                    startDate.setMonth(endDate.getMonth() - 3);
+                    break;
+                case 'year':
+                    startDate.setFullYear(endDate.getFullYear() - 1);
+                    break;
+            }
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+        }
+
+        // 格式选择
+        document.querySelectorAll('input[name="format"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                selectedFormat = this.value;
+                
+                // 更新样式
+                document.querySelectorAll('.format-card').forEach(card => {
+                    card.className = 'format-card border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-300 hover:bg-blue-50';
+                });
+                
+                const selectedCard = this.closest('.export-format-option').querySelector('.format-card');
+                if (this.value === 'xlsx') {
+                    selectedCard.className = 'format-card border-2 border-green-300 bg-green-50 rounded-xl p-4 text-center';
+                } else {
+                    selectedCard.className = 'format-card border-2 border-blue-300 bg-blue-50 rounded-xl p-4 text-center';
+                }
+            });
+        });
+
+        // 快速导出
+        function quickExport(type) {
+            if (type === 'all') {
+                // 选中所有数据类型
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                setTimeRange('year');
+            } else if (type === 'month') {
+                // 选中主要数据类型
+                document.getElementById('inbound').checked = true;
+                document.getElementById('outbound').checked = true;
+                document.getElementById('flow').checked = true;
+                setTimeRange('month');
+            }
+            
+            startExport();
+        }
+
+        // 开始导出
+        function startExport() {
+            // 获取选中的数据类型
+            const selectedData = [];
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('请至少选择一种数据类型进行导出');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                selectedData.push(cb.id);
+            });
+            
+            // 获取时间范围
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('请选择导出的时间范围');
+                return;
+            }
+            
+            // 显示进度条
+            document.getElementById('exportProgress').classList.remove('hidden');
+            
+            // 模拟导出进度
+            simulateExport(selectedData, startDate, endDate, selectedFormat);
+        }
+
+        // 模拟导出进度
+        function simulateExport(dataTypes, startDate, endDate, format) {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressText = document.getElementById('progressText');
+            
+            let progress = 0;
+            const steps = [
+                '正在准备导出数据...',
+                '正在读取入库记录...',
+                '正在读取出库记录...',
+                '正在读取流水明细...',
+                '正在生成文件...',
+                '导出完成！'
+            ];
+            
+            let stepIndex = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        showExportSuccess(dataTypes, format);
+                    }, 500);
+                }
+                
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+                
+                if (stepIndex < steps.length - 1 && progress > (stepIndex + 1) * 16) {
+                    stepIndex++;
+                }
+                progressText.textContent = steps[stepIndex];
+                
+            }, 300);
+        }
+
+        // 显示导出成功
+        function showExportSuccess(dataTypes, format) {
+            const now = new Date();
+            const filename = `账本数据_${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日.${format}`;
+            
+            // 隐藏进度条
+            document.getElementById('exportProgress').classList.add('hidden');
+            
+            // 添加到导出历史
+            addToExportHistory(filename, dataTypes);
+            
+            // 显示成功消息
+            alert(`导出成功！\n\n文件名：${filename}\n数据类型：${dataTypes.length}种\n\n文件已保存到下载文件夹。`);
+            
+            // 模拟文件下载
+            downloadFile(filename, dataTypes, format);
+        }
+
+        // 添加到导出历史
+        function addToExportHistory(filename, dataTypes) {
+            const historyContainer = document.getElementById('exportHistory');
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'flex items-center justify-between p-4 hover:bg-gray-50';
+            historyItem.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-${filename.endsWith('.xlsx') ? 'excel' : 'csv'} text-green-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">${filename}</div>
+                        <div class="text-sm text-gray-500">包含${dataTypes.length}种数据类型</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">今天 ${timeStr}</div>
+                    <button class="text-blue-500 text-sm hover:text-blue-700">重新下载</button>
+                </div>
+            `;
+            
+            historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+        }
+
+        // 模拟文件下载
+        function downloadFile(filename, dataTypes, format) {
+            // 生成示例数据
+            const data = generateExportData(dataTypes);
+            
+            if (format === 'csv') {
+                downloadCSV(data, filename);
+            } else {
+                // 对于Excel格式，这里只是模拟
+                console.log('Excel文件下载:', filename, data);
+            }
+        }
+
+        // 生成导出数据
+        function generateExportData(dataTypes) {
+            const data = [];
+            
+            if (dataTypes.includes('inbound')) {
+                data.push(['=== 入库记录 ===']);
+                data.push(['日期', '商品名称', '数量', '单价', '总金额', '供应商', '备注']);
+                data.push(['2024-07-16', '红茶原料', '50kg', '50.00', '2500.00', '福建茶叶批发商', '优质红茶']);
+                data.push(['2024-07-15', '包装盒', '100个', '2.50', '250.00', '包装材料供应商', '礼品包装盒']);
+                data.push(['']);
+            }
+            
+            if (dataTypes.includes('outbound')) {
+                data.push(['=== 出库记录 ===']);
+                data.push(['日期', '商品名称', '销售数量', '销售单价', '销售总额', '客户姓名', '备注']);
+                data.push(['2024-07-16', '红茶礼盒', '10盒', '88.00', '880.00', '张先生', '线上订单']);
+                data.push(['2024-07-15', '绿茶散装', '5kg', '120.00', '600.00', '李女士', '门店销售']);
+                data.push(['']);
+            }
+            
+            if (dataTypes.includes('flow')) {
+                data.push(['=== 流水明细 ===']);
+                data.push(['日期', '类型', '金额', '分类', '备注']);
+                data.push(['2024-07-16', '收入', '880.00', '销售收入', '红茶礼盒销售']);
+                data.push(['2024-07-16', '支出', '2500.00', '采购成本', '红茶原料采购']);
+                data.push(['']);
+            }
+            
+            return data;
+        }
+
+        // 下载CSV文件
+        function downloadCSV(data, filename) {
+            const csvContent = data.map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 返回上一页
+        function goBack() {
+            window.history.back();
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认日期
+            setTimeRange('month');
+        });
+
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加供应商 - 茶农手账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .input-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button class="p-2 text-gray-600" onclick="goBack()">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </button>
+            <h1 class="text-xl font-bold text-gray-900">添加供应商</h1>
+            <button class="p-2 text-gray-600">
+                <i class="fas fa-question-circle text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="p-4 space-y-6">
+        <!-- 基本信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">基本信息</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">供应商名称 *</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入供应商名称">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">供应商类型</label>
+                    <select class="w-full p-3 border border-gray-200 rounded-xl input-focus">
+                        <option>请选择供应商类型</option>
+                        <option>茶叶原料供应商</option>
+                        <option>包装材料供应商</option>
+                        <option>设备供应商</option>
+                        <option>物流服务商</option>
+                        <option>其他</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">供应商编码</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="系统自动生成或手动输入">
+                </div>
+            </div>
+        </div>
+
+        <!-- 联系信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">联系信息</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">联系人姓名 *</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入联系人姓名">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">联系电话 *</label>
+                    <input type="tel" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入联系电话">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">微信号</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入微信号">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                    <input type="email" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入邮箱地址">
+                </div>
+            </div>
+        </div>
+
+        <!-- 地址信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">地址信息</h3>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-3">
+                    <select class="p-3 border border-gray-200 rounded-xl input-focus">
+                        <option>省份</option>
+                        <option>福建省</option>
+                        <option>浙江省</option>
+                        <option>云南省</option>
+                        <option>安徽省</option>
+                    </select>
+                    <select class="p-3 border border-gray-200 rounded-xl input-focus">
+                        <option>城市</option>
+                        <option>福州市</option>
+                        <option>厦门市</option>
+                        <option>泉州市</option>
+                        <option>安溪县</option>
+                    </select>
+                    <select class="p-3 border border-gray-200 rounded-xl input-focus">
+                        <option>区县</option>
+                        <option>鼓楼区</option>
+                        <option>台江区</option>
+                        <option>仓山区</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">详细地址</label>
+                    <textarea class="w-full p-3 border border-gray-200 rounded-xl input-focus h-20" placeholder="请输入详细地址"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 业务信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">业务信息</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">主营产品</label>
+                    <textarea class="w-full p-3 border border-gray-200 rounded-xl input-focus h-20" placeholder="请描述供应商主营产品"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">合作等级</label>
+                        <select class="w-full p-3 border border-gray-200 rounded-xl input-focus">
+                            <option>请选择合作等级</option>
+                            <option>战略合作伙伴</option>
+                            <option>核心供应商</option>
+                            <option>一般供应商</option>
+                            <option>试用供应商</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">信用等级</label>
+                        <select class="w-full p-3 border border-gray-200 rounded-xl input-focus">
+                            <option>请选择信用等级</option>
+                            <option>A+级</option>
+                            <option>A级</option>
+                            <option>B+级</option>
+                            <option>B级</option>
+                            <option>C级</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">付款方式</label>
+                        <select class="w-full p-3 border border-gray-200 rounded-xl input-focus">
+                            <option>请选择付款方式</option>
+                            <option>现金支付</option>
+                            <option>银行转账</option>
+                            <option>支付宝</option>
+                            <option>微信支付</option>
+                            <option>月结</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">账期（天）</label>
+                        <input type="number" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="0" min="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 财务信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">财务信息</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">开户银行</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入开户银行">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">银行账号</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入银行账号">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">税号</label>
+                    <input type="text" class="w-full p-3 border border-gray-200 rounded-xl input-focus" placeholder="请输入税号">
+                </div>
+            </div>
+        </div>
+
+        <!-- 备注信息 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">备注信息</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                    <textarea class="w-full p-3 border border-gray-200 rounded-xl input-focus h-24" placeholder="请输入备注信息"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">状态</label>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="active" class="mr-2" checked>
+                            <span class="text-sm">启用</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="pending" class="mr-2">
+                            <span class="text-sm">待审核</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="inactive" class="mr-2">
+                            <span class="text-sm">停用</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex space-x-4 pb-6">
+            <button class="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium" onclick="saveDraft()">
+                保存草稿
+            </button>
+            <button class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium" onclick="saveSupplier()">
+                确认添加
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function saveDraft() {
+            alert('草稿已保存');
+        }
+
+        function saveSupplier() {
+            // 这里可以添加表单验证逻辑
+            alert('供应商添加成功');
+            // 返回供应商管理页面
+            window.location.href = 'supplier-management.html';
+        }
+    </script>
+</body>
+</html>

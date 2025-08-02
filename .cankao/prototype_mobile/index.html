@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>茶农手账系统 - 高保真原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .phone-container {
+            width: 393px;
+            height: 852px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .page-container {
+            height: calc(100% - 44px);
+            overflow-y: auto;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .prototype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .prototype-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        .page-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="prototype-title">
+        茶农手账系统 - 高保真原型界面
+    </div>
+    
+    <div class="prototype-grid">
+        <!-- 资产页 -->
+        <div>
+            <div class="page-title">资产页 (AssetsView)</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="assets.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 流水页 -->
+        <div>
+            <div class="page-title">流水页 (FlowView)</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="flow.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 记录页 -->
+        <div>
+            <div class="page-title">记录页 (Record)</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="record.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品页 -->
+        <div>
+            <div class="page-title">商品页 (Inventory)</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="inventory.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的页 -->
+        <div>
+            <div class="page-title">我的页 (Profile)</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="profile.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 入库记录表单 -->
+        <div>
+            <div class="page-title">入库记录表单</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="inbound-form.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 销售记录表单 -->
+        <div>
+            <div class="page-title">销售记录表单</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="sales-form.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 客户分析页面 -->
+        <div>
+            <div class="page-title">客户分析页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="customer-analysis.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 供应商分析页面 -->
+        <div>
+            <div class="page-title">供应商分析页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="supplier-analysis.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 出库记录页面 -->
+        <div>
+            <div class="page-title">出库记录页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="outbound-records.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 供应商管理页面 -->
+        <div>
+            <div class="page-title">供应商管理页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="supplier-management.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 客户管理页面 -->
+        <div>
+            <div class="page-title">客户管理页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="customer-management.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+
+        <!-- 设置页面 -->
+        <div>
+            <div class="page-title">设置页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="settings.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加供应商页面 -->
+        <div>
+            <div class="page-title">添加供应商页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="add-supplier.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加客户页面 -->
+        <div>
+            <div class="page-title">添加客户页面</div>
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>茶农手账</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-signal text-sm"></i>
+                            <i class="fas fa-wifi text-sm"></i>
+                            <i class="fas fa-battery-three-quarters text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="page-container">
+                        <iframe src="add-customer.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

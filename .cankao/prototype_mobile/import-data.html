@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据导入</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">数据导入</h1>
+
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 返回按钮 -->
+                <button onclick="window.location.href='data-management.html'" class="p-2 text-gray-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入说明 -->
+    <div class="p-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-blue-500 text-lg mt-0.5"></i>
+                <div>
+                    <h3 class="font-semibold text-blue-900 mb-2">导入说明</h3>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                        <li>• 支持Excel (.xlsx) 和CSV (.csv) 格式文件</li>
+                        <li>• 文件大小不超过10MB</li>
+                        <li>• 请使用标准模板格式，确保数据准确性</li>
+                        <li>• 导入前请检查数据格式和必填字段</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模板下载区域 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-download text-blue-500 mr-2"></i>
+                下载模板
+            </h3>
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="downloadTemplate('inbound')" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-arrow-down text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium text-gray-900">入库记录模板</div>
+                            <div class="text-sm text-gray-500">包含商品信息、数量、价格等字段</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-download text-green-600"></i>
+                </button>
+
+                <button onclick="downloadTemplate('outbound')" class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-arrow-up text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium text-gray-900">出库记录模板</div>
+                            <div class="text-sm text-gray-500">包含销售信息、客户、收入等字段</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-download text-red-600"></i>
+                </button>
+
+                <button onclick="downloadTemplate('inventory')" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-boxes text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium text-gray-900">供应商信息模板</div>
+                            <div class="text-sm text-gray-500">包含商品名称、当前库存、实际库存等</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-download text-blue-600"></i>
+                </button>
+
+                <button onclick="downloadTemplate('customer')" class="flex items-center justify-between p-4 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-users text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium text-gray-900">客户信息模板</div>
+                            <div class="text-sm text-gray-500">包含客户姓名、联系方式、地址等</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-download text-purple-600"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件上传区域 -->
+    <div class="px-4 mb-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-upload text-blue-500 mr-2"></i>
+                上传文件
+            </h3>
+            
+            <div id="uploadArea" class="upload-area rounded-xl p-8 text-center">
+                <div id="uploadContent">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <div class="text-lg font-medium text-gray-700 mb-2">点击选择文件或拖拽到此处</div>
+                    <div class="text-sm text-gray-500 mb-4">支持 .xlsx, .csv 格式，最大10MB</div>
+                    <button id="selectFileBtn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        选择文件
+                    </button>
+                </div>
+                
+                <!-- 上传进度 -->
+                <div id="uploadProgress" class="hidden">
+                    <div class="flex items-center justify-center mb-4">
+                        <i class="fas fa-file-excel text-4xl text-green-500"></i>
+                    </div>
+                    <div class="text-lg font-medium text-gray-700 mb-2" id="fileName">文件名.xlsx</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                        <div id="progressBar" class="progress-bar bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="text-sm text-gray-600" id="progressText">上传中... 0%</div>
+                </div>
+            </div>
+            
+            <input type="file" id="fileInput" accept=".xlsx,.csv" class="hidden">
+        </div>
+    </div>
+
+    <!-- 导入历史 -->
+    <div class="px-4 mb-20">
+        <div class="bg-white rounded-xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-history text-gray-500 mr-2"></i>
+                    导入历史
+                </h3>
+            </div>
+            
+            <div class="divide-y divide-gray-100" id="importHistory">
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">入库记录_2024年7月.xlsx</div>
+                            <div class="text-sm text-gray-500">成功导入 156 条记录</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">今天 15:30</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">查看详情</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">客户信息_批量导入.csv</div>
+                            <div class="text-sm text-gray-500">导入 45 条，失败 3 条</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">昨天 10:15</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">查看详情</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-times text-red-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">供应商信息_7月份.xlsx</div>
+                            <div class="text-sm text-gray-500">导入失败：格式错误</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">07-15 14:20</div>
+                        <button class="text-blue-500 text-sm hover:text-blue-700">重新导入</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        // 文件上传相关变量
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const uploadContent = document.getElementById('uploadContent');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const fileName = document.getElementById('fileName');
+
+        // 点击选择文件
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 点击上传区域选择文件
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target === uploadArea || e.target.closest('#uploadContent')) {
+                fileInput.click();
+            }
+        });
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        // 文件选择
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        // 处理文件上传
+        function handleFileUpload(file) {
+            // 验证文件类型
+            const allowedTypes = ['.xlsx', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExtension)) {
+                alert('请选择 Excel (.xlsx) 或 CSV (.csv) 格式的文件');
+                return;
+            }
+
+            // 验证文件大小 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('文件大小不能超过 10MB');
+                return;
+            }
+
+            // 显示上传进度
+            fileName.textContent = file.name;
+            uploadContent.classList.add('hidden');
+            uploadProgress.classList.remove('hidden');
+
+            // 模拟上传进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        showUploadSuccess(file);
+                    }, 500);
+                }
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `上传中... ${Math.round(progress)}%`;
+            }, 200);
+        }
+
+        // 显示上传成功
+        function showUploadSuccess(file) {
+            uploadProgress.innerHTML = `
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-check-circle text-4xl text-green-500"></i>
+                </div>
+                <div class="text-lg font-medium text-gray-700 mb-2">${file.name}</div>
+                <div class="text-sm text-green-600 mb-4">上传成功！正在解析数据...</div>
+                <button onclick="processImport('${file.name}')" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                    开始导入
+                </button>
+                <button onclick="resetUpload()" class="ml-3 text-gray-500 hover:text-gray-700">
+                    重新选择
+                </button>
+            `;
+        }
+
+        // 重置上传状态
+        function resetUpload() {
+            uploadContent.classList.remove('hidden');
+            uploadProgress.classList.add('hidden');
+            fileInput.value = '';
+        }
+
+        // 处理导入
+        function processImport(filename) {
+            alert(`开始处理文件：${filename}\n\n这里将显示数据预览和导入确认界面。`);
+        }
+
+        // 下载模板
+        function downloadTemplate(type) {
+            const templates = {
+                'inbound': {
+                    name: '入库记录模板.xlsx',
+                    data: generateInboundTemplate()
+                },
+                'outbound': {
+                    name: '出库记录模板.xlsx',
+                    data: generateOutboundTemplate()
+                },
+                'inventory': {
+                    name: '供应商信息模板.xlsx',
+                    data: generateInventoryTemplate()
+                },
+                'customer': {
+                    name: '客户信息模板.xlsx',
+                    data: generateCustomerTemplate()
+                }
+            };
+
+            const template = templates[type];
+            if (template) {
+                downloadCSV(template.data, template.name);
+            }
+        }
+
+        // 生成入库记录模板
+        function generateInboundTemplate() {
+            return [
+                ['日期', '商品名称', '商品类别', '数量', '单位', '单价', '总金额', '供应商', '备注'],
+                ['2024-07-16', '红茶原料', '茶叶原料', '50', 'kg', '50.00', '2500.00', '福建茶叶批发商', '优质红茶'],
+                ['2024-07-16', '包装盒', '包装材料', '100', '个', '2.50', '250.00', '包装材料供应商', '礼品包装盒'],
+                ['', '', '', '', '', '', '', '', '']
+            ];
+        }
+
+        // 生成出库记录模板
+        function generateOutboundTemplate() {
+            return [
+                ['日期', '商品名称', '销售数量', '单位', '销售单价', '销售总额', '成本价', '利润', '客户姓名', '客户电话', '备注'],
+                ['2024-07-16', '红茶礼盒', '10', '盒', '88.00', '880.00', '45.00', '430.00', '张先生', '13800138000', '线上订单'],
+                ['2024-07-16', '绿茶散装', '5', 'kg', '120.00', '600.00', '60.00', '300.00', '李女士', '13900139000', '门店销售'],
+                ['', '', '', '', '', '', '', '', '', '', '']
+            ];
+        }
+
+        // 生成库商品模板
+        function generateInventoryTemplate() {
+            return [
+                ['商品名称', '商品类别', '单位', '系统库存', '实际库存', '差异数量', '盘点日期', '盘点人', '备注'],
+                ['红茶原料', '茶叶原料', 'kg', '45.5', '44.2', '-1.3', '2024-07-16', '张三', '正常损耗'],
+                ['包装盒', '包装材料', '个', '150', '148', '-2', '2024-07-16', '张三', '破损2个'],
+                ['', '', '', '', '', '', '', '', '']
+            ];
+        }
+
+        // 生成客户信息模板
+        function generateCustomerTemplate() {
+            return [
+                ['客户姓名', '联系电话', '微信号', '地址', '客户类型', '信用等级', '备注'],
+                ['张先生', '13800138000', 'zhangsan123', '北京市朝阳区xxx街道', '零售客户', 'A', '老客户'],
+                ['李女士', '13900139000', 'lisi456', '上海市浦东新区xxx路', '批发客户', 'B', '新客户'],
+                ['', '', '', '', '', '', '']
+            ];
+        }
+
+        // 下载CSV文件
+        function downloadCSV(data, filename) {
+            const csvContent = data.map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename.replace('.xlsx', '.csv'));
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 返回上一页
+        function goBack() {
+            window.history.back();
+        }
+
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

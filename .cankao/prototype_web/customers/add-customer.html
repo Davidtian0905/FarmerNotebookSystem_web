@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加客户 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .upload-area.dragover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .preference-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        
+        .preference-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .preference-item:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .preference-item.selected {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="customer-list.html" class="hover:text-gray-900">客户管理</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">添加客户</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="customer-list.html" class="nav-sublink">客户列表</a></li>
+                        <li><a href="customer-analysis.html" class="nav-sublink">客户分析</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">添加客户</h2>
+                <p class="text-gray-600 mt-1">录入新客户的详细信息</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="customer-list.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回列表
+                </a>
+            </div>
+        </div>
+
+        <form id="customerForm" class="w-full">
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    基本信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label required">客户姓名</label>
+                        <input type="text" class="form-input" name="customerName" required placeholder="请输入客户姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">客户类型</label>
+                        <select class="form-input" name="customerType">
+                            <option value="">请选择客户类型</option>
+                            <option value="个人客户">个人客户</option>
+                            <option value="企业客户">企业客户</option>
+                            <option value="经销商">经销商</option>
+                            <option value="批发商">批发商</option>
+                            <option value="零售商">零售商</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">客户编码</label>
+                        <input type="text" class="form-input" name="customerCode" placeholder="系统自动生成或手动输入">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">公司名称</label>
+                        <input type="text" class="form-input" name="companyName" placeholder="如为企业客户请填写">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-phone mr-2 text-green-600"></i>
+                    联系信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label required">联系电话</label>
+                        <input type="tel" class="form-input" name="contactPhone" required placeholder="请输入联系电话">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">微信号</label>
+                        <input type="text" class="form-input" name="wechat" placeholder="请输入微信号">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">QQ号</label>
+                        <input type="text" class="form-input" name="qq" placeholder="请输入QQ号">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">邮箱地址</label>
+                        <input type="email" class="form-input" name="email" placeholder="请输入邮箱地址">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地址信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-map-marker-alt mr-2 text-red-600"></i>
+                    地址信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="form-group">
+                        <label class="form-label">省份</label>
+                        <select class="form-input" name="province">
+                            <option value="">请选择省份</option>
+                            <option value="福建省">福建省</option>
+                            <option value="浙江省">浙江省</option>
+                            <option value="云南省">云南省</option>
+                            <option value="安徽省">安徽省</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">城市</label>
+                        <select class="form-input" name="city">
+                            <option value="">请选择城市</option>
+                            <option value="福州市">福州市</option>
+                            <option value="厦门市">厦门市</option>
+                            <option value="泉州市">泉州市</option>
+                            <option value="安溪县">安溪县</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">区县</label>
+                        <select class="form-input" name="district">
+                            <option value="">请选择区县</option>
+                            <option value="鼓楼区">鼓楼区</option>
+                            <option value="台江区">台江区</option>
+                            <option value="仓山区">仓山区</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">详细地址</label>
+                    <textarea class="form-input" name="address" rows="3" placeholder="请输入详细地址"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">邮政编码</label>
+                    <input type="text" class="form-input" name="postalCode" placeholder="请输入邮政编码">
+                </div>
+            </div>
+
+            <!-- 业务信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-briefcase mr-2 text-purple-600"></i>
+                    业务信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">客户来源</label>
+                        <select class="form-input" name="customerSource">
+                            <option value="">请选择客户来源</option>
+                            <option value="线上推广">线上推广</option>
+                            <option value="朋友介绍">朋友介绍</option>
+                            <option value="展会">展会</option>
+                            <option value="老客户推荐">老客户推荐</option>
+                            <option value="电话营销">电话营销</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">客户等级</label>
+                        <select class="form-input" name="customerLevel">
+                            <option value="">请选择客户等级</option>
+                            <option value="VIP客户">VIP客户</option>
+                            <option value="重要客户">重要客户</option>
+                            <option value="普通客户">普通客户</option>
+                            <option value="潜在客户">潜在客户</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">首次购买时间</label>
+                        <input type="date" class="form-input" name="firstPurchaseDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">生日</label>
+                        <input type="date" class="form-input" name="birthday">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">偏好产品</label>
+                    <div class="preference-grid">
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="铁观音" class="mr-2">
+                            <span>铁观音</span>
+                        </label>
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="大红袍" class="mr-2">
+                            <span>大红袍</span>
+                        </label>
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="普洱茶" class="mr-2">
+                            <span>普洱茶</span>
+                        </label>
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="龙井茶" class="mr-2">
+                            <span>龙井茶</span>
+                        </label>
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="白茶" class="mr-2">
+                            <span>白茶</span>
+                        </label>
+                        <label class="preference-item">
+                            <input type="checkbox" name="preferences" value="其他" class="mr-2">
+                            <span>其他</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 销售信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-line mr-2 text-orange-600"></i>
+                    销售信息
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">折扣率（%）</label>
+                        <input type="number" class="form-input" name="discountRate" placeholder="0" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">结算方式</label>
+                        <select class="form-input" name="paymentMethod">
+                            <option value="">请选择结算方式</option>
+                            <option value="现金支付">现金支付</option>
+                            <option value="银行转账">银行转账</option>
+                            <option value="支付宝">支付宝</option>
+                            <option value="微信支付">微信支付</option>
+                            <option value="月结">月结</option>
+                            <option value="货到付款">货到付款</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">负责销售员</label>
+                        <input type="text" class="form-input" name="salesperson" placeholder="请输入负责销售员">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 备注信息 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-sticky-note mr-2 text-indigo-600"></i>
+                    备注信息
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">备注说明</label>
+                    <textarea class="form-input" name="remarks" rows="4" placeholder="请输入备注信息，如特殊要求、合作历史等..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">状态</label>
+                    <div class="flex space-x-6">
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="active" class="mr-2" checked>
+                            <span>启用</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="inactive" class="mr-2">
+                            <span>停用</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="pending" class="mr-2">
+                            <span>待审核</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="flex justify-end space-x-4 mt-8">
+                <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                    <i class="fas fa-save mr-2"></i>
+                    保存草稿
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>
+                    确认添加
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function saveDraft() {
+            Message.info('草稿已保存');
+        }
+
+        // 偏好产品选择处理
+        document.querySelectorAll('input[name="preferences"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const item = this.closest('.preference-item');
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        });
+
+        // 表单提交
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 验证必填字段
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('border-red-500');
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                Message.error('请填写所有必填字段');
+                return;
+            }
+            
+            Message.info('正在添加客户...');
+            
+            // 模拟提交
+            setTimeout(() => {
+                Message.success('客户添加成功！');
+                setTimeout(() => {
+                    window.location.href = 'customer-list.html';
+                }, 1500);
+            }, 2000);
+        });
+
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 

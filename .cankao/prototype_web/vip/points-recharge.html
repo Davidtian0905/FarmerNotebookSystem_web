@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分充值 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .points-card {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+        }
+        
+        .package-item {
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .package-item:hover {
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .package-item.selected {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        
+        .payment-method {
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-method:hover {
+            border-color: #10b981;
+        }
+        
+        .payment-method.selected {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="vip-upgrade.html" class="hover:text-gray-900">VIP功能</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">积分充值</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/import-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-crown"></i>
+                        <span>VIP功能</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="vip-upgrade.html" class="nav-sublink">VIP升级</a></li>
+                        <li><a href="points-recharge.html" class="nav-sublink active">积分充值</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">积分充值</h2>
+            </div>
+        </div>
+
+        <!-- 当前积分状态 -->
+        <div class="points-card rounded-2xl p-8 mb-8">
+            <div class="text-center flex flex-col items-center">
+                <div class="flex items-center mb-2">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-coins text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-0">当前积分：85</h3>
+                    
+                </div>
+                <p class="opacity-90">积分可用于AI语音记账功能</p>
+            </div>
+        </div>
+
+        <!-- 充值套餐选择 -->
+        <div class="card mb-8">
+            <div class="card-header">
+                <h3 class="card-title">选择充值套餐</h3>
+                <p class="text-sm text-gray-600">1积分 = 1次AI语音记账</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 100积分套餐 -->
+                    <div class="package-item rounded-xl p-6" onclick="selectPackage(this, 100, 9.9)">
+                        <div class="text-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">100积分</h4>
+                            <p class="text-sm text-gray-500">适合轻度使用</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900 mb-1">¥9.9</div>
+                            <div class="text-xs text-gray-500 mb-2">0.099元/积分</div>
+                        </div>
+                    </div>
+
+                    <!-- 300积分套餐 - 推荐 -->
+                    <div class="package-item selected rounded-xl p-6 relative" onclick="selectPackage(this, 300, 25.9)">
+                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium">热门</span>
+                        </div>
+                        <div class="text-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">300积分</h4>
+                            <p class="text-sm text-green-600 font-medium">推荐套餐</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900 mb-1">¥25.9</div>
+                            <div class="text-xs text-gray-500 mb-1">0.086元/积分</div>
+                            <div class="text-xs text-red-500 font-medium">省¥3.8</div>
+                        </div>
+                    </div>
+
+                    <!-- 500积分套餐 -->
+                    <div class="package-item rounded-xl p-6" onclick="selectPackage(this, 500, 39.9)">
+                        <div class="text-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">500积分</h4>
+                            <p class="text-sm text-gray-500">适合重度使用</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900 mb-1">¥39.9</div>
+                            <div class="text-xs text-gray-500 mb-1">0.080元/积分</div>
+                            <div class="text-xs text-red-500 font-medium">省¥9.6</div>
+                        </div>
+                    </div>
+
+                    <!-- 1000积分套餐 -->
+                    <div class="package-item rounded-xl p-6 relative" onclick="selectPackage(this, 1000, 69.9)">
+                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium">最划算</span>
+                        </div>
+                        <div class="text-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">1000积分</h4>
+                            <p class="text-sm text-purple-600 font-medium">超值套餐</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900 mb-1">¥69.9</div>
+                            <div class="text-xs text-gray-500 mb-1">0.070元/积分</div>
+                            <div class="text-xs text-red-500 font-medium">省¥29.1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 支付方式 -->
+        <div class="card mb-8">
+            <div class="card-header">
+                <h3 class="card-title">支付方式</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 微信支付 -->
+                    <div class="payment-method selected rounded-xl p-4" onclick="selectPayment(this, 'wechat')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <i class="fab fa-weixin text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">微信支付</div>
+                                    <div class="text-sm text-gray-500">安全便捷</div>
+                                </div>
+                            </div>
+                            <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 支付宝 -->
+                    <div class="payment-method rounded-xl p-4" onclick="selectPayment(this, 'alipay')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <i class="fab fa-alipay text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">支付宝</div>
+                                    <div class="text-sm text-gray-500">快速支付</div>
+                                </div>
+                            </div>
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单详情 -->
+        <div class="card mb-8">
+            <div class="card-header">
+                <h3 class="card-title">订单详情</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">充值积分</span>
+                        <span class="font-medium" id="selected-points">300积分</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">支付金额</span>
+                        <span class="font-medium text-red-500" id="selected-price">¥25.9</span>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">充值后积分</span>
+                        <span class="font-medium text-green-600" id="total-points">385积分</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 立即支付按钮 -->
+        <div class="flex justify-center">
+            <button class="bg-green-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:bg-green-700 transition-colors" onclick="proceedPayment()">
+                <i class="fab fa-weixin mr-2"></i>
+                立即支付 <span id="pay-amount">¥25.9</span>
+            </button>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        let selectedPoints = 300;
+        let selectedPrice = 25.9;
+        let currentPoints = 85;
+        let selectedPayment = 'wechat';
+
+        function selectPackage(element, points, price) {
+            // 移除所有选中状态
+            document.querySelectorAll('.package-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 添加选中状态
+            element.classList.add('selected');
+            
+            // 更新选中的套餐信息
+            selectedPoints = points;
+            selectedPrice = price;
+            
+            // 更新订单详情
+            updateOrderDetails();
+        }
+
+        function selectPayment(element, payment) {
+            // 移除所有选中状态
+            document.querySelectorAll('.payment-method').forEach(item => {
+                item.classList.remove('selected');
+                const checkIcon = item.querySelector('.fa-check');
+                const emptyCircle = item.querySelector('.border-gray-300');
+                if (checkIcon) checkIcon.style.display = 'none';
+                if (emptyCircle) emptyCircle.style.display = 'block';
+            });
+            
+            // 添加选中状态
+            element.classList.add('selected');
+            const checkIcon = element.querySelector('.fa-check');
+            const emptyCircle = element.querySelector('.border-gray-300');
+            if (checkIcon) checkIcon.style.display = 'flex';
+            if (emptyCircle) emptyCircle.style.display = 'none';
+            
+            selectedPayment = payment;
+        }
+
+        function updateOrderDetails() {
+            document.getElementById('selected-points').textContent = selectedPoints + '积分';
+            document.getElementById('selected-price').textContent = '¥' + selectedPrice;
+            document.getElementById('total-points').textContent = (currentPoints + selectedPoints) + '积分';
+            document.getElementById('pay-amount').textContent = '¥' + selectedPrice;
+        }
+
+        function proceedPayment() {
+            const paymentText = selectedPayment === 'wechat' ? '微信支付' : '支付宝';
+            if (confirm(`确认使用${paymentText}支付 ¥${selectedPrice} 购买 ${selectedPoints} 积分吗？`)) {
+                alert('正在跳转到支付页面...');
+                // 这里可以集成真实的支付接口
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+        // 初始化导航组状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

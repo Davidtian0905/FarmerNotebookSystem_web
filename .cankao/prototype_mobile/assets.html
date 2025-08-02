@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资产页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 搜索按钮 -->
+                <button class="p-2 text-gray-600">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 切页导航 -->
+        <div class="flex">
+            <button class="flex-1 py-4 text-center font-medium tab-active" onclick="showTab('assets')">资产页</button>
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('customer')">客户分析</button>
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('supplier')">供应商分析</button>
+        </div>
+    </div>
+
+    <!-- 总览卡片 -->
+    <div class="p-4">
+        <div class="gradient-bg rounded-2xl p-6 text-white card-shadow">
+            <h2 class="text-lg font-semibold mb-4">资产总览</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-lg font-bold">¥128,560</div>
+                    <div class="text-sm opacity-90">总收入</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-bold">¥89,240</div>
+                    <div class="text-sm opacity-90">总支出</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-bold">¥39,320</div>
+                    <div class="text-sm opacity-90">净资产</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 时间维度切换 -->
+    <div class="px-4 mb-4">
+        <div class="flex bg-gray-100 rounded-xl p-1">
+            <button class="flex-1 py-2 px-3 rounded-lg bg-white text-sm font-medium text-gray-900 shadow-sm">总统计</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">本周</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">本月</button>
+            <button class="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-gray-600">本年</button>
+        </div>
+    </div>
+
+    <!-- 图表统计区 -->
+    <div class="px-4 space-y-4">
+        <!-- 净资产趋势 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">净资产趋势</h3>
+                <i class="fas fa-chart-line text-blue-500"></i>
+            </div>
+            <div class="h-48">
+                <canvas id="assetTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 收支趋势 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">收支趋势</h3>
+                <i class="fas fa-chart-area text-green-500"></i>
+            </div>
+            <div class="h-48">
+                <canvas id="flowChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 收入结构分析 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">收入结构分析</h3>
+            <div class="flex items-center justify-center mb-4">
+                <canvas id="incomeChart" width="200" height="200"></canvas>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">铁观音销售</span>
+                    </div>
+                    <span class="text-sm font-medium">¥45,680 (35.5%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">大红袍销售</span>
+                    </div>
+                    <span class="text-sm font-medium">¥38,920 (30.3%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">普洱茶销售</span>
+                    </div>
+                    <span class="text-sm font-medium">¥28,560 (22.2%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">礼品套装</span>
+                    </div>
+                    <span class="text-sm font-medium">¥15,400 (12.0%)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成本结构分析 -->
+        <div class="bg-white rounded-2xl p-4 card-shadow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">成本结构分析</h3>
+            <div class="flex items-center justify-center mb-4">
+                <canvas id="costChart" width="200" height="200"></canvas>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">茶叶原料</span>
+                    </div>
+                    <span class="text-sm font-medium">¥52,340 (58.6%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">包装材料</span>
+                    </div>
+                    <span class="text-sm font-medium">¥18,960 (21.2%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">运输费用</span>
+                    </div>
+                    <span class="text-sm font-medium">¥12,450 (13.9%)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-gray-500 rounded-full mr-2"></div>
+                        <span class="text-sm text-gray-600">其他费用</span>
+                    </div>
+                    <span class="text-sm font-medium">¥5,490 (6.3%)</span>
+                </div>
+            </div>
+        </div>
+
+      
+
+    <!-- 底部导航栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="flex">
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-chart-bar text-blue-500 text-xl mb-1 block"></i>
+                <span class="text-xs text-blue-500 font-medium">资产</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-list text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">流水</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <i class="fas fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs text-gray-400">记录</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-boxes text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">商品</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-user text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        // 切页功能
+        function showTab(tabName) {
+            // 移除所有按钮的激活状态
+            const buttons = document.querySelectorAll('.flex button');
+            buttons.forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // 激活当前按钮
+            event.target.classList.add('tab-active');
+            event.target.classList.remove('text-gray-600');
+            
+            // 根据选择的tab显示不同内容
+            if (tabName === 'customer') {
+                window.location.href = 'customer-analysis.html';
+            } else if (tabName === 'supplier') {
+                window.location.href = 'supplier-analysis.html';
+            }
+            // assets tab保持在当前页面
+        }
+
+        // 净资产趋势图
+        const assetCtx = document.getElementById('assetTrendChart').getContext('2d');
+        new Chart(assetCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+                datasets: [{
+                    label: '净资产',
+                    data: [5000, 8000, 32000, 10000, 18000, 19000, 29320],
+                    borderColor: 'rgb(102, 126, 234)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // 绘制收入结构饼图
+        function drawIncomeChart() {
+            const canvas = document.getElementById('incomeChart');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            // 数据
+            const data = [
+                { label: '铁观音销售', value: 35.5, color: '#10B981' },
+                { label: '大红袍销售', value: 30.3, color: '#3B82F6' },
+                { label: '普洱茶销售', value: 22.2, color: '#8B5CF6' },
+                { label: '礼品套装', value: 12.0, color: '#F59E0B' }
+            ];
+
+            let currentAngle = -Math.PI / 2;
+
+            data.forEach(item => {
+                const sliceAngle = (item.value / 100) * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                currentAngle += sliceAngle;
+            });
+        }
+
+        // 绘制成本结构饼图
+        function drawCostChart() {
+            const canvas = document.getElementById('costChart');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            // 数据
+            const data = [
+                { label: '茶叶原料', value: 58.6, color: '#EF4444' },
+                { label: '包装材料', value: 21.2, color: '#F59E0B' },
+                { label: '运输费用', value: 13.9, color: '#6366F1' },
+                { label: '其他费用', value: 6.3, color: '#6B7280' }
+            ];
+
+            let currentAngle = -Math.PI / 2;
+
+            data.forEach(item => {
+                const sliceAngle = (item.value / 100) * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                currentAngle += sliceAngle;
+            });
+        }
+
+        // 页面加载完成后绘制图表
+        document.addEventListener('DOMContentLoaded', function() {
+            drawIncomeChart();
+            drawCostChart();
+        });
+    </script>
+</body>
+</html>
+
+
+   <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+
+    <script>
+        // 收支趋势图
+        const flowCtx = document.getElementById('flowChart').getContext('2d');
+        new Chart(flowCtx, {
+            type: 'line',
+            data: {
+                labels: ['7/10', '7/11', '7/12', '7/13', '7/14', '7/15', '7/16'],
+                datasets: [{
+                    label: '收入',
+                    data: [1200, 800, 1500, 2200, 1600, 800, 1200],
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: false
+                }, {
+                    label: '支出',
+                    data: [500, 300, 800, 400, 2500, 120, 160],
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

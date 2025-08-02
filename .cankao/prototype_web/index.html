@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>茶农手账系统 - Web版高保真原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared/css/custom.css">
+    <style>
+        .prototype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            padding: 24px;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .prototype-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .prototype-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .prototype-header {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .prototype-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .prototype-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .page-link {
+            display: block;
+            padding: 12px 16px;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .page-link:hover {
+            background: #f1f5f9;
+            color: #10B981;
+            border-color: #10B981;
+            transform: translateX(4px);
+        }
+        
+        .page-link i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .category-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .auth-icon { background: #3b82f6; }
+        .dashboard-icon { background: #10b981; }
+        .assets-icon { background: #f59e0b; }
+        .records-icon { background: #8b5cf6; }
+        .inventory-icon { background: #06b6d4; }
+        .customers-icon { background: #ec4899; }
+        .suppliers-icon { background: #84cc16; }
+        .data-icon { background: #6366f1; }
+        .vip-icon { background: #f97316; }
+        .profile-icon { background: #64748b; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 页面标题 -->
+    <div class="prototype-header">
+        <h1 class="prototype-title">茶农手账系统</h1>
+        <p class="prototype-subtitle">Web版高保真原型 - 完整功能展示</p>
+    </div>
+
+    <!-- 统计信息 -->
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">25</div>
+                <div class="stat-label">页面总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10</div>
+                <div class="stat-label">功能模块</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">移动端功能覆盖</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">响应式</div>
+                <div class="stat-label">桌面端适配</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能模块导航 -->
+    <div class="prototype-grid max-w-7xl mx-auto">
+        <!-- 认证模块 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon auth-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    认证模块
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="auth/login.html" class="page-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    登录页面
+                </a>
+                <a href="auth/register.html" class="page-link">
+                    <i class="fas fa-user-plus"></i>
+                    注册页面
+                </a>
+                <a href="auth/forgot-password.html" class="page-link">
+                    <i class="fas fa-key"></i>
+                    忘记密码页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 仪表板 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon dashboard-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    仪表板
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="dashboard/dashboard.html" class="page-link">
+                    <i class="fas fa-chart-pie"></i>
+                    主仪表板页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 资产总览 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon assets-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    资产总览
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="assets/assets-overview.html" class="page-link">
+                    <i class="fas fa-chart-line"></i>
+                    资产总览页面
+                </a>
+                <a href="assets/assets-trend.html" class="page-link">
+                    <i class="fas fa-trending-up"></i>
+                    资产趋势分析
+                </a>
+            </div>
+        </div>
+
+        <!-- 记录管理 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon records-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    记录管理
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="records/flow-records.html" class="page-link">
+                    <i class="fas fa-stream"></i>
+                    流水明细页面
+                </a>
+                <a href="records/inbound-form.html" class="page-link">
+                    <i class="fas fa-plus-circle"></i>
+                    入库记录表单
+                </a>
+                <a href="records/sales-form.html" class="page-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    销售记录表单
+                </a>
+                <a href="records/outbound-records.html" class="page-link">
+                    <i class="fas fa-camera"></i>
+                    OCR拍照识别
+                </a>
+                <a href="records/voice-recording.html" class="page-link">
+                    <i class="fas fa-microphone"></i>
+                    AI语音记账
+                </a>
+            </div>
+        </div>
+
+        <!-- 库存管理 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon inventory-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    库存管理
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="inventory/inventory-list.html" class="page-link">
+                    <i class="fas fa-list"></i>
+                    库存列表页面
+                </a>
+                <a href="inventory/inventory-check.html" class="page-link">
+                    <i class="fas fa-clipboard-check"></i>
+                    库存盘点页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 客户管理 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon customers-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    客户管理
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="customers/customer-list.html" class="page-link">
+                    <i class="fas fa-list-ul"></i>
+                    客户列表页面
+                </a>
+                <a href="customers/customer-detail.html" class="page-link">
+                    <i class="fas fa-user"></i>
+                    客户详情页面
+                </a>
+                <a href="customers/customer-analysis.html" class="page-link">
+                    <i class="fas fa-chart-bar"></i>
+                    客户分析页面
+                </a>
+                <a href="customers/add-customer.html" class="page-link">
+                    <i class="fas fa-user-plus"></i>
+                    添加客户页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 供应商管理 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon suppliers-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    供应商管理
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="suppliers/supplier-list.html" class="page-link">
+                    <i class="fas fa-list-ul"></i>
+                    供应商列表页面
+                </a>
+                <a href="suppliers/supplier-detail.html" class="page-link">
+                    <i class="fas fa-building"></i>
+                    供应商详情页面
+                </a>
+                <a href="suppliers/supplier-analysis.html" class="page-link">
+                    <i class="fas fa-chart-bar"></i>
+                    供应商分析页面
+                </a>
+                <a href="suppliers/add-supplier.html" class="page-link">
+                    <i class="fas fa-plus"></i>
+                    添加供应商页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 数据管理 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon data-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    数据管理
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="data/export-data.html" class="page-link">
+                    <i class="fas fa-download"></i>
+                    数据导出页面
+                </a>
+                <a href="data/import-data.html" class="page-link">
+                    <i class="fas fa-upload"></i>
+                    数据导入页面
+                </a>
+            </div>
+        </div>
+
+        <!-- VIP功能 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon vip-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    VIP功能
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="vip/points-recharge.html" class="page-link">
+                    <i class="fas fa-coins"></i>
+                    积分充值页面
+                </a>
+                <a href="vip/vip-upgrade.html" class="page-link">
+                    <i class="fas fa-star"></i>
+                    VIP升级页面
+                </a>
+            </div>
+        </div>
+
+        <!-- 个人中心 -->
+        <div class="prototype-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <div class="category-icon profile-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    个人中心
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="profile/profile.html" class="page-link">
+                    <i class="fas fa-user"></i>
+                    个人中心主页
+                </a>
+                <a href="profile/settings.html" class="page-link">
+                    <i class="fas fa-cog"></i>
+                    设置页面
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚信息 -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-600 mb-2">茶农手账系统 Web版高保真原型</p>
+            <p class="text-sm text-gray-500">基于移动端原型设计，适配桌面端操作体验</p>
+        </div>
+    </footer>
+
+    <script src="shared/js/main.js"></script>
+    <script src="shared/js/components.js"></script>
+</body>
+</html>

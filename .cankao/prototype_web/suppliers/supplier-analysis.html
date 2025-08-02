@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应商分析 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analysis-card {
+            transition: all 0.2s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .supplier-rank {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .rating-stars {
+            color: #fbbf24;
+        }
+        
+        .trend-up {
+            color: #10b981;
+        }
+        
+        .trend-down {
+            color: #ef4444;
+        }
+        
+        .trend-stable {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <a href="supplier-list.html" class="hover:text-gray-900">供应商管理</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">供应商分析</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu">
+                        <li><a href="supplier-list.html" class="nav-sublink">供应商列表</a></li>
+                        <li><a href="supplier-analysis.html" class="nav-sublink active">供应商分析</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../data/export-data.html" class="nav-link">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题和操作 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">供应商分析</h2>
+                <p class="text-gray-600 mt-1">评估供应商表现，优化采购策略</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="supplier-list.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回供应商列表
+                </a>
+            </div>
+        </div>
+
+        <!-- 供应商概览统计 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="analysis-card card text-center">
+
+                <h3 class="text-3xl font-bold text-green-600 mb-2">24</h3>
+                <p class="text-sm text-gray-600 mb-2">总供应商数</p>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-blue-600 mb-2">18</h3>
+                <p class="text-sm text-gray-600 mb-2">活跃供应商</p>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-purple-600 mb-2">¥186.5万</h3>
+                <p class="text-sm text-gray-600 mb-2">总采购金额</p>
+            </div>
+
+            <div class="analysis-card card text-center">
+                <h3 class="text-3xl font-bold text-yellow-600 mb-2">95.2%</h3>
+                <p class="text-sm text-gray-600 mb-2">按时交付率</p>
+            </div>
+        </div>
+
+        <!-- 主要分析内容 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧内容 -->
+            <div class="space-y-8">
+                <!-- 采购成本分析 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">采购成本分析</h3>
+                        <p class="text-sm text-gray-600">按成本项目的占比分析</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="supplierTypeChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- 采购金额趋势 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">采购金额趋势</h3>
+                        <p class="text-sm text-gray-600">最近6个月的采购趋势</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="purchaseTrendChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧内容 -->
+            <div class="space-y-8">
+                <!-- 供应商采购金额排名 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">供应商采购金额排名</h3>
+                        <p class="text-sm text-gray-600">按照供应商的采购金额来排列</p>
+                    </div>
+                    <div class="p-6">
+                        <canvas id="supplierPurchaseRankChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+
+                <!-- 优质供应商排行 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">供应商评级排名</h3>
+                        <p class="text-sm text-gray-600">按综合评分排序的前5名供应商</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                            <div class="flex items-center">
+                                <div class="supplier-rank mr-3">1</div>
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">福建安溪茶园</div>
+                                    <div class="text-sm text-gray-500">茶叶种植基地</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center rating-stars mb-1">
+                                    <span class="text-sm font-medium text-gray-900 mr-1">4.8</span>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                </div>
+                                <div class="text-sm text-gray-500">¥32,500</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 bg-gray-400 text-white rounded flex items-center justify-center text-sm font-bold mr-3">2</div>
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-leaf text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">杭州龙井茶业</div>
+                                    <div class="text-sm text-gray-500">茶叶加工厂</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center rating-stars mb-1">
+                                    <span class="text-sm font-medium text-gray-900 mr-1">4.5</span>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="far fa-star text-xs"></i>
+                                </div>
+                                <div class="text-sm text-gray-500">¥18,600</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 bg-orange-400 text-white rounded flex items-center justify-center text-sm font-bold mr-3">3</div>
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-leaf text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">云南普洱茶厂</div>
+                                    <div class="text-sm text-gray-500">茶叶生产商</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center rating-stars mb-1">
+                                    <span class="text-sm font-medium text-gray-900 mr-1">4.3</span>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="fas fa-star text-xs"></i>
+                                    <i class="far fa-star text-xs"></i>
+                                </div>
+                                <div class="text-sm text-gray-500">¥25,800</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center pt-3">
+                            <a href="supplier-list.html" class="text-blue-600 hover:text-blue-800 text-sm">查看完整排行榜 →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+            
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 成本分析图表
+            const costCtx = document.getElementById('supplierTypeChart').getContext('2d');
+            new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['茶叶原料', '包装材料', '生产设备', '运输费用', '其他'],
+                    datasets: [{
+                        label: '成本占比',
+                        data: [65, 18, 12, 3, 2],
+                        backgroundColor: [
+                            '#10B981',
+                            '#3B82F6',
+                            '#8B5CF6',
+                            '#F59E0B',
+                            '#EF4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '成本占比: ' + context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '成本占比 (%)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '成本项目'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 供应商采购金额排名图
+            const supplierRankCtx = document.getElementById('supplierPurchaseRankChart').getContext('2d');
+            new Chart(supplierRankCtx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        '福建安溪茶园',
+                        '杭州龙井茶业', 
+                        '云南普洱茶厂',
+                        '安徽黄山茶业',
+                        '四川蒙顶茶厂',
+                        '浙江西湖茶业',
+                        '湖南安化茶厂',
+                        '江西婺源茶业',
+                        '贵州都匀茶厂',
+                        '广西六堡茶厂'
+                    ],
+                    datasets: [{
+                        label: '采购金额 (万元)',
+                        data: [32.5, 28.6, 25.8, 22.3, 19.7, 16.4, 14.2, 12.8, 11.5, 9.8],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',   // 绿色 - 第一名
+                            'rgba(59, 130, 246, 0.8)',    // 蓝色 - 第二名
+                            'rgba(139, 92, 246, 0.8)',    // 紫色 - 第三名
+                            'rgba(245, 158, 11, 0.8)',    // 橙色
+                            'rgba(239, 68, 68, 0.8)',     // 红色
+                            'rgba(16, 185, 129, 0.6)',    // 浅绿色
+                            'rgba(59, 130, 246, 0.6)',    // 浅蓝色
+                            'rgba(139, 92, 246, 0.6)',    // 浅紫色
+                            'rgba(245, 158, 11, 0.6)',    // 浅橙色
+                            'rgba(239, 68, 68, 0.6)'      // 浅红色
+                        ],
+                        borderColor: [
+                            '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444',
+                            '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // 水平条形图
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '采购金额 (万元)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '供应商名称'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '采购金额: ¥' + context.parsed.x + '万元';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 采购金额趋势图
+            const purchaseTrendCtx = document.getElementById('purchaseTrendChart').getContext('2d');
+            new Chart(purchaseTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '采购金额 (万元)',
+                        data: [6.5, 7.2, 5.8, 8.1, 9.3, 8.9],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '采购金额 (万元)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '月份'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '采购金额: ¥' + context.parsed.y + '万元';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+            // 初始化导航组状态
+            const activeNavGroup = document.querySelector('.nav-group .nav-link.active');
+            if (activeNavGroup) {
+                const submenu = activeNavGroup.nextElementSibling;
+                const icon = activeNavGroup.querySelector('.fa-chevron-down');
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据导出 - 茶农手账系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/css/custom.css">
+    <style>
+        .export-card {
+            transition: all 0.2s ease;
+        }
+        
+        .export-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .backup-status {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="layout-header">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center">
+                <div class="flex items-center mr-8">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">茶农手账</h1>
+                </div>
+            
+            <button class="btn-icon mr-4" onclick="Sidebar.toggle()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="flex items-center text-sm text-gray-600">
+                <a href="../dashboard/dashboard.html" class="hover:text-gray-900">首页</a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">数据管理</span>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-gray-900">数据导出</span>
+            </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button class="btn-icon relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <div class="relative">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100" onclick="toggleUserMenu()">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32&q=80" 
+                         alt="用户头像" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">张茶农</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                
+                <div id="userMenu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden z-50">
+                    <a href="../profile/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i>设置
+                    </a>
+                    <hr class="my-2">
+                    <a href="../auth/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 左侧边栏 -->
+    <aside class="layout-sidebar">
+        <nav class="p-4">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../assets/assets-overview.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>资产总览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../records/flow-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-stream"></i>
+                        <span>流水记录</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../warehouse/inbound-records.html" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <span>入库出库</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../inventory/inventory-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span>库存管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../customers/customer-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>客户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../suppliers/supplier-list.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>供应商管理</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-group">
+                    <a href="#" class="nav-link active" onclick="toggleNavGroup(this)">
+                        <i class="nav-icon fas fa-database"></i>
+                        <span>数据管理</span>
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform"></i>
+                    </a>
+                    <ul class="nav-submenu" style="display: block;">
+                        <li><a href="import-data.html" class="nav-sublink">数据导入</a></li>
+                        <li><a href="export-data.html" class="nav-sublink active">数据导出</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="../vip/vip-upgrade.html" class="nav-link">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <span>VIP功能</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../profile/profile.html" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="layout-main">
+        <!-- 页面标题 -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">数据导出</h2>
+                <p class="text-gray-600 mt-1">导出系统数据到外部文件</p>
+            </div>
+                <button class="btn btn-primary" onclick="createBackup()">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    立即备份
+                </button>
+            </div>
+        </div>
+
+        <!-- 导出说明 -->
+        <div class="card mb-6">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-info-circle text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">导出说明</h3>
+                        <p class="text-sm text-gray-600">选择需要导出的数据类型和格式，系统将生成相应的文件</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        支持Excel、CSV、PDF等多种格式
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        可选择时间范围和数据类型
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        支持完整数据备份导出
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出选项 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 流水明细导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-stream text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">流水明细</h4>
+                                <p class="text-sm text-gray-600">导出收支流水明细</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>1,156条记录</div>
+                            <div>全部时间</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mb-3">
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('records', 'excel')">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('records', 'csv')">
+                            <i class="fas fa-file-csv mr-1"></i>
+                            CSV
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('records', 'pdf')">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <button class="btn btn-outline w-full" onclick="showCustomExport('records')">
+                        <i class="fas fa-cog mr-2"></i>
+                        自定义导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 库存数据导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-boxes text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">库存数据</h4>
+                                <p class="text-sm text-gray-600">导出库存明细数据</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>12种商品</div>
+                            <div>¥45,680</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mb-3">
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('inventory', 'excel')">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('inventory', 'csv')">
+                            <i class="fas fa-file-csv mr-1"></i>
+                            CSV
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('inventory', 'pdf')">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <button class="btn btn-outline w-full" onclick="showCustomExport('inventory')">
+                        <i class="fas fa-cog mr-2"></i>
+                        自定义导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 客户数据导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-users text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">客户数据</h4>
+                                <p class="text-sm text-gray-600">导出客户信息数据</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>156位客户</div>
+                            <div>89位活跃</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mb-3">
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('customers', 'excel')">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('customers', 'csv')">
+                            <i class="fas fa-file-csv mr-1"></i>
+                            CSV
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('customers', 'pdf')">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <button class="btn btn-outline w-full" onclick="showCustomExport('customers')">
+                        <i class="fas fa-cog mr-2"></i>
+                        自定义导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 供应商数据导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-truck text-orange-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">供应商数据</h4>
+                                <p class="text-sm text-gray-600">导出供应商信息数据</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>23家供应商</div>
+                            <div>15家合作中</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mb-3">
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('suppliers', 'excel')">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('suppliers', 'csv')">
+                            <i class="fas fa-file-csv mr-1"></i>
+                            CSV
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('suppliers', 'pdf')">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <button class="btn btn-outline w-full" onclick="showCustomExport('suppliers')">
+                        <i class="fas fa-cog mr-2"></i>
+                        自定义导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 财务报表导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-chart-pie text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">财务报表</h4>
+                                <p class="text-sm text-gray-600">导出财务分析报表</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>综合报表</div>
+                            <div>本年度</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mb-3">
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('reports', 'excel')">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary btn-sm flex-1" onclick="exportData('reports', 'pdf')">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <button class="btn btn-outline w-full" onclick="showCustomExport('reports')">
+                        <i class="fas fa-cog mr-2"></i>
+                        自定义导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 完整备份导出 -->
+            <div class="card export-card">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-database text-red-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">完整备份</h4>
+                                <p class="text-sm text-gray-600">导出所有数据备份</p>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <div>45.6MB</div>
+                            <div>全部数据</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-full" onclick="exportData('backup', 'zip')">
+                        <i class="fas fa-download mr-2"></i>
+                        下载完整备份
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 备份状态和数据统计 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- 备份状态 -->
+            <div class="backup-status rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">数据备份状态</h3>
+                        <p class="opacity-90 mb-4">最后备份时间：2024-07-16 08:30</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-2xl font-bold">1,256</div>
+                                <div class="opacity-90 text-sm">总记录数</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold">45.6MB</div>
+                                <div class="opacity-90 text-sm">数据大小</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <i class="fas fa-cloud-upload-alt text-5xl opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据统计 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">数据统计</h3>
+                    <p class="text-sm text-gray-600">查看系统数据统计信息</p>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">1,256</div>
+                        <div class="text-sm text-gray-600">总记录数</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600 mb-2">12</div>
+                        <div class="text-sm text-gray-600">商品种类</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600 mb-2">156</div>
+                        <div class="text-sm text-gray-600">客户数量</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-orange-600 mb-2">45.6MB</div>
+                        <div class="text-sm text-gray-600">数据大小</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出历史 -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3 class="card-title">导出历史</h3>
+                <p class="text-sm text-gray-600">查看最近的数据导出记录</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">导出时间</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">数据类型</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">文件名</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">格式</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">状态</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-16 15:20</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">流水明细</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">records_20240716.xlsx</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">Excel</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    成功
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">下载</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-15 10:05</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">库存数据</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">inventory_20240715.csv</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">CSV</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    成功
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">下载</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4 text-sm text-gray-600">2024-07-14 17:30</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">客户数据</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">customers_20240714.pdf</td>
+                            <td class="py-3 px-4 text-sm text-gray-600">PDF</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    失败
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm">重试</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="../shared/js/main.js"></script>
+    <script src="../shared/js/components.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 切换导航组
+        function toggleNavGroup(element) {
+            const submenu = element.nextElementSibling;
+            const icon = element.querySelector('.fa-chevron-down');
+
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 导出数据
+        function exportData(type, format) {
+            Message.info(`正在导出${type}数据为${format}格式...`);
+            // 模拟导出进度
+            setTimeout(() => {
+                Message.success(`${type}数据导出成功！`);
+            }, 2000);
+        }
+
+        // 创建备份
+        function createBackup() {
+            Message.info('正在创建数据备份...');
+            setTimeout(() => {
+                Message.success('数据备份创建成功！');
+            }, 3000);
+        }
+
+        // 显示自定义导出设置
+        function showCustomExport(type) {
+            Modal.show(`
+                <form class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">数据类型</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" checked> ${type === 'records' ? '流水明细' : type === 'inventory' ? '库存数据' : type === 'customers' ? '客户数据' : type === 'suppliers' ? '供应商数据' : '财务报表'}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">时间范围</label>
+                        <select class="form-input">
+                            <option>最近一周</option>
+                            <option>最近一月</option>
+                            <option>最近三月</option>
+                            <option>最近一年</option>
+                            <option>全部时间</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">导出格式</label>
+                        <select class="form-input">
+                            <option>Excel (.xlsx)</option>
+                            <option>CSV (.csv)</option>
+                            <option>PDF (.pdf)</option>
+                            <option>JSON (.json)</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" class="btn btn-secondary" onclick="Modal.hide()">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="executeCustomExport()">开始导出</button>
+                    </div>
+                </form>
+            `, {
+                title: '自定义导出设置',
+                width: '450px'
+            });
+        }
+
+        // 执行自定义导出
+        function executeCustomExport() {
+            Modal.hide();
+            Message.info('正在根据您的设置导出数据...');
+            setTimeout(() => {
+                Message.success('自定义数据导出成功！');
+            }, 3000);
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

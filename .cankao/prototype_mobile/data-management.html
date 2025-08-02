@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 左侧导航栏 -->
+    <div id="sidebar" class="sidebar fixed top-0 left-0 w-80 h-full bg-white shadow-lg z-50">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">功能菜单</h2>
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 space-y-4">
+            <!-- 个人中心 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face" 
+                         alt="头像" class="w-12 h-12 rounded-full object-cover">
+                    <div>
+                        <div class="font-semibold text-gray-900">张茶农</div>
+                        <div class="text-sm text-gray-500">138****8888</div>
+                    </div>
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600" onclick="window.location.href='profile.html'">
+                    个人中心
+                </button>
+            </div>
+            
+            <!-- 出库入库 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">库存管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='inbound-form.html'">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">入库记录</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='outbound-records.html'">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-red-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">出库记录</span>
+                </button>
+            </div>
+            
+            <!-- 数据管理 -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">数据管理</h3>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='import-data.html'">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-import text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导入</span>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg" onclick="window.location.href='export-data.html'">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-export text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">数据导出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleSidebar()"></div>
+    
+    <!-- 顶部导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <!-- 左侧菜单按钮 -->
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <!-- 中间标题 -->
+            <h1 class="text-xl font-bold text-gray-900">数据管理</h1>
+            
+            <!-- 右侧功能区 -->
+            <div class="flex items-center space-x-3">
+                <!-- 搜索按钮 -->
+                <button class="p-2 text-gray-600">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+                
+                <!-- 用户头像和菜单 -->
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" class="flex items-center space-x-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face" 
+                             alt="头像" class="w-8 h-8 rounded-full object-cover">
+                    </button>
+                    
+                    <!-- 用户菜单下拉 -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                <span class="text-gray-700">设置</span>
+                            </button>
+                            <button class="w-full flex items-center px-4 py-2 text-left hover:bg-gray-50 text-red-600">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 切页导航 -->
+        <div class="flex">
+            <button class="flex-1 py-4 text-center font-medium tab-active" onclick="showTab('import')">数据导入</button>
+            <button class="flex-1 py-4 text-center font-medium text-gray-600" onclick="showTab('export')">数据导出</button>
+        </div>
+    </div>
+
+    <!-- 数据管理总览 -->
+    <div class="p-4">
+        <div class="gradient-bg rounded-2xl p-6 text-white card-shadow">
+            <h2 class="text-lg font-semibold mb-4">数据管理中心</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <div class="text-lg font-bold">1,248</div>
+                    <div class="text-sm opacity-90">总记录数</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-bold">156</div>
+                    <div class="text-sm opacity-90">记账天数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能卡片 -->
+    <div class="px-4 space-y-4">
+        <!-- 数据导入卡片 -->
+        <div class="feature-card bg-white rounded-2xl p-6 card-shadow" onclick="window.location.href='import-data.html'">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-file-import text-blue-600 text-2xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">数据导入</h3>
+                    <p class="text-sm text-gray-500 mb-3">从Excel或CSV文件导入记账数据</p>
+                    <div class="flex items-center space-x-4 text-xs text-gray-400">
+                        <span>• 支持Excel/CSV格式</span>
+                        <span>• 批量导入</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- 数据导出卡片 -->
+        <div class="feature-card bg-white rounded-2xl p-6 card-shadow" onclick="window.location.href='export-data.html'">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-file-export text-purple-600 text-2xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">数据导出</h3>
+                    <p class="text-sm text-gray-500 mb-3">导出记账数据到Excel或CSV文件</p>
+                    <div class="flex items-center space-x-4 text-xs text-gray-400">
+                        <span>• 多格式导出</span>
+                        <span>• 自定义时间范围</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近操作 -->
+    <div class="px-4 mt-6">
+        <div class="bg-white rounded-2xl card-shadow">
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">最近操作</h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-import text-green-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">导入销售记录</div>
+                            <div class="text-sm text-gray-500">2024年3月数据 • 156条记录</div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-400">2小时前</div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-export text-blue-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">导出财务报表</div>
+                            <div class="text-sm text-gray-500">2024年Q1数据 • Excel格式</div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-400">1天前</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div class="flex">
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-chart-bar text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">资产</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-list text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">流水</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <i class="fas fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs text-gray-400">记录</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-boxes text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">商品</span>
+            </div>
+            <div class="flex-1 py-2 text-center">
+                <i class="fas fa-user text-gray-400 text-xl mb-1 block"></i>
+                <span class="text-xs text-gray-400">我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部安全区域 -->
+    <div class="h-20"></div>
+    
+    <script>
+        // 侧边栏控制函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+        
+        // 用户菜单控制函数
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userMenu');
+            const button = e.target.closest('button');
+            
+            if (!button || button.onclick?.toString().indexOf('toggleUserMenu') === -1) {
+                menu.classList.add('hidden');
+            }
+        });
+        
+        // 切页功能
+        function showTab(tabName) {
+            // 移除所有按钮的激活状态
+            const buttons = document.querySelectorAll('.flex button');
+            buttons.forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // 激活当前按钮
+            event.target.classList.add('tab-active');
+            event.target.classList.remove('text-gray-600');
+            
+            // 根据选择的标签页跳转
+            if (tabName === 'import') {
+                window.location.href = 'import-data.html';
+            } else if (tabName === 'export') {
+                window.location.href = 'export-data.html';
+            }
+        }
+    </script>
+</body>
+</html>
