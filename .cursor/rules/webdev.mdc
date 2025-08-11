@@ -7,7 +7,7 @@ frontend/src
 components
 存放可复用的 Vue 组件，每个组件为一个 .vue 文件或单独文件夹。
 views
-存放页面级 Vue 组件（例如 Home.vue、UploadEssay.vue），通常与路由映射。
+存放页面级 Vue 组件，通常与路由映射。
 api
 存放 API 服务文件，按模块划分，文件命名为 moduleApi.js（例如 userApi.js）。
 assets

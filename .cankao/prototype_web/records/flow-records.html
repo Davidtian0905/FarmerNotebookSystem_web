@@ -182,7 +182,6 @@
         <div class="filter-card rounded-2xl p-6 mb-6">
             <form class="grid grid-cols-1 md:grid-cols-5 gap-4" data-filter-for="recordsTable">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">时间范围</label>
                     <select name="timeRange" class="form-input">
                         <option value="">全部时间</option>
                         <option value="today">今天</option>
@@ -190,22 +189,21 @@
                         <option value="month">本月</option>
                         <option value="quarter">本季度</option>
                         <option value="year">本年</option>
+                        <option value="custom">自定义</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">记录类型</label>
                     <select name="type" class="form-input">
-                        <option value="">全部类型</option>
+                        <option value="">记录类型</option>
                         <option value="income">收入</option>
                         <option value="expense">支出</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">茶叶品种</label>
                     <select name="teaType" class="form-input">
-                        <option value="">全部品种</option>
+                        <option value="">商品类型</option>
                         <option value="tieguanyin">铁观音</option>
                         <option value="longjing">龙井茶</option>
                         <option value="puer">普洱茶</option>
@@ -214,7 +212,6 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">金额范围</label>
                     <select name="amountRange" class="form-input">
                         <option value="">全部金额</option>
                         <option value="0-100">¥0 - ¥100</option>
@@ -237,45 +234,7 @@
             </form>
         </div>
 
-        <!-- 统计卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="card">
-                <div class="flex items-center justify-center h-full">
-                    <div>
-                        <p class="text-2xl font-bold text-green-600">¥8,520</p>
-                        <p class="text-sm font-medium text-gray-600">本周收入</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="flex items-center justify-center h-full">
-                    <div>
-                        <p class="text-2xl font-bold text-red-600">¥3,240</p>
-                        <p class="text-sm font-medium text-gray-600">本周支出</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="flex items-center justify-center h-full">
-                    <div>
-                        <p class="text-2xl font-bold text-purple-600">¥5,280</p>
-                        <p class="text-sm font-medium text-gray-600">净收益</p>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="card">
-                <div class="flex items-center justify-center h-full">
-                    <div>
-                        <p class="text-2xl font-bold text-yellow-600">6</p>
-                        <p class="text-sm font-medium text-gray-600">本周新增记录</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+   
 
 
         <!-- 流水明细列表 -->

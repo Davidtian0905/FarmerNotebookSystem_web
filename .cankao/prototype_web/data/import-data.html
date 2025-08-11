@@ -209,14 +209,14 @@
                             <i class="fas fa-stream text-blue-600 text-xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900">流水明细导入</h4>
-                            <p class="text-sm text-gray-600">导入收支流水记录</p>
+                            <h4 class="font-semibold text-gray-900">入库记录</h4>
+                            <p class="text-sm text-gray-600">导入物料记录</p>
                         </div>
                     </div>
                     <div class="space-y-4">
                         <div class="text-sm text-gray-600">
                             <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
-                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">流水记录模板.xlsx</a></p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">物料记录模板.xlsx</a></p>
                         </div>
                         <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
                              onclick="document.getElementById('recordsFile').click()"
@@ -253,14 +253,14 @@
                             <i class="fas fa-boxes text-green-600 text-xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900">库存数据导入</h4>
-                            <p class="text-sm text-gray-600">导入商品库存信息</p>
+                            <h4 class="font-semibold text-gray-900">出库数据导入</h4>
+                            <p class="text-sm text-gray-600">导入商品出库信息</p>
                         </div>
                     </div>
                     <div class="space-y-4">
                         <div class="text-sm text-gray-600">
                             <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
-                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">库存数据模板.xlsx</a></p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">商品出库数据模板.xlsx</a></p>
                         </div>
                         <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
                              onclick="document.getElementById('inventoryFile').click()"
@@ -297,14 +297,14 @@
                             <i class="fas fa-users text-purple-600 text-xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900">客户数据导入</h4>
+                            <h4 class="font-semibold text-gray-900">客户信息导入</h4>
                             <p class="text-sm text-gray-600">导入客户信息数据</p>
                         </div>
                     </div>
                     <div class="space-y-4">
                         <div class="text-sm text-gray-600">
                             <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
-                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">客户数据模板.xlsx</a></p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">客户信息模板.xlsx</a></p>
                         </div>
                         <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
                              onclick="document.getElementById('customersFile').click()"
@@ -341,14 +341,14 @@
                             <i class="fas fa-truck text-orange-600 text-xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900">供应商数据导入</h4>
+                            <h4 class="font-semibold text-gray-900">供应商信息导入</h4>
                             <p class="text-sm text-gray-600">导入供应商信息数据</p>
                         </div>
                     </div>
                     <div class="space-y-4">
                         <div class="text-sm text-gray-600">
                             <p>支持格式：Excel (.xlsx), CSV (.csv)</p>
-                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">供应商数据模板.xlsx</a></p>
+                            <p>模板下载：<a href="#" class="text-blue-600 hover:text-blue-800">供应商信息模板.xlsx</a></p>
                         </div>
                         <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
                              onclick="document.getElementById('suppliersFile').click()"
@@ -377,93 +377,7 @@
                 </div>
             </div>
 
-            <!-- 完整数据恢复 -->
-            <div class="card import-card">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-database text-red-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">完整数据恢复</h4>
-                            <p class="text-sm text-gray-600">从备份文件恢复所有数据</p>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="text-sm text-gray-600">
-                            <p>支持格式：备份文件 (.backup)</p>
-                            <p class="text-red-600">⚠️ 恢复操作将覆盖现有数据，请谨慎操作</p>
-                        </div>
-                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer border-orange-300" 
-                             onclick="document.getElementById('backupFile').click()"
-                             ondrop="handleDrop(event, 'backup')"
-                             ondragover="handleDragOver(event)"
-                             ondragleave="handleDragLeave(event)">
-                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
-                            <p class="text-gray-600 mb-1">选择备份文件</p>
-                            <p class="text-xs text-gray-500">支持 .backup 格式</p>
-                            <input type="file" id="backupFile" class="hidden" accept=".backup" onchange="handleFileImport('backup', this)">
-                        </div>
-                        <div id="backupProgress" class="hidden">
-                            <div class="flex items-center justify-between text-sm mb-2">
-                                <span>恢复进度</span>
-                                <span id="backupProgressText">0%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div id="backupProgressBar" class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline border-red-300 text-red-600 hover:bg-red-50 w-full" onclick="restoreData()">
-                            <i class="fas fa-undo mr-2"></i>
-                            恢复数据
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 批量导入 -->
-            <div class="card import-card">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-layer-group text-indigo-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900">批量导入</h4>
-                            <p class="text-sm text-gray-600">一次性导入多种类型数据</p>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="text-sm text-gray-600">
-                            <p>支持同时导入多种数据类型</p>
-                            <p>请将不同数据类型的文件打包为ZIP格式</p>
-                        </div>
-                        <div class="upload-area rounded-lg p-6 text-center cursor-pointer" 
-                             onclick="document.getElementById('batchFile').click()"
-                             ondrop="handleDrop(event, 'batch')"
-                             ondragover="handleDragOver(event)"
-                             ondragleave="handleDragLeave(event)">
-                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
-                            <p class="text-gray-600 mb-1">选择ZIP文件</p>
-                            <p class="text-xs text-gray-500">支持 .zip 格式</p>
-                            <input type="file" id="batchFile" class="hidden" accept=".zip" onchange="handleFileImport('batch', this)">
-                        </div>
-                        <div id="batchProgress" class="hidden">
-                            <div class="flex items-center justify-between text-sm mb-2">
-                                <span>批量导入进度</span>
-                                <span id="batchProgressText">0%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div id="batchProgressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary w-full" onclick="importData('batch')">
-                            <i class="fas fa-upload mr-2"></i>
-                            开始批量导入
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
         </div>
 
         <!-- 导入历史 -->
