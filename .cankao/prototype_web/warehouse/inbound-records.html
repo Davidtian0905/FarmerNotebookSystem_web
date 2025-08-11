@@ -247,10 +247,10 @@
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-cog text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="font-semibold text-gray-900 mb-2">自定义物料模板</h3>
-                    <p class="text-sm text-gray-600 mb-4">管理物料模板等</p>
+                    <h3 class="font-semibold text-gray-900 mb-2">自定义入库模板</h3>
+                    <p class="text-sm text-gray-600 mb-4">管理物料模板，新增入库模板</p>
                     <button class="quick-action-btn w-full" onclick="window.location.href='../templates/material-templates.html'">
-                        自定义物料模板
+                        新增入库模板
                     </button>
                 </div>
             </div>
@@ -378,114 +378,45 @@
             </div>
         </div>
 
-        <!-- 筛选器 -->
-        <div class="card mb-6">
-            <div class="p-4">
-                <form class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">时间范围</label>
-                        <select class="form-input">
-                            <option>今天</option>
-                            <option>本周</option>
-                            <option>本月</option>
-                            <option>自定义</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">商品类型</label>
-                        <select class="form-input">
-                            <option>全部</option>
-                            <option>铁观音</option>
-                            <option>龙井茶</option>
-                            <option>普洱茶</option>
-                            <option>大红袍</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">仓库</label>
-                        <select class="form-input">
-                            <option>全部仓库</option>
-                            <option>主仓库</option>
-                            <option>副仓库</option>
-                            <option>临时仓库</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">供应商</label>
-                        <select class="form-input">
-                            <option>全部供应商</option>
-                            <option>福建安溪茶园</option>
-                            <option>杭州龙井茶业</option>
-                            <option>云南普洱茶厂</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
-                        <select class="form-input">
-                            <option>全部状态</option>
-                            <option>已完成</option>
-                            <option>待审核</option>
-                            <option>已取消</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-end">
-                        <button type="submit" class="btn btn-primary w-full">
-                            <i class="fas fa-search mr-2"></i>
-                            筛选
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- 入库记录列表 -->
+        <!-- 物料列表 -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">入库记录列表</h3>
-                <div class="flex items-center space-x-2">
-                    <button class="btn btn-secondary btn-sm">
-                        <i class="fas fa-filter mr-2"></i>
-                        高级筛选
-                    </button>
-                </div>
+                <h3 class="card-title">物料列表</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">入库单号</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品信息</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物料名称</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物料编号</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">入库时间</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量单位</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单价</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总金额</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">供应商</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">仓库</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">入库时间</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">仓库位置</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">保质期</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">质量检测</th>
+                            
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr class="hover:bg-gray-50">
+                      <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">IN202407160001</div>
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                <div class="text-sm font-medium text-gray-900">铁观音</div>
+                                <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250716001</div>
                                 <div class="text-sm text-gray-500">批次: B20240716001</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-leaf text-green-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">铁观音</div>
-                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
-                                    </div>
-                                </div>
+                                <div class="text-sm text-gray-900">2024-07-16</div>
+                                <div class="text-sm text-gray-500">09:30</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">50斤</div>
@@ -503,23 +434,15 @@
                                 <div class="text-sm text-gray-900">主仓库</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">2024-07-16</div>
-                                <div class="text-sm text-gray-500">09:30</div>
+                                <div class="text-sm text-gray-900">2026-07-16</div>
+                                <div class="text-sm text-gray-500">保质期2年</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="status-badge status-completed">已完成</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
-                                <button class="text-green-600 hover:text-green-900 mr-3">编辑</button>
-                                <button class="text-red-600 hover:text-red-900">删除</button>
-                            </td>
+
                         </tr>
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">IN202407160002</div>
-                                <div class="text-sm text-gray-500">批次: B20240716002</div>
-                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -530,6 +453,14 @@
                                         <div class="text-sm text-gray-500">一级 · 绿茶</div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250716002</div>
+                                <div class="text-sm text-gray-500">批次: B20240716002</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-16</div>
+                                <div class="text-sm text-gray-500">14:20</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">30斤</div>
@@ -547,21 +478,237 @@
                                 <div class="text-sm text-gray-900">主仓库</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">2024-07-16</div>
-                                <div class="text-sm text-gray-500">14:20</div>
+                                <div class="text-sm text-gray-900">2026-07-16</div>
+                                <div class="text-sm text-gray-500">保质期2年</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="status-badge status-pending">待审核</span>
+                                <span class="status-badge status-pending">不合格</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
-                                <button class="text-green-600 hover:text-green-900 mr-3">审核</button>
-                                <button class="text-red-600 hover:text-red-900">取消</button>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">大红袍</div>
+                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250715003</div>
+                                <div class="text-sm text-gray-500">批次: B20240715003</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-15</div>
+                                <div class="text-sm text-gray-500">16:45</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">20斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥200/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥4,000</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">武夷山茶业</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">精品仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2027-07-15</div>
+                                <div class="text-sm text-gray-500">保质期3年</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-completed">已完成</span>
+                            </td>
+
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-amber-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">普洱茶</div>
+                                        <div class="text-sm text-gray-500">熟茶 · 黑茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250714004</div>
+                                <div class="text-sm text-gray-500">批次: B20240714004</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-14</div>
+                                <div class="text-sm text-gray-500">11:15</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">100饼</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥35/饼</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥3,500</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">云南普洱茶厂</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">主仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2035-07-05</div>
+                                <div class="text-sm text-gray-500">保质期10年</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-completed">已完成</span>
+                            </td>
+
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">正山小种</div>
+                                        <div class="text-sm text-gray-500">特级 · 红茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250713005</div>
+                                <div class="text-sm text-gray-500">批次: B20240713005</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-13</div>
+                                <div class="text-sm text-gray-500">08:30</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">25斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥150/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥3,750</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">武夷山正山茶业</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">精品仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2026-07-13</div>
+                                <div class="text-sm text-gray-500">保质期2年</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-in-progress">检测中</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-teal-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">碧螺春</div>
+                                        <div class="text-sm text-gray-500">特级 · 绿茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250712006</div>
+                                <div class="text-sm text-gray-500">批次: B20240712006</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-12</div>
+                                <div class="text-sm text-gray-500">15:20</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">15斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥180/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥2,700</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">苏州洞庭茶园</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">冷藏仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2025-07-12</div>
+                                <div class="text-sm text-gray-500">保质期1年</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-completed">已完成</span>
+                            </td>
+
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-leaf text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">黄山毛峰</div>
+                                        <div class="text-sm text-gray-500">一级 · 绿茶</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250711007</div>
+                                <div class="text-sm text-gray-500">批次: B20240711007</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2024-07-11</div>
+                                <div class="text-sm text-gray-500">10:45</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">40斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">¥90/斤</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">¥3,600</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">黄山茶叶合作社</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">主仓库</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">2025-07-11</div>
+                                <div class="text-sm text-gray-500">保质期1年</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-pending">不合格</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+
             </div>
+        </div>    
+
 
             <!-- 分页 -->
             <div class="p-4 border-t border-gray-100 flex items-center justify-between">

@@ -190,7 +190,11 @@
             <div class="flex items-center space-x-3">
                 <a href="inventory-check.html" class="btn btn-primary">
                     <i class="fas fa-clipboard-check mr-2"></i>
-                    库存盘点
+                    物料盘点
+                </a>
+                <a href="product-check.html" class="btn btn-primary">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    商品盘点
                 </a>
             </div>
         </div>
@@ -230,37 +234,51 @@
         <!-- 库存列表 -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">库存列表</h3>
-                <div class="flex items-center space-x-2">
-                                 <!-- 快捷筛选 -->
-                 <div class="flex items-center space-x-1">
-                     <button class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium" onclick="filterInventory('all')">
-                         全部商品
-                     </button>
-                     <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('sufficient')">
-                         库存充足
-                     </button>
-                     <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('low')">
-                         库存偏低
-                     </button>
-                     <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('warning')">
-                         库存预警
-                     </button>
-                     <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('out')">
-                         缺货商品
-                     </button>
-                 </div>
+                <!-- 选项卡切换 -->
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button id="inventoryTab" class="px-4 py-2 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm" onclick="switchTab('inventory')">
+                                库存列表
+                            </button>
+                            <button id="productTab" class="px-4 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900" onclick="switchTab('product')">
+                                商品列表
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <!-- 快捷筛选 -->
+                        <div class="flex items-center space-x-1">
+                            <button class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium" onclick="filterInventory('all')">
+                                全部商品
+                            </button>
+                            <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('sufficient')">
+                                库存充足
+                            </button>
+                            <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('low')">
+                                库存偏低
+                            </button>
+                            <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('warning')">
+                                库存预警
+                            </button>
+                            <button class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200" onclick="filterInventory('out')">
+                                缺货商品
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            
+            <!-- 库存列表表格 -->
+            <div id="inventoryTable" class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物料名称</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">茶叶类型</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单价(元/斤)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总数量(斤)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预警线(斤)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物料编码</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">仓库位置</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总数量</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预警线</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">库存状态</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">库存进度</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后更新</th>
@@ -281,13 +299,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    乌龙茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250116001</div>
+                                <div class="text-sm text-gray-500">批次: B20250116001</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥280</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">156</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">50</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">主仓库</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">156斤</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">50斤</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     库存充足
@@ -321,13 +338,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    绿茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250116002</div>
+                                <div class="text-sm text-gray-500">批次: B20250116002</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥320</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">98</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">30</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">主仓库</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">98斤</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">30斤</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     库存充足
@@ -361,13 +377,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    黑茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250115003</div>
+                                <div class="text-sm text-gray-500">批次: B20250115003</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥450</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">42</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">40</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">精品仓库</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">42斤</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">40斤</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     库存预警
@@ -401,13 +416,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    乌龙茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250114004</div>
+                                <div class="text-sm text-gray-500">批次: B20250114004</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥380</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">28</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">35</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">主仓库</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">28斤</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">35斤</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                     库存偏低
@@ -441,11 +455,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    绿茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250114004</div>
+                                <div class="text-sm text-gray-500">批次: B20250114004</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥260</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">冷藏区</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">0</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">20</td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -481,11 +494,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    绿茶
-                                </span>
+                                <div class="text-sm font-medium text-gray-900">W_MAT20250114004</div>
+                                <div class="text-sm text-gray-500">批次: B20250114004</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">¥180</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">仓库A区</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">85</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">25</td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -502,6 +514,202 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-15 10:20</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">查看详情</button>
+                                <button class="text-green-600 hover:text-green-900">编辑</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 商品列表表格 -->
+            <div id="productTable" class="overflow-x-auto" style="display: none;">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品名称</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品编码</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">物料信息</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总数量</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预警线</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">库存状态</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">库存进度</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="product-item" data-status="sufficient">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="tea-type-icon longjing mr-3">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">龙井茶散装</div>
+                                        <div class="text-sm text-gray-500">精装版</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">P_LJC20250716003</div>
+                                <div class="text-sm text-gray-500">成本价: ¥120</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div>• 龙井茶叶 1000g</div>
+                                    <div>• 密封袋 2个</div>
+                                    <div>• 标签贴 1套</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">45套</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15套</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    库存充足
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="stock-level w-20 mr-2">
+                                        <div class="stock-fill stock-high" style="width: 75%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">75%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">查看详情</button>
+                                <button class="text-green-600 hover:text-green-900">编辑</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="product-item" data-status="sufficient">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="tea-type-icon dahongpao mr-3">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">大红袍精品装</div>
+                                        <div class="text-sm text-gray-500">礼盒装</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">P_DHP20250716005</div>
+                                <div class="text-sm text-gray-500">成本价: ¥280</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div>• 大红袍茶叶 250g</div>
+                                    <div>• 木质礼盒 1个</div>
+                                    <div>• 茶杯 2个</div>
+                                    <div>• 说明书 1份</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">28套</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10套</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    库存充足
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="stock-level w-20 mr-2">
+                                        <div class="stock-fill stock-high" style="width: 70%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">70%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">查看详情</button>
+                                <button class="text-green-600 hover:text-green-900">编辑</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="product-item" data-status="low">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="tea-type-icon puer mr-3">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">普洱茶饼套装</div>
+                                        <div class="text-sm text-gray-500">收藏版</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">P_PEC20250716008</div>
+                                <div class="text-sm text-gray-500">成本价: ¥200</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div>• 普洱茶饼 2个(357g/个)</div>
+                                    <div>• 竹制包装盒 1个</div>
+                                    <div>• 茶刀 1把</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8套</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">12套</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    库存偏低
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="stock-level w-20 mr-2">
+                                        <div class="stock-fill stock-low" style="width: 35%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">35%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">查看详情</button>
+                                <button class="text-green-600 hover:text-green-900">编辑</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="product-item" data-status="warning">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="tea-type-icon tieguanyin mr-3">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">铁观音礼品装</div>
+                                        <div class="text-sm text-gray-500">高档装</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">P_TGY20250715010</div>
+                                <div class="text-sm text-gray-500">成本价: ¥350</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div>• 铁观音茶叶 500g</div>
+                                    <div>• 紫砂茶具套装 1套</div>
+                                    <div>• 精装礼盒 1个</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5套</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8套</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    库存预警
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="stock-level w-20 mr-2">
+                                        <div class="stock-fill stock-medium" style="width: 20%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">20%</span>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <button class="text-indigo-600 hover:text-indigo-900 mr-3">查看详情</button>
                                 <button class="text-green-600 hover:text-green-900">编辑</button>
@@ -548,6 +756,58 @@
     <script src="../shared/js/main.js"></script>
     <script src="../shared/js/components.js"></script>
     <script>
+        // 切换选项卡
+        function switchTab(tabType) {
+            const inventoryTab = document.getElementById('inventoryTab');
+            const productTab = document.getElementById('productTab');
+            const inventoryTable = document.getElementById('inventoryTable');
+            const productTable = document.getElementById('productTable');
+            
+            if (tabType === 'inventory') {
+                // 激活库存列表选项卡
+                inventoryTab.className = 'px-4 py-2 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm';
+                productTab.className = 'px-4 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900';
+                
+                // 显示库存列表，隐藏商品列表
+                inventoryTable.style.display = 'block';
+                productTable.style.display = 'none';
+            } else if (tabType === 'product') {
+                // 激活商品列表选项卡
+                productTab.className = 'px-4 py-2 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm';
+                inventoryTab.className = 'px-4 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900';
+                
+                // 显示商品列表，隐藏库存列表
+                productTable.style.display = 'block';
+                inventoryTable.style.display = 'none';
+            }
+        }
+        
+        // 筛选库存
+        function filterInventory(status) {
+            const items = document.querySelectorAll('.inventory-item, .product-item');
+            const buttons = document.querySelectorAll('[onclick^="filterInventory"]');
+
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                btn.className = 'px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200';
+            });
+            event.target.className = 'px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium';
+
+            // 筛选商品
+            items.forEach(item => {
+                if (status === 'all') {
+                    item.style.display = 'table-row';
+                } else {
+                    const itemStatus = item.getAttribute('data-status');
+                    if (itemStatus === status) {
+                        item.style.display = 'table-row';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
         // 切换用户菜单
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
@@ -566,31 +826,6 @@
                 submenu.style.display = 'block';
                 icon.style.transform = 'rotate(180deg)';
             }
-        }
-        // 筛选库存
-        function filterInventory(status) {
-            const items = document.querySelectorAll('.inventory-item');
-            const buttons = document.querySelectorAll('[onclick^="filterInventory"]');
-
-            // 更新按钮状态
-            buttons.forEach(btn => {
-                btn.className = 'px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200';
-            });
-            event.target.className = 'px-4 py-2 bg-green-500 text-white rounded-lg font-medium';
-
-            // 筛选商品
-            items.forEach(item => {
-                if (status === 'all') {
-                    item.style.display = 'block';
-                } else {
-                    const itemStatus = item.getAttribute('data-status');
-                    if (itemStatus === status) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                }
-            });
         }
 
         // 点击外部关闭菜单
