@@ -14,10 +14,7 @@
 - 不允许在对话中使用npm run dev 启动项目
 - 不要在vue页面中定义测试数据，所有的数据必须来自后端服务或者mock接口
 - 不要创建测试文档，没有我的允许，不允许创建测试页面
-目前的测试页面为:
-http://localhost:3000/assets-test-mock
-文件地址：frontend\src\views\AssetsTestMock.vue
-文件地址：frontend\src\views\DashboardTestMock.vue
+
 
 你不允许修改：frontend\src\mock\database_flow.js中的默认交易数据 - 模拟真实的入库和出库记录的内容
 

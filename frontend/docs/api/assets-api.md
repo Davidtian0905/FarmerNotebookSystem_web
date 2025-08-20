@@ -2,20 +2,16 @@
 
 ## 概述
 
-资产总览API提供财务管理系统的核心数据接口，所有数据基于交易流水实时计算得出，支持多维度时间筛选和数据分析功能。
-
-
+资产总览API提供农民记账系统的资产汇总、趋势分析、收支分析等核心功能。支持多种时间维度查询（年度、月度、周度、日度、总计），为前端提供完整的资产数据服务。系统采用Mock模式和真实API模式双重支持，便于开发和生产环境使用。
 
 ## 数据流架构
 
 ```
-交易流水 (database_flow.js) 
-    ↓
-资产计算引擎 (database_assets.js)
-    ↓
-API接口层 (assetsApi.js)
-    ↓
-前端展示 (Vue组件)
+前端组件 → API接口层 → Mock/真实API → 数据处理层 → 数据存储
+    ↓         ↓           ↓           ↓          ↓
+用户交互   参数验证     模式切换     业务逻辑    Mock数据库/真实数据库
+    ↓         ↓           ↓           ↓          ↓
+数据展示 ← 响应格式化 ← 统一接口 ← 计算汇总 ← 交易记录
 ```
 
 ### 数据来源说明
@@ -103,26 +99,39 @@ const assetData = {
 
 ### 1. 获取资产汇总数据
 
-**接口地址**: `/assets/summary`
-
-**请求方式**: POST
+**接口路径**: `/assets/summary` | `/api/assets/summary` | `/mock/assets/summary`  
+**请求方法**: POST  
+**接口描述**: 获取指定时间维度的资产汇总数据，支持年度、月度、周度、日度和总计查询
 
 **数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'day'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+| startDate | string | 否 | - | 开始日期 YYYY-MM-DD |
+| endDate | string | 否 | - | 结束日期 YYYY-MM-DD |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
 ```
 
-**参数说明**:
+**参数详细说明**:
 - `period` (必填): 时间维度
   - `year`: 本年数据（12个月）
   - `month`: 本月数据（1-31天）
   - `week`: 本周数据（7天）
+  - `day`: 本日数据
   - `total`: 总统计数据（从最早年份至今）
 - `year` (可选): 指定年份，默认为当前年份
 - `month` (可选): 指定月份，默认为当前月份
@@ -164,7 +173,10 @@ const assetData = {
         "netAssets": 4300,
         "transactionCount": 2
       }
-    ]
+    ],
+    "yearlyData": [],
+    "dailyData": [],
+    "weeklyData": []
   },
   "message": "获取成功"
 }
@@ -185,16 +197,26 @@ const assetData = {
 
 ### 2. 获取资产趋势数据
 
-**接口地址**: `/assets/trend`
-
-**请求方式**: POST
+**接口路径**: `/assets/trend` | `/api/assets/trend` | `/mock/assets/trend`  
+**请求方法**: POST  
+**接口描述**: 获取资产变化趋势数据，支持多种时间维度的趋势分析
 
 **数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
@@ -238,16 +260,26 @@ const assetData = {
 
 ### 3. 获取收支趋势数据
 
-**接口地址**: `/assets/income-expense`
-
-**请求方式**: POST
+**接口路径**: `/assets/income-expense` | `/api/assets/income-expense` | `/mock/assets/income-expense`  
+**请求方法**: POST  
+**接口描述**: 获取收入和支出的趋势对比数据，支持多种时间维度分析
 
 **数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
@@ -290,18 +322,35 @@ const assetData = {
 
 ### 4. 获取收入结构分析
 
-**接口地址**: `/assets/income-structure`
+**接口路径**: `/assets/income-structure` | `/api/assets/income-structure` | `/mock/assets/income-structure`  
+**请求方法**: POST  
+**接口描述**: 获取收入来源的结构分析数据，按产品类别统计收入占比
 
-**请求方式**: POST
+**数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
 ```
+
+**计算逻辑**:
+- 【收入结构】 = 按产品类别分组统计OUTBOUND交易的amount总和
+- 【占比计算】 = 各类别收入 / 总收入 * 100%
+- 【颜色配置】 = 预设的图表颜色方案
 
 **响应示例**:
 ```json
@@ -339,18 +388,35 @@ const assetData = {
 
 ### 5. 获取成本结构分析
 
-**接口地址**: `/assets/cost-structure`
+**接口路径**: `/assets/cost-structure` | `/api/assets/cost-structure` | `/mock/assets/cost-structure`  
+**请求方法**: POST  
+**接口描述**: 获取成本支出的结构分析数据，按支出类别统计成本占比
 
-**请求方式**: POST
+**数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
 ```
+
+**计算逻辑**:
+- 【成本结构】 = 按支出类别分组统计INBOUND交易的amount总和
+- 【占比计算】 = 各类别支出 / 总支出 * 100%
+- 【颜色配置】 = 预设的图表颜色方案
 
 **响应示例**:
 ```json
@@ -388,18 +454,35 @@ const assetData = {
 
 ### 6. 获取资产统计数据
 
-**接口地址**: `/assets/statistics`
+**接口路径**: `/assets/statistics` | `/api/assets/statistics` | `/mock/assets/statistics`  
+**请求方法**: POST  
+**接口描述**: 获取资产的统计分析数据，包括平均值、增长率等指标
 
-**请求方式**: POST
+**数据来源**: 基于交易流水实时计算
 
-**请求参数**:
+#### 请求参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| period | string | 是 | 'year' | 时间维度：'year'\|'month'\|'week'\|'total' |
+| year | number | 否 | 当前年份 | 指定年份 |
+| month | number | 否 | 当前月份 | 指定月份（period为month时必填） |
+| currentDayOfWeek | number | 否 | - | 当前星期几（1-7，周度查询时使用） |
+| currentDate | string | 否 | - | 当前日期 YYYY-MM-DD（周度查询时使用） |
+
+**请求示例**:
 ```json
 {
-  "period": "year|month|week|total",
+  "period": "year",
   "year": 2025,
   "month": 1
 }
 ```
+
+**计算逻辑**:
+- 【平均日收入】 = 总收入 / 时间范围天数
+- 【平均日支出】 = 总支出 / 时间范围天数
+- 【增长率】 = (当前期间净资产 - 上期净资产) / 上期净资产 * 100%
 
 **响应示例**:
 ```json
@@ -411,13 +494,66 @@ const assetData = {
     "netAssets": 39320,
     "avgDailyIncome": 10713,
     "avgDailyExpense": 7437,
-    "growthRate": 12.5
+    "growthRate": 12.5,
+    "statistics": {
+      "averageDailyIncome": 500,
+      "averageDailyExpense": 300,
+      "growthRate": 15.5,
+      "totalTransactions": 120,
+      "activeCategories": 8,
+      "netAssetsGrowth": 12.3,
+      "incomeGrowthRate": 8.7,
+      "expenseGrowthRate": 5.2
+    },
+    "period": "year",
+    "year": 2025,
+    "month": 1
   },
   "message": "获取成功"
 }
 ```
 
 ## 时间维度说明
+
+### 支持的时间维度
+
+- **year**: 年度数据，返回12个月的数据点
+- **month**: 月度数据，返回指定月份每日的数据点  
+- **week**: 周度数据，返回7天的数据点
+- **day**: 日度数据，返回单日汇总数据
+- **total**: 总计数据，返回所有时间的汇总统计信息
+
+### 时间参数规则
+
+1. **year参数**: 指定查询的年份，默认为当前年份
+2. **month参数**: 指定查询的月份（1-12），仅在period为'month'时必填
+3. **currentDayOfWeek参数**: 当前星期几（1-7），周度查询时使用，用于确定周的起始和结束
+4. **currentDate参数**: 当前日期（YYYY-MM-DD格式），周度查询时使用，配合currentDayOfWeek计算周范围
+5. **时间范围**: 系统会根据period自动计算数据范围
+
+### 周度查询说明
+
+周度查询需要提供 `currentDayOfWeek` 和 `currentDate` 参数：
+- 系统会根据当前日期和星期几，计算出本周的起始日期（周一）和结束日期（周日）
+- 返回本周7天的数据，包括已过去的天数和未来的天数（未来天数数据为0）
+
+**示例**：
+```json
+{
+  "period": "week",
+  "year": 2025,
+  "currentDayOfWeek": 3,
+  "currentDate": "2025-01-15"
+}
+```
+
+### 数据计算逻辑
+
+- **年度数据**: 按月份分组统计，返回12个月的数据点
+- **月度数据**: 按日期分组统计，返回指定月份每日数据
+- **周度数据**: 按日期分组统计，返回本周7天数据
+- **日度数据**: 返回指定日期的汇总数据
+- **总计数据**: 返回所有交易记录的汇总统计
 
 ### 本年 (period: "year")
 - **数据范围**: 当前年份的12个月数据
@@ -441,14 +577,44 @@ const assetData = {
 
 ## 错误处理
 
+### 错误响应格式
+
+```json
+{
+  "error": 1,
+  "message": "错误描述",
+  "body": null
+}
+```
+
 ### 常见错误码
 
-| 错误码 | 说明 | 处理方式 |
-|--------|------|----------|
-| 0 | 成功 | 正常处理数据 |
-| 401 | 未授权 | 跳转到登录页面 |
-| 500 | 系统错误 | 显示系统错误提示 |
-| 400 | 参数错误 | 显示具体错误信息 |
+| 错误码 | 错误类型 | 说明 | 处理建议 |
+|--------|----------|------|----------|
+| 0 | 成功 | 请求成功 | - |
+| 1 | 参数错误 | 请求参数不正确或缺失 | 检查参数格式和必填项 |
+| 2 | 数据不存在 | 查询的数据不存在 | 确认查询条件是否正确 |
+| 3 | 服务器内部错误 | 服务器处理异常 | 稍后重试或联系技术支持 |
+| 4 | 权限不足 | 没有访问权限 | 检查用户权限设置 |
+| 5 | 请求频率过高 | API调用频率超限 | 降低请求频率 |
+| 400 | 参数错误 | 显示具体错误信息 | 检查请求参数 |
+| 401 | 未授权 | 跳转到登录页面 | 重新登录 |
+| 500 | 系统错误 | 显示系统错误提示 | 联系技术支持 |
+
+### 错误处理最佳实践
+
+1. **参数验证**: 前端应在发送请求前验证参数的完整性和格式
+2. **错误重试**: 对于网络错误或服务器错误，可以实现自动重试机制
+3. **用户提示**: 根据错误码向用户显示友好的错误提示信息
+4. **日志记录**: 记录API调用错误，便于问题排查
+
+### Mock模式错误处理
+
+在Mock模式下，系统会模拟真实的错误场景：
+- 参数验证错误
+- 数据格式错误
+- 模拟网络延迟和超时
+- 随机错误场景（用于测试错误处理逻辑）
 
 ### 错误响应示例
 ```json
@@ -458,6 +624,56 @@ const assetData = {
   "message": "时间维度参数错误"
 }
 ```
+
+## Mock数据结构说明
+
+### 交易记录结构
+
+```javascript
+{
+  id: string,           // 交易ID
+  date: string,         // 交易日期 (YYYY-MM-DD)
+  type: 'INBOUND' | 'OUTBOUND',  // 交易类型
+  amount: number,       // 交易金额
+  category: string,     // 交易分类
+  description: string,  // 交易描述
+  productType: string   // 产品类型
+}
+```
+
+### 数据生成规则
+
+1. **时间范围**: 自动生成过去12个月的交易数据
+2. **交易类型**: 随机生成收入(OUTBOUND)和支出(INBOUND)交易
+3. **金额范围**: 收入1000-5000元，支出500-2000元
+4. **分类多样性**: 包含多种农业相关的收入和支出分类
+5. **数据一致性**: 确保生成的数据在不同API接口间保持一致
+
+### Mock API特性
+
+- **实时计算**: Mock数据基于模拟的交易记录实时计算，确保数据的准确性
+- **参数响应**: 根据不同的查询参数返回相应的数据范围
+- **错误模拟**: 支持模拟各种错误场景，便于前端错误处理测试
+- **性能优化**: 使用缓存机制提高Mock API的响应速度
+
+## 版本更新记录
+
+### v2.1.0 (2025-01-15)
+- 新增周度查询支持，添加 `currentDayOfWeek` 和 `currentDate` 参数
+- 优化数据结构，统一返回格式包含 `monthlyData`、`yearlyData`、`dailyData`、`weeklyData`
+- 完善错误处理机制，新增详细的错误码说明
+- 更新Mock API实现，支持更真实的数据模拟
+
+### v2.0.0 (2025-01-01)
+- 重构API架构，支持Mock模式和真实API模式切换
+- 统一接口路径格式，支持 `/api/` 和 `/mock/` 前缀
+- 优化数据计算逻辑，提高查询性能
+- 新增资产统计分析接口
+
+### v1.0.0 (2024-12-01)
+- 初始版本发布
+- 基础的资产汇总、趋势、收支分析功能
+- 支持年度、月度、总计查询
 
 ## 使用示例
 
