@@ -178,9 +178,26 @@ const loadAssetData = async () => {
       period: currentPeriod.value
     }
     
+    // 获取当前系统时间信息
+    const now = new Date()
+    const currentDateInfo = {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      day: now.getDate(),
+      dayOfWeek: now.getDay(), // 0=周日, 1=周一, ..., 6=周六
+      currentDate: now.toISOString().split('T')[0]
+    }
+    
     // 只有在非总计模式下才添加年份参数
     if (currentPeriod.value !== 'total') {
-      params.year = new Date().getFullYear()
+      params.year = currentDateInfo.year
+    }
+    
+    // 周度模式下添加当前日期信息，用于限制显示数据
+    if (currentPeriod.value === 'week') {
+      params.currentDayOfWeek = currentDateInfo.dayOfWeek
+      params.currentDate = currentDateInfo.currentDate
+      console.log('周度模式 - 当前是周', currentDateInfo.dayOfWeek === 0 ? '日' : ['一', '二', '三', '四', '五', '六'][currentDateInfo.dayOfWeek - 1])
     }
     
     console.log('准备调用Mock API，参数:', params)

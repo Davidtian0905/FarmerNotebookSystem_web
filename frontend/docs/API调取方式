@@ -1,0 +1,47 @@
+AssetsTestMock.vue → assetsApi → request.js → Mock拦截器 → mockServer → database_assets.js → 返回数据
+
+AssetsOverview.vue → 直接调用Mock函数 → database_assets.js → 返回数据
+
+
+## 各文件功能分析
+### 1. f:\DevCode\FarmerNotebookSystem\frontend\src\utils\request.js
+功能 : HTTP请求工具，负责统一的网络请求处理
+
+- 创建axios实例，配置基础URL、超时时间等
+- 请求拦截器：添加token、处理Mock模式切换
+- 响应拦截器：统一错误处理、Mock数据回退
+- 支持动态切换Mock模式和后端API模式
+### 2. f:\DevCode\FarmerNotebookSystem\frontend\src\api\assets.js
+功能 : 资产相关的API接口定义层
+
+- 定义所有资产相关的API调用方法
+- 封装具体的HTTP请求参数和路径
+- 提供统一的接口给上层调用
+### 3. f:\DevCode\FarmerNotebookSystem\frontend\src\mock\database_assets.js
+功能 : Mock数据库，负责模拟后端数据逻辑
+
+- 基于交易记录动态计算资产数据
+- 支持不同时间维度的数据聚合（年/月/周/总计）
+- 提供事件驱动的数据更新机制
+- 缓存机制优化性能
+### 4. f:\DevCode\FarmerNotebookSystem\frontend\src\stores\assets.js
+功能 : Pinia状态管理，负责资产数据的状态管理
+
+- 集中管理资产相关的状态数据
+- 提供getter用于数据格式化和计算
+- 封装异步action调用API获取数据
+- 统一的错误处理和加载状态管理
+### 5. f:\DevCode\FarmerNotebookSystem\frontend\src\views\AssetsOverview.vue
+功能 : 资产总览页面，生产环境使用
+
+- 直接调用Mock函数获取数据（绕过API层）
+- 手动管理本地状态
+- 集成Chart.js进行数据可视化
+- 响应式设计和用户交互
+### 6. f:\DevCode\FarmerNotebookSystem\frontend\src\views\AssetsTestMock.vue
+功能 : Mock数据测试页面，开发调试使用
+
+- 通过API层调用数据（完整的请求链路）
+- 提供详细的调试信息和测试功能
+- 支持API模式切换测试
+- 显示原始数据结构用于调试

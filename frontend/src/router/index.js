@@ -116,8 +116,8 @@ const routes = [
   },
   {
     path: '/test-mock',
-    name: 'TestMock',
-    component: () => import('@/views/TestMock.vue'),
+    name: 'DashboardTestMock',
+    component: () => import('@/views/DashboardTestMock.vue'),
     meta: {
       title: 'Mock数据测试',
       requiresAuth: false

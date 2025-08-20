@@ -6,43 +6,41 @@
 import { createSuccessResponse, createErrorResponse, mockDelay } from './utils.js'
 import { handleMockApiRequest } from './api/index.js'
 
-// Mock服务器路由处理
+// Mock服务器
+import { createLogger } from './utils/logger.js';
+
+const logger = createLogger('SERVER');
+
 export const mockServer = {
-  
-  // 处理其他API请求
-  async handleRequest(url, method, data) {
-    console.log('Mock服务器收到请求:', { url, method, data })
+  // 模拟服务器请求处理
+  handleRequest: (url, method, data) => {
+    logger.info('Mock服务器处理请求:', { url, method, data });
     
-    // 添加模拟延迟
-    await mockDelay(100, 300)
-    
-    // 标准化URL
-    let normalizedUrl = url
-    if (url.startsWith('http')) {
-      const urlObj = new URL(url)
-      normalizedUrl = urlObj.pathname
+    // 模拟不同的响应
+    if (url.includes('/api/login')) {
+      return {
+        error: 0,
+        body: { token: 'mock-token-123', user: { id: 1, name: '测试用户' } },
+        message: '登录成功'
+      };
     }
     
-    console.log('标准化后的URL:', normalizedUrl)
-    
-    // 使用新的Mock API处理机制
-    try {
-      const response = handleMockApiRequest(normalizedUrl, data)
-      console.log('Mock API返回:', response)
-      
-      // 确保返回标准格式
-      if (response && typeof response === 'object') {
-        return response
-      } else {
-        console.warn('Mock API返回格式异常:', response)
-        return createErrorResponse(500, 'Mock API返回格式异常')
-      }
-    } catch (error) {
-      console.error('Mock API处理错误:', error)
-      return createErrorResponse(500, 'Mock API处理失败')
+    if (url.includes('/api/assets')) {
+      return {
+        error: 0,
+        body: { assets: [], total: 0 },
+        message: '获取资产数据成功'
+      };
     }
+    
+    // 默认响应
+    return {
+      error: 0,
+      body: {},
+      message: '请求处理成功'
+    };
   }
 }
 
 // 导出默认的mock服务器实例
-export default mockServer 
+export default mockServer

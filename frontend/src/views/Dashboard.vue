@@ -16,6 +16,16 @@
           <i class="fas fa-sync-alt mr-1"></i>
           刷新
         </van-button>
+        <van-button
+          type="warning"
+          size="small"
+          :loading="resetLoading"
+          @click="resetAllData"
+          style="margin-left: 8px;"
+        >
+          <i class="fas fa-redo mr-1"></i>
+          重置数据
+        </van-button>
       </div>
     </div>
 
@@ -98,7 +108,7 @@
         <!-- 收支趋势图 -->
         <ChartWidget
           title="收支趋势"
-          subtitle="近7天收支变化"
+          :subtitle="`近7天收入=${dashboardStore.total7dayIncome}，近7天支出=${dashboardStore.total7dayExpense}，近7天利润=${dashboardStore.total7dayProfit}`"
           type="line"
           :data="incomeExpenseData"
           height="300px"
@@ -118,17 +128,19 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast } from 'vant'
+import { showToast, showConfirmDialog } from 'vant'
 import Layout from '@/components/layout/Layout.vue'
 import StatCard from '@/components/dashboard/StatCard.vue'
 import QuickAction from '@/components/dashboard/QuickAction.vue'
 import ChartWidget from '@/components/dashboard/ChartWidget.vue'
 import { useDashboardStore } from '@/stores/dashboard.js'
 import { useUserStore } from '@/stores/user.js'
+import { resetTransactionData } from '@/mock/database_flow'
 
 const router = useRouter()
 const dashboardStore = useDashboardStore()
 const userStore = useUserStore()
+const resetLoading = ref(false)
 
 // 获取当前是星期几
 const getCurrentWeekday = () => {
@@ -190,30 +202,9 @@ const incomeExpenseData = computed(() => {
     }
   }
   
+  // 直接返回从mock API获取的chartData对象
   const chartData = dashboardStore.weekData.charts.incomeExpense
-  return {
-    labels: chartData.map(item => item.day),
-    datasets: [
-      {
-        label: '收入',
-        data: chartData.map(item => item.income),
-        borderColor: '#10B981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: '支出',
-        data: chartData.map(item => item.expense),
-        borderColor: '#EF4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  }
+  return chartData
 })
 
 // 方法
@@ -245,6 +236,44 @@ const refreshChartData = async (chartType) => {
   } catch (error) {
     console.error('更新图表数据失败:', error)
     showToast('更新失败，请重试')
+  }
+}
+
+// 重置所有数据
+const resetAllData = async () => {
+  try {
+    const result = await showConfirmDialog({
+      title: '确认重置',
+      message: '此操作将清除所有交易数据并重新加载测试数据，是否继续？',
+      confirmButtonText: '确认重置',
+      cancelButtonText: '取消'
+    })
+    
+    if (result === 'confirm') {
+      resetLoading.value = true
+      
+      // 重置交易数据
+      resetTransactionData()
+      
+      // 清除dashboard store的缓存
+       dashboardStore.clearData()
+      
+      // 重新加载所有数据
+      await dashboardStore.fetchAllData()
+      
+      showToast({
+        type: 'success',
+        message: '数据重置成功！已加载完整测试数据'
+      })
+    }
+  } catch (error) {
+    console.error('重置数据失败:', error)
+    showToast({
+      type: 'fail',
+      message: '重置数据失败，请重试'
+    })
+  } finally {
+    resetLoading.value = false
   }
 }
 
@@ -337,4 +366,4 @@ onMounted(async () => {
     min-width: auto;
   }
 }
-</style> 
+</style>

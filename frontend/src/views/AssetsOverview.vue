@@ -73,11 +73,7 @@
       <!-- 净资产趋势 -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">净资产趋势</h3>
-          <div class="flex items-center space-x-2">
-            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span class="text-sm text-gray-600">近12个月</span>
-          </div>
+          <h3 class="card-title">资产趋势</h3>
         </div>
         <div class="chart-container">
           <canvas ref="assetTrendChart"></canvas>
@@ -161,15 +157,9 @@ import { ref, onMounted, nextTick } from 'vue'
 import { showToast } from 'vant'
 import Layout from '@/components/layout/Layout.vue'
 import Chart from 'chart.js/auto'
-import { 
-  getAssetDataByPeriod,
-  getAssetOverview,
-  getAssetTrend,
-  getIncomeExpenseTrend,
-  getIncomeStructure,
-  getCostStructure,
-  getAssetStatistics
-} from '@/mock'
+import { useAssetsStore } from '@/stores/assets'
+// 初始化Pinia Store
+const assetsStore = useAssetsStore()
 
 // 响应式数据
 const activeTab = ref('year')
@@ -199,40 +189,109 @@ let costChartInstance = null
 
 // 格式化数字
 const formatNumber = (num) => {
-  return num.toLocaleString('zh-CN')
+  if (num === undefined || num === null || isNaN(num)) {
+    return '0'
+  }
+  return Number(num).toLocaleString('zh-CN')
 }
 
-// 加载资产数据
-const loadAssetData = async (period = 'year') => {
+// 统一加载所有数据（避免重复API调用）
+const loadAllData = async (params = { period: 'year' }) => {
   try {
-    // 获取资产总览
-    const overviewData = getAssetOverview({ period })
+    console.log('=== 开始加载数据 ===', params)
+    
+    // 如果传入的是字符串，转换为对象格式（向后兼容）
+    if (typeof params === 'string') {
+      params = { period: params }
+    }
+    
+    console.log('处理后的参数:', params)
+    
+    // 特别处理本周数据的调试信息
+    if (params.period === 'week') {
+      console.log('🗓️ 本周数据处理:', {
+        currentDate: params.currentDate,
+        currentDayOfWeek: params.currentDayOfWeek,
+        year: params.year
+      })
+    }
+    
+    // 记录开始时间
+    const startTime = Date.now()
+    
+    // 并行获取所有需要的数据
+    console.log('开始并行获取数据...')
+    await Promise.all([
+      // 资产总览数据
+      assetsStore.fetchAssetOverview(params).then(() => {
+        console.log('✓ 资产总览数据获取完成')
+      }),
+      // 资产趋势数据
+      assetsStore.fetchAssetTrend(params).then(() => {
+        console.log('✓ 资产趋势数据获取完成')
+      }),
+      // 收支趋势数据
+      assetsStore.fetchIncomeExpenseTrend(params).then(() => {
+        console.log('✓ 收支趋势数据获取完成')
+      }),
+      // 收入结构数据
+      assetsStore.fetchIncomeStructure(params).then(() => {
+        console.log('✓ 收入结构数据获取完成')
+      }),
+      // 成本结构数据
+      assetsStore.fetchCostStructure(params).then(() => {
+        console.log('✓ 成本结构数据获取完成')
+      })
+    ])
+    
+    const endTime = Date.now()
+    console.log(`所有数据获取完成，耗时: ${endTime - startTime}ms`)
+    
+    // 检查Store中是否有错误
+    if (assetsStore.error) {
+      console.error('Store获取数据失败:', assetsStore.error)
+      showToast('数据加载失败')
+      return
+    }
+    
+    // 更新资产总览数据
+    const overviewData = assetsStore.assetOverview
+    console.log('资产总览原始数据:', overviewData)
+    
     assetData.value = {
       totalIncome: overviewData.totalIncome || 0,
       totalExpense: overviewData.totalExpense || 0,
       netAssets: overviewData.netAssets || 0
     }
     
-    // 获取收入结构
-    incomeStructure.value = getIncomeStructure({ period })
+    console.log('更新后的资产数据:', assetData.value)
     
-    // 获取成本结构
-    costStructure.value = getCostStructure({ period })
+    // 更新结构数据
+    incomeStructure.value = assetsStore.incomeStructure
+    costStructure.value = assetsStore.costStructure
     
-    console.log('资产数据加载成功:', {
-      overview: assetData.value,
-      incomeStructure: incomeStructure.value,
-      costStructure: costStructure.value
-    })
+    console.log('收入结构数据:', incomeStructure.value)
+    console.log('成本结构数据:', costStructure.value)
+    
+    // 更新图表数据
+    console.log('开始更新图表数据...')
+    updateChartsFromStore()
+    
+    console.log('=== 数据加载完成 ===')
+
   } catch (error) {
-    console.error('加载资产数据失败:', error)
+    console.error('加载数据失败:', error)
+    console.error('错误堆栈:', error.stack)
     showToast('数据加载失败')
   }
 }
 
+
+
 // 切换时间维度
 const handleTabChange = async (name) => {
   try {
+    console.log('=== 开始切换时间维度 ===', name)
     activeTab.value = name
     
     let period = 'year'
@@ -252,11 +311,43 @@ const handleTabChange = async (name) => {
       periodName = mapping.name
     }
     
-    // 加载数据
-    await loadAssetData(period)
+    console.log('映射结果:', { period, periodName })
     
-    // 更新图表
-    await updateCharts(period)
+    // 准备API参数
+    const params = { period }
+    
+    // 获取当前系统时间信息
+    const now = new Date()
+    const currentDateInfo = {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      day: now.getDate(),
+      dayOfWeek: now.getDay(),
+      currentDate: now.toISOString().split('T')[0]
+    }
+    
+    console.log('当前时间信息:', currentDateInfo)
+    
+    // 添加时间参数
+    if (period !== 'total') {
+      params.year = currentDateInfo.year
+    }
+    
+    if (period === 'week') {
+      params.currentDayOfWeek = currentDateInfo.dayOfWeek
+      params.currentDate = currentDateInfo.currentDate
+      console.log('本周特殊参数:', {
+        currentDayOfWeek: params.currentDayOfWeek,
+        currentDate: params.currentDate
+      })
+    }
+    
+    console.log('最终API参数:', params)
+    
+    // 统一加载所有数据
+    await loadAllData(params)
+    
+    console.log('=== 时间维度切换完成 ===', periodName)
     
     showToast(`已切换到${periodName}`)
     
@@ -266,38 +357,99 @@ const handleTabChange = async (name) => {
   }
 }
 
-// 更新图表数据
-const updateCharts = async (period = 'year') => {
+// 从Store中获取数据更新图表（不重新调用API）
+const updateChartsFromStore = () => {
   try {
-    // 从mock数据库获取数据
-    const chartData = getAssetDataByPeriod(period)
+    console.log('=== 开始更新图表数据 ===', activeTab.value)
+    
+    // 获取Store中已加载的图表数据
+    const assetTrendData = assetsStore.assetTrendChartData
+    const incomeExpenseData = assetsStore.incomeExpenseTrend
+    
+    console.log('Store中的原始数据:')
+    console.log('- 资产趋势数据:', assetTrendData)
+    console.log('- 收支趋势数据:', incomeExpenseData)
     
     // 更新净资产趋势图表
-    if (assetTrendChartInstance) {
-      assetTrendChartInstance.data.labels = chartData.labels
-      assetTrendChartInstance.data.datasets[0].data = chartData.datasets[0].data
+    if (assetTrendChartInstance && assetTrendData) {
+      console.log('更新净资产趋势图表:', {
+        labels: assetTrendData.labels,
+        data: assetTrendData.data,
+        labelsLength: assetTrendData.labels?.length,
+        dataLength: assetTrendData.data?.length
+      })
+      
+      assetTrendChartInstance.data.labels = assetTrendData.labels || []
+      assetTrendChartInstance.data.datasets[0].data = assetTrendData.data || []
       assetTrendChartInstance.update()
+      
+      console.log('✓ 净资产趋势图表更新完成')
+    } else {
+      console.warn('净资产趋势图表更新失败:', {
+        hasChartInstance: !!assetTrendChartInstance,
+        hasData: !!assetTrendData
+      })
     }
     
     // 更新收支趋势图表
-    if (incomeExpenseChartInstance) {
-      incomeExpenseChartInstance.data.labels = chartData.incomeExpense.labels
-      incomeExpenseChartInstance.data.datasets[0].data = chartData.incomeExpense.datasets[0].data
-      incomeExpenseChartInstance.data.datasets[1].data = chartData.incomeExpense.datasets[1].data
+    if (incomeExpenseChartInstance && incomeExpenseData) {
+      // 处理收支趋势数据，支持不同时间维度
+      const labels = incomeExpenseData.income?.map(item => item.month) || []
+      const incomeData = incomeExpenseData.income?.map(item => item.value) || []
+      const expenseData = incomeExpenseData.expense?.map(item => item.value) || []
+      
+      console.log('收支趋势图表数据处理:', {
+        period: activeTab.value,
+        originalData: incomeExpenseData,
+        processedLabels: labels,
+        processedIncomeData: incomeData,
+        processedExpenseData: expenseData,
+        labelsLength: labels.length,
+        incomeDataLength: incomeData.length,
+        expenseDataLength: expenseData.length
+      })
+      
+      // 特别处理本周数据的标签问题
+      if (activeTab.value === 'week') {
+        console.log('🗓️ 本周数据标签检查:', {
+          incomeItems: incomeExpenseData.income,
+          expenseItems: incomeExpenseData.expense,
+          extractedLabels: labels
+        })
+      }
+      
+      incomeExpenseChartInstance.data.labels = labels
+      incomeExpenseChartInstance.data.datasets[0].data = incomeData
+      incomeExpenseChartInstance.data.datasets[1].data = expenseData
       incomeExpenseChartInstance.update()
+      
+      console.log('✓ 收支趋势图表更新完成')
+    } else {
+      console.warn('收支趋势图表更新失败:', {
+        hasChartInstance: !!incomeExpenseChartInstance,
+        hasData: !!incomeExpenseData
+      })
     }
     
     // 更新饼图
+    console.log('开始更新饼图...')
     updatePieCharts()
     
     // 更新图表标题
-    updateChartTitles(period)
+    console.log('开始更新图表标题...')
+    updateChartTitles(activeTab.value)
+    
+    console.log('=== 图表数据更新完成 ===')
     
   } catch (error) {
     console.error('更新图表失败:', error)
     showToast('图表更新失败')
   }
 }
+
+
+
+
 
 // 更新饼图
 const updatePieCharts = () => {
@@ -337,17 +489,9 @@ const updateChartTitles = (period) => {
       break
   }
   
-  // 更新净资产趋势图表标题
-  const assetTrendTitle = document.querySelector('.card-title')
-  if (assetTrendTitle) {
-    assetTrendTitle.textContent = `净资产趋势 (${periodText})`
-  }
-  
-  // 更新收支趋势图表标题
-  const incomeExpenseTitle = document.querySelectorAll('.card-title')[1]
-  if (incomeExpenseTitle) {
-    incomeExpenseTitle.textContent = `收支趋势 (${periodText})`
-  }
+  const titles = document.querySelectorAll('.card-title')
+  if (titles[0]) titles[0].textContent = `净资产趋势 (${periodText})`
+  if (titles[1]) titles[1].textContent = `收支趋势 (${periodText})`
 }
 
 // 初始化净资产趋势图表
@@ -433,156 +577,82 @@ const initIncomeExpenseChart = () => {
   })
 }
 
+// 创建饼图的通用配置
+const createPieChartConfig = (dataSource, tooltipCallback) => ({
+  type: 'doughnut',
+  data: {
+    labels: dataSource.value.map(item => item.name),
+    datasets: [{
+      data: dataSource.value.map(item => item.percentage),
+      backgroundColor: dataSource.value.map(item => item.color),
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: tooltipCallback } }
+    },
+    cutout: '50%',
+    layout: { padding: 30 }
+  },
+  plugins: [{
+    id: 'datalabels',
+    afterDraw: function(chart) {
+      const ctx = chart.ctx
+      ctx.save()
+      
+      const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2
+      const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2
+      
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        const meta = chart.getDatasetMeta(datasetIndex)
+        if (!meta.hidden) {
+          dataset.data.forEach((value, index) => {
+            const element = meta.data[index]
+            if (element && dataSource.value[index]) {
+              const item = dataSource.value[index]
+              const angle = element.startAngle + (element.endAngle - element.startAngle) / 2
+              const radius = element.outerRadius * 0.8
+              const x = centerX + Math.cos(angle) * radius
+              const y = centerY + Math.sin(angle) * radius
+              
+              ctx.fillStyle = '#FFFFFF'
+              ctx.font = '12px Arial'
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'middle'
+              ctx.fillText(item.name, x, y - 8)
+              ctx.fillText(`${item.percentage}%`, x, y + 8)
+            }
+          })
+        }
+      })
+      
+      ctx.restore()
+    }
+  }]
+})
+
 // 初始化收入结构饼图
 const initIncomeStructureChart = () => {
   const ctx = incomeStructureChart.value.getContext('2d')
-  incomeStructureChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: incomeStructure.value.map(item => item.name),
-      datasets: [{
-        data: incomeStructure.value.map(item => item.percentage),
-        backgroundColor: incomeStructure.value.map(item => item.color),
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const item = incomeStructure.value[context.dataIndex]
-              return `${item.name}: ¥${formatNumber(item.value)} (${item.percentage}%)`
-            }
-          }
-        }
-      },
-      cutout: '50%',
-      layout: {
-        padding: 30
-      }
-    },
-    plugins: [{
-      id: 'datalabels',
-      afterDraw: function(chart) {
-        const ctx = chart.ctx
-        ctx.save()
-        
-        const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2
-        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2
-        
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          const meta = chart.getDatasetMeta(datasetIndex)
-          if (!meta.hidden) {
-            dataset.data.forEach((value, index) => {
-              const element = meta.data[index]
-              if (element) {
-                const item = incomeStructure.value[index]
-                const percentage = item.percentage
-                
-                // 计算标签位置
-                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2
-                const radius = element.outerRadius * 0.8
-                const x = centerX + Math.cos(angle) * radius
-                const y = centerY + Math.sin(angle) * radius
-                
-                // 绘制文字
-                ctx.fillStyle = '#FFFFFF'
-                ctx.font = '12px Arial'
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                ctx.fillText(item.name, x, y - 8)
-                ctx.fillText(`${percentage}%`, x, y + 8)
-              }
-            })
-          }
-        })
-        
-        ctx.restore()
-      }
-    }]
+  const config = createPieChartConfig(incomeStructure, function(context) {
+    const item = incomeStructure.value[context.dataIndex]
+    return `${item.name}: ¥${formatNumber(item.value)} (${item.percentage}%)`
   })
+  incomeStructureChartInstance = new Chart(ctx, config)
 }
 
 // 初始化成本结构分析饼图
 const initCostChart = () => {
   const ctx = costChart.value.getContext('2d')
-  costChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: costStructure.value.map(item => item.name),
-      datasets: [{
-        data: costStructure.value.map(item => item.percentage),
-        backgroundColor: costStructure.value.map(item => item.color),
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const item = costStructure.value[context.dataIndex]
-              return `${item.name}: ¥${formatNumber(item.value)} (${item.percentage}%)`
-            }
-          }
-        }
-      },
-      cutout: '50%',
-      layout: {
-        padding: 30
-      }
-    },
-    plugins: [{
-      id: 'datalabels',
-      afterDraw: function(chart) {
-        const ctx = chart.ctx
-        ctx.save()
-        
-        const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2
-        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2
-        
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          const meta = chart.getDatasetMeta(datasetIndex)
-          if (!meta.hidden) {
-            dataset.data.forEach((value, index) => {
-              const element = meta.data[index]
-              if (element) {
-                const item = costStructure.value[index]
-                const percentage = item.percentage
-                
-                // 计算标签位置
-                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2
-                const radius = element.outerRadius * 0.8
-                const x = centerX + Math.cos(angle) * radius
-                const y = centerY + Math.sin(angle) * radius
-                
-                // 绘制文字
-                ctx.fillStyle = '#FFFFFF'
-                ctx.font = '12px Arial'
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                ctx.fillText(item.name, x, y - 8)
-                ctx.fillText(`${percentage}%`, x, y + 8)
-              }
-            })
-          }
-        })
-        
-        ctx.restore()
-      }
-    }]
+  const config = createPieChartConfig(costStructure, function(context) {
+    const item = costStructure.value[context.dataIndex]
+    return `${item.name}: ¥${formatNumber(item.value)} (${item.percentage}%)`
   })
+  costChartInstance = new Chart(ctx, config)
 }
 
 // 组件挂载后初始化图表
@@ -597,16 +667,14 @@ onMounted(async () => {
     initIncomeStructureChart()
     initCostChart()
     
-    // 加载初始数据
-    await loadAssetData('year')
+    // 初始化数据
+    const now = new Date()
+    const initialParams = {
+      period: 'year',
+      year: now.getFullYear()
+    }
     
-    // 初始化图表数据
-    await updateCharts('year')
-    
-    // 添加调试信息
-    console.log('资产总览页面初始化完成')
-    console.log('当前时间维度:', activeTab.value)
-    console.log('资产数据:', assetData.value)
+    await loadAllData(initialParams)
     
   } catch (error) {
     console.error('初始化图表失败:', error)
@@ -639,19 +707,28 @@ onMounted(async () => {
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
 
 .card-header {
-  @apply flex items-center justify-between p-6 border-b border-gray-200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .card-title {
-  @apply text-lg font-semibold text-gray-900;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
 }
 
 .card-body {
-  @apply p-6;
+  padding: 1.5rem;
 }
 
 /* 标签切换按钮样式 */
@@ -673,4 +750,4 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
 }
-</style> 
+</style>

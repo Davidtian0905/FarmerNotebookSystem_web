@@ -28,6 +28,9 @@ export const useAssetsStore = defineStore('assets', {
     // 成本结构数据
     costStructure: [],
 
+    // 资产统计数据
+    assetStatistics: {},
+
     // 当前时间筛选维度
     currentPeriod: 'year',
 
@@ -60,6 +63,12 @@ export const useAssetsStore = defineStore('assets', {
      * 获取资产趋势图表数据
      */
     assetTrendChartData: state => {
+      if (!Array.isArray(state.assetTrend)) {
+        return {
+          labels: [],
+          data: []
+        }
+      }
       return {
         labels: state.assetTrend.map(item => item.month),
         data: state.assetTrend.map(item => item.value)
@@ -70,17 +79,20 @@ export const useAssetsStore = defineStore('assets', {
      * 获取收支趋势图表数据
      */
     incomeExpenseChartData: state => {
+      const income = Array.isArray(state.incomeExpenseTrend?.income) ? state.incomeExpenseTrend.income : []
+      const expense = Array.isArray(state.incomeExpenseTrend?.expense) ? state.incomeExpenseTrend.expense : []
+      
       return {
-        labels: state.incomeExpenseTrend.income.map(item => item.month),
+        labels: income.map(item => item.month),
         datasets: [
           {
             label: '收入',
-            data: state.incomeExpenseTrend.income.map(item => item.value),
+            data: income.map(item => item.value),
             backgroundColor: '#10B981'
           },
           {
             label: '支出',
-            data: state.incomeExpenseTrend.expense.map(item => item.value),
+            data: expense.map(item => item.value),
             backgroundColor: '#EF4444'
           }
         ]
@@ -97,8 +109,12 @@ export const useAssetsStore = defineStore('assets', {
         this.loading = true
         this.error = null
 
-        const data = await assetsApi.getAssetOverview(params)
-        this.assetOverview = data
+        const response = await assetsApi.getAssetOverview(params)
+        if (response.error === 0) {
+          this.assetOverview = response.body
+        } else {
+          throw new Error(response.message || '获取资产总览数据失败')
+        }
         this.currentPeriod = params.period || 'year'
       } catch (error) {
         console.error('获取资产总览数据失败:', error)
@@ -116,8 +132,12 @@ export const useAssetsStore = defineStore('assets', {
         this.loading = true
         this.error = null
 
-        const data = await assetsApi.getAssetTrend(params)
-        this.assetTrend = data
+        const response = await assetsApi.getAssetTrend(params)
+        if (response.error === 0) {
+          this.assetTrend = response.body
+        } else {
+          throw new Error(response.message || '获取资产趋势数据失败')
+        }
         this.currentPeriod = params.period || 'year'
       } catch (error) {
         console.error('获取资产趋势数据失败:', error)
@@ -132,14 +152,34 @@ export const useAssetsStore = defineStore('assets', {
      */
     async fetchIncomeExpenseTrend(params = {}) {
       try {
+        console.log('📊 Store: 开始获取收支趋势数据', params)
         this.loading = true
         this.error = null
 
-        const data = await assetsApi.getIncomeExpenseTrend(params)
-        this.incomeExpenseTrend = data
+        const response = await assetsApi.getIncomeExpenseTrend(params)
+        console.log('📊 Store: API响应数据', response)
+        
+        if (response.error === 0) {
+          this.incomeExpenseTrend = response.body
+          console.log('📊 Store: 收支趋势数据已更新', {
+            period: params.period,
+            dataStructure: {
+              hasIncome: !!response.body?.income,
+              hasExpense: !!response.body?.expense,
+              incomeLength: response.body?.income?.length,
+              expenseLength: response.body?.expense?.length
+            },
+            sampleData: {
+              firstIncomeItem: response.body?.income?.[0],
+              firstExpenseItem: response.body?.expense?.[0]
+            }
+          })
+        } else {
+          throw new Error(response.message || '获取收支趋势数据失败')
+        }
         this.currentPeriod = params.period || 'year'
       } catch (error) {
-        console.error('获取收支趋势数据失败:', error)
+        console.error('📊 Store: 获取收支趋势数据失败:', error)
         this.error = error.message
       } finally {
         this.loading = false
@@ -154,8 +194,12 @@ export const useAssetsStore = defineStore('assets', {
         this.loading = true
         this.error = null
 
-        const data = await assetsApi.getIncomeStructure(params)
-        this.incomeStructure = data
+        const response = await assetsApi.getIncomeStructure(params)
+        if (response.error === 0) {
+          this.incomeStructure = response.body
+        } else {
+          throw new Error(response.message || '获取收入结构数据失败')
+        }
       } catch (error) {
         console.error('获取收入结构数据失败:', error)
         this.error = error.message
@@ -172,10 +216,32 @@ export const useAssetsStore = defineStore('assets', {
         this.loading = true
         this.error = null
 
-        const data = await assetsApi.getCostStructure(params)
-        this.costStructure = data
+        const response = await assetsApi.getCostStructure(params)
+        if (response.error === 0) {
+          this.costStructure = response.body
+        } else {
+          throw new Error(response.message || '获取成本结构数据失败')
+        }
       } catch (error) {
         console.error('获取成本结构数据失败:', error)
+        this.error = error.message
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 获取资产统计数据
+     */
+    async fetchAssetStatistics(params = {}) {
+      try {
+        this.loading = true
+        this.error = null
+
+        const data = await assetsApi.getAssetStatistics(params)
+        this.assetStatistics = data
+      } catch (error) {
+        console.error('获取资产统计数据失败:', error)
         this.error = error.message
       } finally {
         this.loading = false
@@ -196,13 +262,15 @@ export const useAssetsStore = defineStore('assets', {
           trendData,
           incomeExpenseData,
           incomeStructureData,
-          costStructureData
+          costStructureData,
+          assetStatisticsData
         ] = await Promise.all([
           assetsApi.getAssetOverview(params),
           assetsApi.getAssetTrend(params),
           assetsApi.getIncomeExpenseTrend(params),
           assetsApi.getIncomeStructure(params),
-          assetsApi.getCostStructure(params)
+          assetsApi.getCostStructure(params),
+          assetsApi.getAssetStatistics(params)
         ])
 
         // 更新状态
@@ -211,6 +279,7 @@ export const useAssetsStore = defineStore('assets', {
         this.incomeExpenseTrend = incomeExpenseData
         this.incomeStructure = incomeStructureData
         this.costStructure = costStructureData
+        this.assetStatistics = assetStatisticsData
         this.currentPeriod = params.period || 'year'
       } catch (error) {
         console.error('获取资产数据失败:', error)
@@ -248,6 +317,7 @@ export const useAssetsStore = defineStore('assets', {
       }
       this.incomeStructure = []
       this.costStructure = []
+      this.assetStatistics = {}
       this.currentPeriod = 'year'
       this.chartData = {
         assetTrend: null,

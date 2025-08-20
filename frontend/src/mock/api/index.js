@@ -5,6 +5,8 @@
 
 import { mockAssetsApi } from './assetsApi.js'
 import { mockTransactionsApi } from './transactionsApi.js'
+// 导入工具函数
+import { createErrorResponse, ERROR_CODES, logger } from '../utils/index.js'
 
 export { mockAssetsApi } from './assetsApi.js'
 export { mockTransactionsApi } from './transactionsApi.js'
@@ -40,43 +42,30 @@ export const mockApiRouter = {
  * @returns {Object} API响应
  */
 export const handleMockApiRequest = (url, params = {}) => {
-  console.log('=== handleMockApiRequest 调试信息 ===')
-  console.log('请求URL:', url)
-  console.log('请求参数:', params)
-  console.log('可用的路由:', Object.keys(mockApiRouter))
-  
   // 标准化URL，移除查询参数
   let normalizedUrl = url
   if (url.includes('?')) {
     normalizedUrl = url.split('?')[0]
   }
   
-  console.log('标准化后的URL:', normalizedUrl)
-  
   const handler = mockApiRouter[normalizedUrl]
   
   if (!handler) {
-    console.warn(`未找到API接口: ${normalizedUrl}`)
-    return {
-      error: 404,
-      body: null,
-      message: `未找到API接口: ${normalizedUrl}`
-    }
+    return createErrorResponse(
+      ERROR_CODES.NOT_FOUND,
+      `未找到API接口: ${normalizedUrl}`
+    )
   }
-  
-  console.log('找到对应的处理器:', normalizedUrl)
   
   try {
     const response = handler(params)
-    console.log('处理器返回结果:', response)
     return response
   } catch (error) {
-    console.error(`Mock API请求失败 [${normalizedUrl}]:`, error)
-    return {
-      error: 500,
-      body: null,
-      message: '系统异常：Mock API请求失败'
-    }
+    logger.error(`Mock API请求失败 [${normalizedUrl}]:`, error)
+    return createErrorResponse(
+      ERROR_CODES.INTERNAL_SERVER_ERROR,
+      '系统异常：Mock API请求失败'
+    )
   }
 }
 
@@ -110,4 +99,4 @@ const getApiDescription = (url) => {
   }
   
   return descriptions[url] || '未知API接口'
-} 
+}

@@ -5,64 +5,26 @@
 
 import { getAllTransactions, addTransaction, updateTransaction, deleteTransaction } from './database_flow.js'
 import { emitTransactionAdded, emitTransactionUpdated, emitTransactionDeleted, getCache, setCache } from './event_system.js'
+import { createLogger } from './utils/logger.js'
+import {
+  getCurrentDateInfo,
+  getWeekNumber,
+  parseTimeDimensions,
+  getYearRange,
+  filterTransactionsByPeriod,
+  calculateNetAssets,
+  calculateTransactionStats,
+  formatAmount,
+  formatDate
+} from './utils/index.js'
+
+const logger = createLogger('DB_ASSETS')
 
 // Mock数据库存储键名
 const DB_KEYS = {
   ASSETS_DATA: 'mock_assets_data',
   ASSETS_CONFIG: 'mock_assets_config',
   LAST_UPDATE: 'mock_assets_last_update'
-}
-
-/**
- * 获取当前时间信息
- * @returns {Object} 当前时间信息
- */
-const getCurrentDateInfo = () => {
-  const now = new Date()
-  return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-    day: now.getDate(),
-    dayOfWeek: now.getDay(), // 0=周日, 1=周一, ..., 6=周六
-    currentDate: now.toISOString().split('T')[0]
-  }
-}
-
-/**
- * 计算净资产
- * @param {number} income - 收入
- * @param {number} expense - 支出
- * @returns {number} 净资产
- */
-const calculateNetAssets = (income, expense) => {
-  return income - expense
-}
-
-/**
- * 获取周数
- * @param {Date} date - 日期对象
- * @returns {number} 周数 (1-53)
- */
-const getWeekNumber = (date) => {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
-  const pastDaysOfYear = (date - firstDayOfYear) / 86400000
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
-}
-
-/**
- * 解析时间维度
- * @param {string} dateStr - 日期字符串 (YYYY-MM-DD)
- * @returns {Object} 时间维度信息
- */
-const parseTimeDimensions = (dateStr) => {
-  const date = new Date(dateStr)
-  return {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-    week: getWeekNumber(date),
-    day: date.getDate(),
-    dayOfWeek: date.getDay() // 0=周日, 1=周一, ..., 6=周六
-  }
 }
 
 /**
@@ -73,109 +35,49 @@ const parseTimeDimensions = (dateStr) => {
  * @returns {Object} 汇总数据
  */
 export const calculateSummaryFromTransactions = (transactions, period, params = {}) => {
-  const currentInfo = getCurrentDateInfo()
-  const { year = currentInfo.year, month = currentInfo.month } = params
+  console.log('[DEBUG] calculateSummaryFromTransactions - 开始汇总:', {
+    originalTransactionsCount: transactions.length,
+    period,
+    params,
+    sampleOriginalTransactions: transactions.slice(0, 3).map(t => ({
+      id: t.id,
+      date: t.date,
+      type: t.type,
+      amount: t.amount
+    }))
+  })
   
-  // 过滤交易记录
-  let filteredTransactions = transactions
+  // 使用新的工具函数进行数据过滤
+  const filteredTransactions = filterTransactionsByPeriod(transactions, period, params)
   
-  switch (period) {
-    case 'year':
-      // 本年数据
-      filteredTransactions = transactions.filter(t => {
-        const transactionYear = new Date(t.date).getFullYear()
-        return transactionYear === year
-      })
-      break
-      
-    case 'month':
-      // 本月数据
-      filteredTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date)
-        return transactionDate.getFullYear() === year && 
-               transactionDate.getMonth() + 1 === month
-      })
-      break
-      
-    case 'week':
-      // 本周数据
-      const currentWeek = getWeekNumber(new Date())
-      filteredTransactions = transactions.filter(t => {
-        const transactionWeek = getWeekNumber(new Date(t.date))
-        return transactionWeek === currentWeek
-      })
-      break
-      
-    case 'day':
-      // 今日数据
-      const today = new Date().toISOString().split('T')[0]
-      filteredTransactions = transactions.filter(t => t.date === today)
-      break
-      
-    case 'total':
-      // 总统计：包含所有年份的数据，不过滤
-      filteredTransactions = transactions
-      break
-      
-    default:
-      filteredTransactions = transactions
+  console.log('[DEBUG] calculateSummaryFromTransactions - 过滤后数据:', {
+    filteredCount: filteredTransactions.length,
+    filteredTransactions: filteredTransactions.map(t => ({
+      id: t.id,
+      date: t.date,
+      type: t.type,
+      amount: t.amount
+    }))
+  })
+  
+  // 使用新的计算工具函数
+  const stats = calculateTransactionStats(filteredTransactions)
+  
+  const result = {
+    totalIncome: stats.income,
+    totalExpense: stats.expense,
+    netAssets: stats.netProfit,
+    transactionCount: stats.totalTransactions,
+    inboundCount: stats.incomeCount,
+    outboundCount: stats.expenseCount
   }
   
-  // 计算汇总数据
-  const inboundTransactions = filteredTransactions.filter(t => t.type === 'INBOUND')
-  const outboundTransactions = filteredTransactions.filter(t => t.type === 'OUTBOUND')
+  console.log('[DEBUG] calculateSummaryFromTransactions - 最终汇总结果:', result)
   
-  const totalIncome = outboundTransactions.reduce((sum, t) => sum + t.amount, 0)
-  const totalExpense = inboundTransactions.reduce((sum, t) => sum + t.amount, 0)
-  const netAssets = calculateNetAssets(totalIncome, totalExpense)
-  
-  // 调试日志
-  console.log('=== calculateSummaryFromTransactions 调试信息 ===')
-  console.log('时间维度:', period)
-  console.log('参数:', params)
-  console.log('过滤前交易记录数:', transactions.length)
-  console.log('过滤后交易记录数:', filteredTransactions.length)
-  console.log('入库记录数:', inboundTransactions.length)
-  console.log('出库记录数:', outboundTransactions.length)
-  console.log('总收入:', totalIncome)
-  console.log('总支出:', totalExpense)
-  console.log('净资产:', netAssets)
-  
-  // 显示交易记录详情
-  if (filteredTransactions.length > 0) {
-    console.log('交易记录详情:')
-    filteredTransactions.forEach(t => {
-      console.log(`  ${t.date} ${t.type} ${t.productName} ¥${t.amount}`)
-    })
-  }
-  
-  return {
-    totalIncome,
-    totalExpense,
-    netAssets,
-    transactionCount: filteredTransactions.length,
-    inboundCount: inboundTransactions.length,
-    outboundCount: outboundTransactions.length
-  }
+  return result
 }
 
-/**
- * 获取交易数据的年份范围
- * @param {Array} transactions - 交易记录数组
- * @returns {Object} 包含最小年份和最大年份的对象
- */
-const getYearRange = (transactions) => {
-  if (transactions.length === 0) {
-    const currentYear = new Date().getFullYear()
-    return { minYear: currentYear, maxYear: currentYear }
-  }
-  
-  const years = transactions.map(t => new Date(t.date).getFullYear())
-  const minYear = Math.min(...years)
-  const maxYear = Math.max(...years)
-  
-  return { minYear, maxYear }
-}
+// getYearRange 函数已移至 utils/dateUtils.js
 
 /**
  * 生成包含缺失年份并填充0值的年度数据
@@ -215,203 +117,241 @@ const generateYearlyDataWithGaps = (transactions) => {
  * @param {Object} params - 查询参数
  * @returns {Object} 图表数据
  */
-const generateChartData = (transactions, period, params = {}) => {
-  const currentInfo = getCurrentDateInfo()
-  const { year = currentInfo.year } = params
+// 创建图表数据集的通用函数
+const createChartDataset = (data, labels) => {
+  return {
+    labels,
+    datasets: [{
+      label: '净资产',
+      data: data.map(d => d.netAssets),
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      tension: 0.4,
+      fill: true
+    }],
+    incomeExpense: {
+      labels,
+      datasets: [
+        {
+          label: '收入',
+          data: data.map(d => d.totalIncome),
+          backgroundColor: '#10B981'
+        },
+        {
+          label: '支出',
+          data: data.map(d => d.totalExpense),
+          backgroundColor: '#EF4444'
+        }
+      ]
+    }
+  }
+}
+
+// 生成总计数据（按年份）
+const generateTotalChartData = (transactions) => {
+  const yearlyDataWithGaps = generateYearlyDataWithGaps(transactions)
   
+  logger.debug('=== total 模式调试信息 ===');
+  logger.debug('年份范围:', getYearRange(transactions));
+  logger.debug('年份标签:', yearlyDataWithGaps.labels);
+  logger.debug('年度数据:', yearlyDataWithGaps.data);
+  
+  return createChartDataset(yearlyDataWithGaps.data, yearlyDataWithGaps.labels)
+}
+
+// 生成年度数据（按月份）
+const generateYearChartData = (transactions, year, currentInfo) => {
+  const yearLabels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+  const yearData = []
+  
+  for (let month = 1; month <= 12; month++) {
+    const monthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date)
+      return transactionDate.getFullYear() === year && transactionDate.getMonth() + 1 === month
+    })
+    
+    const summary = calculateSummaryFromTransactions(monthTransactions, 'month', { year, month })
+    yearData.push(summary)
+  }
+  
+  // 只显示到当前月份的数据
+  const filteredLabels = yearLabels.slice(0, currentInfo.month)
+  const filteredData = yearData.slice(0, currentInfo.month)
+  
+  return createChartDataset(filteredData, filteredLabels)
+}
+
+// 生成月度数据（按日期）
+const generateMonthChartData = (transactions, year, month, currentInfo) => {
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const monthLabels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}日`)
+  const monthData = []
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const summary = calculateSummaryFromTransactions(transactions, 'day', { year, month, day })
+    monthData.push(summary)
+  }
+  
+  // 如果查询当前月份，只显示到当前日期；否则显示整个月
+  const isCurrentMonth = (year === currentInfo.year && month === currentInfo.month)
+  const displayDays = isCurrentMonth ? currentInfo.day : daysInMonth
+  const filteredMonthLabels = monthLabels.slice(0, displayDays)
+  const filteredMonthData = monthData.slice(0, displayDays)
+  
+  return createChartDataset(filteredMonthData, filteredMonthLabels)
+}
+
+// 生成周度数据（按星期）
+const generateWeekChartData = (transactions, year, currentInfo) => {
+  console.log('📅 生成周度图表数据开始', {
+    transactionsCount: transactions.length,
+    year,
+    currentInfo,
+    currentDate: new Date().toISOString().split('T')[0]
+  })
+  
+  const weekLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  const weekData = []
+  const currentWeek = getWeekNumber(new Date())
+  
+  console.log('📅 周度数据生成参数', {
+    weekLabels,
+    currentWeek,
+    currentDayOfWeek: currentInfo.dayOfWeek
+  })
+  
+  for (let dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
+    const dayTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date)
+      const transactionDayOfWeek = transactionDate.getDay()
+      const adjustedDayOfWeek = transactionDayOfWeek === 0 ? 7 : transactionDayOfWeek
+      const transactionWeek = getWeekNumber(transactionDate)
+      
+      const matches = transactionDate.getFullYear() === year && 
+             transactionWeek === currentWeek && 
+             adjustedDayOfWeek === dayOfWeek
+      
+      return matches
+    })
+    
+    console.log(`📅 ${weekLabels[dayOfWeek - 1]} (${dayOfWeek}) 的交易数据`, {
+      dayOfWeek,
+      transactionsCount: dayTransactions.length,
+      transactions: dayTransactions.map(t => ({
+        date: t.date,
+        type: t.type,
+        amount: t.amount,
+        productName: t.productName
+      }))
+    })
+    
+    // 计算当前日期
+    const currentDate = new Date(currentInfo.year, currentInfo.month - 1, currentInfo.day)
+    const weekStart = new Date(currentDate)
+    weekStart.setDate(currentDate.getDate() - currentDate.getDay() + (dayOfWeek === 7 ? 0 : dayOfWeek))
+    
+    const dayParams = {
+      year: weekStart.getFullYear(),
+      month: weekStart.getMonth() + 1,
+      day: weekStart.getDate()
+    }
+    
+    console.log(`📅 ${weekLabels[dayOfWeek - 1]} (${dayOfWeek}) 日期参数`, {
+      dayOfWeek,
+      weekStart: weekStart.toISOString().split('T')[0],
+      dayParams
+    })
+    
+    const summary = calculateSummaryFromTransactions(dayTransactions, 'day', dayParams)
+    console.log(`📅 ${weekLabels[dayOfWeek - 1]} 汇总数据`, summary)
+    weekData.push(summary)
+  }
+  
+  // 只显示到当前日期的数据
+  const currentDayIndex = currentInfo.dayOfWeek === 0 ? 6 : currentInfo.dayOfWeek - 1
+  const filteredWeekLabels = weekLabels.slice(0, currentDayIndex + 1)
+  const filteredWeekData = weekData.slice(0, currentDayIndex + 1)
+  
+  console.log('📅 周度数据过滤结果', {
+    currentDayIndex,
+    originalLabels: weekLabels,
+    filteredLabels: filteredWeekLabels,
+    originalDataLength: weekData.length,
+    filteredDataLength: filteredWeekData.length,
+    filteredData: filteredWeekData
+  })
+  
+  const chartDataset = createChartDataset(filteredWeekData, filteredWeekLabels)
+  console.log('📅 最终周度图表数据集', chartDataset)
+  
+  return chartDataset
+}
+
+// 重构后的主函数
+const generateChartData = (transactions, period, params = {}) => {
+  console.log('🔄 generateChartData 开始', {
+    period,
+    params,
+    transactionsCount: transactions.length
+  })
+  
+  const currentInfo = getCurrentDateInfo()
+  const { year = currentInfo.year, month = currentInfo.month, currentDayOfWeek } = params
+  
+  console.log('🔄 当前时间信息', {
+    originalCurrentInfo: { ...currentInfo },
+    extractedParams: { year, month, currentDayOfWeek }
+  })
+  
+  // 如果前端传递了 currentDayOfWeek，使用它覆盖 currentInfo.dayOfWeek
+  if (currentDayOfWeek !== undefined) {
+    console.log('🔄 覆盖 currentDayOfWeek', {
+      original: currentInfo.dayOfWeek,
+      new: currentDayOfWeek
+    })
+    currentInfo.dayOfWeek = currentDayOfWeek
+  }
+  
+  console.log('🔄 最终使用的参数', {
+    period,
+    year,
+    month,
+    finalCurrentInfo: currentInfo
+  })
+  
+  let result
   switch (period) {
     case 'total':
-      // 总计数据 - 按年份显示所有历史数据，包括缺失年份填充0值
-      const yearlyDataWithGaps = generateYearlyDataWithGaps(transactions)
-      
-      // 调试日志
-      console.log('=== total 模式调试信息 ===')
-      console.log('年份范围:', getYearRange(transactions))
-      console.log('年份标签:', yearlyDataWithGaps.labels)
-      console.log('年度数据:', yearlyDataWithGaps.data)
-      
-      return {
-        labels: yearlyDataWithGaps.labels,
-        datasets: [{
-          label: '净资产',
-          data: yearlyDataWithGaps.data.map(d => d.netAssets),
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
-          fill: true
-        }],
-        incomeExpense: {
-          labels: yearlyDataWithGaps.labels,
-          datasets: [
-            {
-              label: '收入',
-              data: yearlyDataWithGaps.data.map(d => d.totalIncome),
-              backgroundColor: '#10B981'
-            },
-            {
-              label: '支出',
-              data: yearlyDataWithGaps.data.map(d => d.totalExpense),
-              backgroundColor: '#EF4444'
-            }
-          ]
-        }
-      }
+      console.log('🔄 生成总统计数据')
+      result = generateTotalChartData(transactions)
+      break
       
     case 'year':
-      // 年度数据 - 按月份分组
-      const yearLabels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-      const yearData = []
-      
-      for (let month = 1; month <= 12; month++) {
-        const monthTransactions = transactions.filter(t => {
-          const transactionDate = new Date(t.date)
-          return transactionDate.getFullYear() === year && transactionDate.getMonth() + 1 === month
-        })
-        
-        const summary = calculateSummaryFromTransactions(monthTransactions, 'month', { year, month })
-        yearData.push(summary)
-      }
-      
-      // 只显示到当前月份的数据
-      const filteredLabels = yearLabels.slice(0, currentInfo.month)
-      const filteredData = yearData.slice(0, currentInfo.month)
-      
-      return {
-        labels: filteredLabels,
-        datasets: [{
-          label: '净资产',
-          data: filteredData.map(d => d.netAssets),
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
-          fill: true
-        }],
-        incomeExpense: {
-          labels: filteredLabels,
-          datasets: [
-            {
-              label: '收入',
-              data: filteredData.map(d => d.totalIncome),
-              backgroundColor: '#10B981'
-            },
-            {
-              label: '支出',
-              data: filteredData.map(d => d.totalExpense),
-              backgroundColor: '#EF4444'
-            }
-          ]
-        }
-      }
+      console.log('🔄 生成年度数据')
+      result = generateYearChartData(transactions, year, currentInfo)
+      break
       
     case 'month':
-      // 月度数据 - 按日期分组
-      const daysInMonth = new Date(year, currentInfo.month, 0).getDate()
-      const monthLabels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}日`)
-      const monthData = []
-      
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayTransactions = transactions.filter(t => {
-          const transactionDate = new Date(t.date)
-          return transactionDate.getFullYear() === year && 
-                 transactionDate.getMonth() + 1 === currentInfo.month &&
-                 transactionDate.getDate() === day
-        })
-        
-        const summary = calculateSummaryFromTransactions(dayTransactions, 'day', { year, month: currentInfo.month, day })
-        monthData.push(summary)
-      }
-      
-      // 只显示到当前日期的数据
-      const filteredMonthLabels = monthLabels.slice(0, currentInfo.day)
-      const filteredMonthData = monthData.slice(0, currentInfo.day)
-      
-      return {
-        labels: filteredMonthLabels,
-        datasets: [{
-          label: '净资产',
-          data: filteredMonthData.map((day, index) => {
-            const cumulativeIncome = filteredMonthData.slice(0, index + 1).reduce((sum, d) => sum + d.totalIncome, 0)
-            const cumulativeExpense = filteredMonthData.slice(0, index + 1).reduce((sum, d) => sum + d.totalExpense, 0)
-            return calculateNetAssets(cumulativeIncome, cumulativeExpense)
-          }),
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
-          fill: true
-        }],
-        incomeExpense: {
-          labels: filteredMonthLabels,
-          datasets: [
-            {
-              label: '收入',
-              data: filteredMonthData.map(day => day.totalIncome),
-              backgroundColor: '#10B981'
-            },
-            {
-              label: '支出',
-              data: filteredMonthData.map(day => day.totalExpense),
-              backgroundColor: '#EF4444'
-            }
-          ]
-        }
-      }
+      console.log('🔄 生成月度数据')
+      result = generateMonthChartData(transactions, year, month, currentInfo)
+      break
       
     case 'week':
-      // 周度数据 - 按星期分组
-      const weekLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-      const weekData = []
-      
-      for (let dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
-        const dayTransactions = transactions.filter(t => {
-          const transactionDate = new Date(t.date)
-          const transactionDayOfWeek = transactionDate.getDay()
-          const adjustedDayOfWeek = transactionDayOfWeek === 0 ? 7 : transactionDayOfWeek
-          return adjustedDayOfWeek === dayOfWeek
-        })
-        
-        const summary = calculateSummaryFromTransactions(dayTransactions, 'day')
-        weekData.push(summary)
-      }
-      
-      // 只显示到当前日期的数据
-      const currentDayIndex = currentInfo.dayOfWeek === 0 ? 6 : currentInfo.dayOfWeek - 1
-      const filteredWeekLabels = weekLabels.slice(0, currentDayIndex + 1)
-      const filteredWeekData = weekData.slice(0, currentDayIndex + 1)
-      
-      return {
-        labels: filteredWeekLabels,
-        datasets: [{
-          label: '净资产',
-          data: filteredWeekData.map((day, index) => {
-            const cumulativeIncome = filteredWeekData.slice(0, index + 1).reduce((sum, d) => sum + d.totalIncome, 0)
-            const cumulativeExpense = filteredWeekData.slice(0, index + 1).reduce((sum, d) => sum + d.totalExpense, 0)
-            return calculateNetAssets(cumulativeIncome, cumulativeExpense)
-          }),
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
-          fill: true
-        }],
-        incomeExpense: {
-          labels: filteredWeekLabels,
-          datasets: [
-            {
-              label: '收入',
-              data: filteredWeekData.map(day => day.totalIncome),
-              backgroundColor: '#10B981'
-            },
-            {
-              label: '支出',
-              data: filteredWeekData.map(day => day.totalExpense),
-              backgroundColor: '#EF4444'
-            }
-          ]
-        }
-      }
+      console.log('🔄 生成周度数据')
+      result = generateWeekChartData(transactions, year, currentInfo)
+      break
       
     default:
       throw new Error(`不支持的时间维度: ${period}`)
   }
+  
+  console.log('🔄 generateChartData 完成', {
+    period,
+    resultLabelsCount: result?.labels?.length || 0,
+    resultDatasetsCount: result?.datasets?.length || 0
+  })
+  
+  return result
 }
 
 /**
@@ -421,21 +361,56 @@ const generateChartData = (transactions, period, params = {}) => {
  * @returns {Object} 资产数据
  */
 export const getAssetDataByPeriod = (period, params = {}) => {
+  console.log('📊 getAssetDataByPeriod 开始', {
+    period,
+    params,
+    timestamp: new Date().toISOString()
+  })
+  
   // 检查缓存
   const cacheKey = `assets_${period}_${JSON.stringify(params)}`
   const cachedData = getCache(cacheKey)
   if (cachedData) {
+    console.log('📊 使用缓存数据', {
+      cacheKey,
+      cachedLabelsCount: cachedData?.labels?.length || 0,
+      cachedDatasetsCount: cachedData?.datasets?.length || 0
+    })
     return cachedData
   }
   
+  console.log('📊 缓存未命中，生成新数据', { cacheKey })
+  
   // 获取所有交易记录
   const transactions = getAllTransactions()
+  console.log('📊 获取交易记录', {
+    transactionsCount: transactions.length,
+    sampleTransactions: transactions.slice(0, 3).map(t => ({
+      date: t.date,
+      type: t.type,
+      amount: t.amount,
+      productName: t.productName
+    }))
+  })
   
   // 生成图表数据
   const chartData = generateChartData(transactions, period, params)
   
+  console.log('📊 生成的图表数据', {
+    period,
+    labelsCount: chartData?.labels?.length || 0,
+    labels: chartData?.labels || [],
+    datasetsCount: chartData?.datasets?.length || 0,
+    datasets: chartData?.datasets?.map(ds => ({
+      label: ds.label,
+      dataLength: ds.data?.length || 0,
+      sampleData: ds.data?.slice(0, 3) || []
+    })) || []
+  })
+  
   // 缓存结果
   setCache(cacheKey, chartData, 5 * 60 * 1000) // 5分钟缓存
+  console.log('📊 数据已缓存', { cacheKey })
   
   return chartData
 }
@@ -483,19 +458,48 @@ export const getAssetTrend = (params = {}) => {
  * @returns {Object} 收支趋势数据
  */
 export const getIncomeExpenseTrend = (params = {}) => {
+  console.log('💾 Mock DB: 开始生成收支趋势数据', params)
+  
   const { period = 'year' } = params
   const data = getAssetDataByPeriod(period, params)
   
-  return {
+  console.log('💾 Mock DB: 获取到的原始数据', {
+    period,
+    hasIncomeExpenseData: !!data.incomeExpense,
+    labels: data.incomeExpense?.labels,
+    labelsLength: data.incomeExpense?.labels?.length,
+    datasets: data.incomeExpense?.datasets?.map(ds => ({
+      label: ds.label,
+      dataLength: ds.data?.length,
+      sampleData: ds.data?.slice(0, 3)
+    }))
+  })
+  
+  // 根据period确定时间标签的属性名
+  const timeKey = period === 'week' ? 'day' : 'month'
+  console.log('💾 Mock DB: 时间标签键名', { period, timeKey })
+  
+  const result = {
     income: data.incomeExpense.datasets[0].data.map((value, index) => ({
-      month: data.incomeExpense.labels[index],
+      [timeKey]: data.incomeExpense.labels[index],
+      month: data.incomeExpense.labels[index], // 保持向后兼容
       value
     })),
     expense: data.incomeExpense.datasets[1].data.map((value, index) => ({
-      month: data.incomeExpense.labels[index],
+      [timeKey]: data.incomeExpense.labels[index],
+      month: data.incomeExpense.labels[index], // 保持向后兼容
       value
     }))
   }
+  
+  console.log('💾 Mock DB: 生成的收支趋势数据', {
+    incomeLength: result.income?.length,
+    expenseLength: result.expense?.length,
+    sampleIncomeItems: result.income?.slice(0, 3),
+    sampleExpenseItems: result.expense?.slice(0, 3)
+  })
+  
+  return result
 }
 
 /**
@@ -641,11 +645,7 @@ export const deleteTransactionWithEvent = (id) => {
  * @returns {Object} 年度汇总数据
  */
 export const calculateYearlySummary = (transactions, year) => {
-  const yearTransactions = transactions.filter(t => {
-    const transactionYear = new Date(t.date).getFullYear()
-    return transactionYear === year
-  })
-  
+  const yearTransactions = filterTransactionsByPeriod(transactions, 'year', { year })
   return calculateSummaryFromTransactions(yearTransactions, 'year', { year })
 }
 
@@ -657,12 +657,7 @@ export const calculateYearlySummary = (transactions, year) => {
  * @returns {Object} 月度汇总数据
  */
 export const calculateMonthlySummary = (transactions, year, month) => {
-  const monthTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date)
-    return transactionDate.getFullYear() === year && 
-           transactionDate.getMonth() + 1 === month
-  })
-  
+  const monthTransactions = filterTransactionsByPeriod(transactions, 'month', { year, month })
   return calculateSummaryFromTransactions(monthTransactions, 'month', { year, month })
 }
 
@@ -674,12 +669,7 @@ export const calculateMonthlySummary = (transactions, year, month) => {
  * @returns {Object} 周度汇总数据
  */
 export const calculateWeeklySummary = (transactions, year, week) => {
-  const weekTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date)
-    const transactionWeek = getWeekNumber(transactionDate)
-    return transactionDate.getFullYear() === year && transactionWeek === week
-  })
-  
+  const weekTransactions = filterTransactionsByPeriod(transactions, 'week', { year, week })
   return calculateSummaryFromTransactions(weekTransactions, 'week', { year, week })
 }
 
@@ -690,7 +680,7 @@ export const calculateWeeklySummary = (transactions, year, week) => {
  * @returns {Object} 日度汇总数据
  */
 export const calculateDailySummary = (transactions, date) => {
-  const dayTransactions = transactions.filter(t => t.date === date)
+  const dayTransactions = filterTransactionsByPeriod(transactions, 'day', { date })
   return calculateSummaryFromTransactions(dayTransactions, 'day', { date })
 }
 
@@ -721,42 +711,7 @@ export const getHistoricalSummary = (transactions, period, params = {}) => {
   }
 }
 
-/**
- * 按时间维度过滤交易记录
- * @param {Array} transactions - 交易记录数组
- * @param {string} period - 时间维度
- * @param {Object} params - 查询参数
- * @returns {Array} 过滤后的交易记录
- */
-export const filterTransactionsByPeriod = (transactions, period, params = {}) => {
-  const { year, month, startDate, endDate } = params
-  
-  switch (period) {
-    case 'year':
-      return transactions.filter(t => {
-        const transactionYear = new Date(t.date).getFullYear()
-        return transactionYear === year
-      })
-    case 'month':
-      return transactions.filter(t => {
-        const transactionDate = new Date(t.date)
-        return transactionDate.getFullYear() === year && 
-               transactionDate.getMonth() + 1 === month
-      })
-    case 'week':
-      return transactions.filter(t => {
-        const transactionDate = new Date(t.date)
-        const transactionWeek = getWeekNumber(transactionDate)
-        return transactionDate.getFullYear() === year && transactionWeek === params.week
-      })
-    case 'day':
-      return transactions.filter(t => t.date === params.date)
-    case 'total':
-      return transactions
-    default:
-      return transactions
-  }
-}
+// filterTransactionsByPeriod 函数已移至 utils/dataFilters.js，此处移除重复定义
 
 /**
  * 生成月度数据
@@ -782,15 +737,99 @@ export const generateMonthlyData = (transactions, year) => {
 }
 
 /**
+ * 生成日度数据（用于月度查询）
+ * @param {Array} transactions - 交易记录数组
+ * @param {number} year - 年份
+ * @param {number} month - 月份
+ * @returns {Array} 日度数据数组
+ */
+export const generateDailyDataForMonth = (transactions, year, month) => {
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const dailyData = []
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = formatDate(new Date(year, month - 1, day))
+    const daySummary = calculateDailySummary(transactions, dateStr)
+    dailyData.push({
+      day,
+      date: dateStr,
+      income: daySummary.totalIncome,
+      expense: daySummary.totalExpense,
+      netAssets: daySummary.netAssets,
+      transactionCount: daySummary.transactionCount
+    })
+  }
+  
+  return dailyData
+}
+
+/**
+ * 生成周度数据（用于周度查询）
+ * @param {Array} transactions - 交易记录数组
+ * @param {number} year - 年份
+ * @param {number} week - 周数
+ * @param {number} currentDayOfWeek - 当前星期几（可选）
+ * @returns {Array} 周度数据数组
+ */
+export const generateWeeklyDataForWeek = (transactions, year, week, currentDayOfWeek = 7) => {
+  const weeklyData = []
+  const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  
+  for (let dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
+    const dayTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date)
+      const transactionDayOfWeek = transactionDate.getDay()
+      const adjustedDayOfWeek = transactionDayOfWeek === 0 ? 7 : transactionDayOfWeek
+      const transactionWeek = getWeekNumber(transactionDate)
+      
+      return transactionDate.getFullYear() === year && 
+             transactionWeek === week && 
+             adjustedDayOfWeek === dayOfWeek
+    })
+    
+    const daySummary = calculateSummaryFromTransactions(dayTransactions, 'day')
+    weeklyData.push({
+      dayOfWeek,
+      dayName: weekDays[dayOfWeek - 1],
+      income: daySummary.totalIncome,
+      expense: daySummary.totalExpense,
+      netAssets: daySummary.netAssets,
+      transactionCount: daySummary.transactionCount
+    })
+  }
+  
+  return weeklyData
+}
+
+/**
+ * 生成年度数据（用于总计查询）
+ * @param {Array} transactions - 交易记录数组
+ * @returns {Array} 年度数据数组
+ */
+export const generateYearlyDataForApi = (transactions) => {
+  const { minYear, maxYear } = getYearRange(transactions)
+  const yearlyData = []
+  
+  for (let year = minYear; year <= maxYear; year++) {
+    const yearSummary = calculateYearlySummary(transactions, year)
+    yearlyData.push({
+      year,
+      income: yearSummary.totalIncome,
+      expense: yearSummary.totalExpense,
+      netAssets: yearSummary.netAssets,
+      transactionCount: yearSummary.transactionCount
+    })
+  }
+  
+  return yearlyData
+}
+
+/**
  * 调试函数：打印当前数据状态
  */
 export const debugAssetsData = () => {
   const transactions = getAllTransactions()
   const currentInfo = getCurrentDateInfo()
-  
-  console.log('=== 资产数据调试信息 ===')
-  console.log('交易记录总数:', transactions.length)
-  console.log('当前时间信息:', currentInfo)
   
   // 显示当前时间范围内的交易记录
   const currentYearTransactions = transactions.filter(t => {
@@ -804,34 +843,33 @@ export const debugAssetsData = () => {
            transactionDate.getMonth() + 1 === currentInfo.month
   })
   
-  console.log('本年交易记录数:', currentYearTransactions.length)
-  console.log('本月交易记录数:', currentMonthTransactions.length)
-  
-  // 显示交易记录统计
-  const inboundTransactions = transactions.filter(t => t.type === 'INBOUND')
-  const outboundTransactions = transactions.filter(t => t.type === 'OUTBOUND')
-  
-  console.log('入库记录数:', inboundTransactions.length)
-  console.log('出库记录数:', outboundTransactions.length)
-  console.log('总入库金额:', inboundTransactions.reduce((sum, t) => sum + t.amount, 0))
-  console.log('总出库金额:', outboundTransactions.reduce((sum, t) => sum + t.amount, 0))
-  
-  // 显示当前时间范围内的金额统计
-  const currentYearInbound = currentYearTransactions.filter(t => t.type === 'INBOUND')
-  const currentYearOutbound = currentYearTransactions.filter(t => t.type === 'OUTBOUND')
-  
-  console.log('本年入库金额:', currentYearInbound.reduce((sum, t) => sum + t.amount, 0))
-  console.log('本年出库金额:', currentYearOutbound.reduce((sum, t) => sum + t.amount, 0))
+  // 使用工具函数计算统计数据
+  const totalStats = calculateTransactionStats(transactions)
+  const currentYearStats = calculateTransactionStats(currentYearTransactions)
   
   // 测试数据计算
-  console.log('=== 数据计算测试 ===')
-  console.log('年度数据:', getAssetDataByPeriod('year'))
-  console.log('月度数据:', getAssetDataByPeriod('month'))
-  console.log('总计数据:', getAssetDataByPeriod('total'))
+  getAssetDataByPeriod('year')
+  getAssetDataByPeriod('month')
+  getAssetDataByPeriod('total')
   
-  // 显示最近的几条交易记录
-  console.log('最近的交易记录:')
-  transactions.slice(-5).forEach(t => {
-    console.log(`  ${t.date} ${t.time} ${t.type} ${t.productName} ¥${t.amount}`)
-  })
+  // 构建调试信息对象
+  const debugInfo = {
+    totalTransactions: transactions.length,
+    currentInfo,
+    currentYearTransactions: currentYearTransactions.length,
+    currentMonthTransactions: currentMonthTransactions.length,
+    inboundCount: totalStats.incomeCount,
+    outboundCount: totalStats.expenseCount,
+    totalInbound: totalStats.income,
+    totalOutbound: totalStats.expense,
+    currentYearInbound: currentYearStats.income,
+    currentYearOutbound: currentYearStats.expense,
+    recentTransactions: transactions.slice(-5)
+  }
+  
+  // 使用日志系统输出调试信息
+  logger.info('=== 资产数据调试信息 ===');
+  logger.debug('调试信息详情:', debugInfo);
+  
+  return debugInfo
 }

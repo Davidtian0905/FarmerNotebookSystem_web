@@ -3,8 +3,20 @@
  * 模拟后端API，提供交易记录数据
  */
 
-import { getAllTransactions, filterTransactionsByPeriod } from '../database_flow.js'
+import { getAllTransactions } from '../database_flow.js'
 import { calculateSummaryFromTransactions } from '../database_assets.js'
+// 导入工具函数
+import { 
+  filterTransactionsByPeriod,
+  createLogger,
+  createSuccessResponse, 
+  createErrorResponse, 
+  createMockSuccessResponse,
+  createMockErrorResponse,
+  ERROR_CODES 
+} from '../utils/index.js'
+
+const logger = createLogger('TRANSACTIONS_API')
 
 /**
  * Mock交易记录API
@@ -23,51 +35,66 @@ export const mockTransactionsApi = {
    */
   getList(params = {}) {
     try {
-      const { period = 'year', year, month, type = 'all', startDate, endDate } = params
+      const { type, period = 'year', year, month, page = 1, pageSize = 10 } = params
       
-      // 参数验证
-      if (!year && period !== 'total') {
-        return {
-          error: 400,
-          body: null,
-          message: '缺少必要参数：year'
+      // 获取所有交易数据
+      const allTransactions = getAllTransactions()
+      
+      // 根据类型过滤
+      let filteredTransactions = allTransactions
+      if (type && type !== 'all') {
+        filteredTransactions = allTransactions.filter(t => t.type === type)
+      }
+      
+      // 根据时间维度过滤
+      if (period && year) {
+        const currentYear = parseInt(year)
+        if (period === 'year') {
+          filteredTransactions = filteredTransactions.filter(t => {
+            const transactionYear = new Date(t.date).getFullYear()
+            return transactionYear === currentYear
+          })
+        } else if (period === 'month' && month) {
+          const currentMonth = parseInt(month)
+          filteredTransactions = filteredTransactions.filter(t => {
+            const transactionDate = new Date(t.date)
+            return transactionDate.getFullYear() === currentYear && 
+                   transactionDate.getMonth() + 1 === currentMonth
+          })
         }
       }
       
-      // 获取交易数据
-      let transactions = getAllTransactions()
+      // 计算汇总信息
+      const totalIncome = filteredTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0)
       
-      // 按类型过滤
-      if (type !== 'all') {
-        transactions = transactions.filter(t => t.type === type)
-      }
+      const totalExpense = filteredTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0)
       
-      // 按时间维度过滤
-      const filteredTransactions = filterTransactionsByPeriod(transactions, period, params)
+      // 分页处理
+      const startIndex = (page - 1) * pageSize
+      const endIndex = startIndex + pageSize
+      const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex)
       
-      // 计算汇总
-      const summary = calculateSummaryFromTransactions(filteredTransactions, period, params)
-      
-      return {
-        error: 0,
-        body: {
-          transactions: filteredTransactions,
-          summary,
-          totalCount: filteredTransactions.length,
-          period,
-          year,
-          month,
-          type
-        },
-        message: ''
-      }
+      return createSuccessResponse({
+        list: paginatedTransactions,
+        total: filteredTransactions.length,
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        summary: {
+          totalIncome,
+          totalExpense,
+          netIncome: totalIncome - totalExpense
+        }
+      }, '获取交易记录成功')
     } catch (error) {
-      console.error('获取交易记录失败:', error)
-      return {
-        error: 500,
-        body: null,
-        message: '系统异常：获取交易记录失败'
-      }
+      logger.error('获取交易记录失败:', error)
+      return createErrorResponse(
+        ERROR_CODES.INTERNAL_SERVER_ERROR,
+        '系统异常：获取交易记录失败'
+      )
     }
   },
 
@@ -80,11 +107,10 @@ export const mockTransactionsApi = {
     try {
       // 参数验证
       if (!transaction.type || !transaction.amount) {
-        return {
-          error: 400,
-          body: null,
-          message: '缺少必要参数：type, amount'
-        }
+        return createErrorResponse(
+          ERROR_CODES.BAD_REQUEST,
+          '缺少必要参数：type, amount'
+        )
       }
       
       // 导入添加函数
@@ -93,21 +119,16 @@ export const mockTransactionsApi = {
       // 添加交易记录
       const newTransaction = addTransaction(transaction)
       
-      return {
-        error: 0,
-        body: {
-          transaction: newTransaction,
-          message: '交易记录添加成功'
-        },
-        message: ''
-      }
+      return createSuccessResponse({
+        transaction: newTransaction,
+        message: '交易记录添加成功'
+      }, '交易记录添加成功')
     } catch (error) {
-      console.error('添加交易记录失败:', error)
-      return {
-        error: 500,
-        body: null,
-        message: '系统异常：添加交易记录失败'
-      }
+      logger.error('添加交易记录失败:', error)
+      return createErrorResponse(
+        ERROR_CODES.INTERNAL_SERVER_ERROR,
+        '系统异常：添加交易记录失败'
+      )
     }
   },
 
@@ -121,11 +142,10 @@ export const mockTransactionsApi = {
     try {
       // 参数验证
       if (!id) {
-        return {
-          error: 400,
-          body: null,
-          message: '缺少必要参数：id'
-        }
+        return createErrorResponse(
+          ERROR_CODES.BAD_REQUEST,
+          '缺少必要参数：id'
+        )
       }
       
       // 导入更新函数
@@ -135,28 +155,22 @@ export const mockTransactionsApi = {
       const updatedTransaction = updateTransaction(id, updates)
       
       if (!updatedTransaction) {
-        return {
-          error: 404,
-          body: null,
-          message: '交易记录不存在'
-        }
+        return createErrorResponse(
+          ERROR_CODES.NOT_FOUND,
+          '交易记录不存在'
+        )
       }
       
-      return {
-        error: 0,
-        body: {
-          transaction: updatedTransaction,
-          message: '交易记录更新成功'
-        },
-        message: ''
-      }
+      return createSuccessResponse({
+        transaction: updatedTransaction,
+        message: '交易记录更新成功'
+      }, '交易记录更新成功')
     } catch (error) {
-      console.error('更新交易记录失败:', error)
-      return {
-        error: 500,
-        body: null,
-        message: '系统异常：更新交易记录失败'
-      }
+      logger.error('更新交易记录失败:', error)
+      return createErrorResponse(
+        ERROR_CODES.INTERNAL_SERVER_ERROR,
+        '系统异常：更新交易记录失败'
+      )
     }
   },
 
@@ -169,11 +183,10 @@ export const mockTransactionsApi = {
     try {
       // 参数验证
       if (!id) {
-        return {
-          error: 400,
-          body: null,
-          message: '缺少必要参数：id'
-        }
+        return createErrorResponse(
+          ERROR_CODES.BAD_REQUEST,
+          '缺少必要参数：id'
+        )
       }
       
       // 导入删除函数
@@ -183,27 +196,21 @@ export const mockTransactionsApi = {
       const success = deleteTransaction(id)
       
       if (!success) {
-        return {
-          error: 404,
-          body: null,
-          message: '交易记录不存在'
-        }
+        return createErrorResponse(
+          ERROR_CODES.NOT_FOUND,
+          '交易记录不存在'
+        )
       }
       
-      return {
-        error: 0,
-        body: {
-          message: '交易记录删除成功'
-        },
-        message: ''
-      }
+      return createSuccessResponse({
+        message: '交易记录删除成功'
+      }, '交易记录删除成功')
     } catch (error) {
-      console.error('删除交易记录失败:', error)
-      return {
-        error: 500,
-        body: null,
-        message: '系统异常：删除交易记录失败'
-      }
+      logger.error('删除交易记录失败:', error)
+      return createErrorResponse(
+        ERROR_CODES.INTERNAL_SERVER_ERROR,
+        '系统异常：删除交易记录失败'
+      )
     }
   },
 
@@ -255,4 +262,4 @@ export const mockTransactionsApi = {
       }
     }
   }
-} 
+}

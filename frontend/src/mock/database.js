@@ -10,55 +10,6 @@ const DB_KEYS = {
   LAST_UPDATE: 'mock_last_update'
 }
 
-// 默认财务数据（来自API文档）
-const DEFAULT_DASHBOARD_DATA = [
-  {
-    "date": "2025-07-24",
-    "total_income": 2400,
-    "total_expense": 1800
-  },
-
-  {
-    "date": "2025-07-25",
-    "total_income": 2500,
-    "total_expense": 1400
-  },
-  {
-    "date": "2025-07-26",
-    "total_income": 2200,
-    "total_expense": 1500
-  },
-  {
-    "date": "2025-07-27",
-    "total_income": 1900,
-    "total_expense": 1100
-  },
-  {
-    "date": "2025-07-28",
-    "total_income": 2400,
-    "total_expense": 1300
-  },
-  {
-    "date": "2025-07-29",
-    "total_income": 2100,
-    "total_expense": 1400
-  },
-  {
-    "date": "2025-07-30",
-    "total_income": 2200,
-    "total_expense": 1600
-  },
-  {
-    "date": "2025-07-31",
-    "total_income": 2300,
-    "total_expense": 1800
-  },
-  {
-    "date": "2025-08-01",
-    "total_income": 1000,
-    "total_expense": 100
-  }
-]
 
 /**
  * 计算利润
@@ -78,7 +29,7 @@ export const calculateNetProfit = (totalIncome, totalExpense) => {
  */
 export const calculateGrowthRate = (currentValue, previousValue) => {
   if (previousValue === 0) return 0
-  return ((currentValue - previousValue) / Math.abs(previousValue) * 100).toFixed(1)
+  return parseFloat(((currentValue - previousValue) / Math.abs(previousValue) * 100).toFixed(1))
 }
 
 /**

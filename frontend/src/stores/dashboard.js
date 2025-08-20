@@ -42,6 +42,19 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return calculateNetProfit(weekTotalIncome.value, weekTotalExpense.value)
   })
 
+  // 7天数据计算属性（更清晰的命名）
+  const total7dayIncome = computed(() => {
+    return weekTotalIncome.value
+  })
+
+  const total7dayExpense = computed(() => {
+    return weekTotalExpense.value
+  })
+
+  const total7dayProfit = computed(() => {
+    return weekNetProfit.value
+  })
+
   const avgDailyIncome = computed(() => {
     return weekData.value?.summary?.avg_daily_income || 0
   })
@@ -210,6 +223,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     weekTotalIncome,
     weekTotalExpense,
     weekNetProfit,
+    // 7天数据计算属性（更清晰的命名）
+    total7dayIncome,
+    total7dayExpense,
+    total7dayProfit,
     avgDailyIncome,
     avgDailyExpense,
     avgDailyProfit,

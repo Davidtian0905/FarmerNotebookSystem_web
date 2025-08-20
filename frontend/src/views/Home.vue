@@ -61,7 +61,7 @@
           <van-button 
             type="primary" 
             size="small" 
-            @click="goToTestMock"
+            @click="goToDashboardTestMock"
             icon="setting-o"
           >
             Mock功能测试
@@ -106,7 +106,7 @@ const goToRegister = () => {
   router.push('/register')
 }
 
-const goToTestMock = () => {
+const goToDashboardTestMock = () => {
   console.log('点击Mock测试按钮，准备跳转到 /test-mock')
   router.push('/test-mock')
 }

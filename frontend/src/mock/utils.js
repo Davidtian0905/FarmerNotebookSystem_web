@@ -6,13 +6,17 @@
 /**
  * 检查是否使用Mock模式
  */
+import { createLogger } from './utils/logger.js';
+
+const logger = createLogger('UTILS');
+
 export const isMockMode = () => {
   // 在开发环境下，如果没有明确设置，默认启用Mock模式
   const isDev = import.meta.env.DEV || process.env.NODE_ENV === 'development'
   if (isDev) {
     const mockSetting = localStorage.getItem('useMock')
     const result = mockSetting === null ? true : mockSetting === 'true'
-    console.log('Mock模式检查:', {
+    logger.debug('Mock模式检查:', {
       environment: isDev ? 'development' : 'production',
       mockSetting,
       result
@@ -33,7 +37,9 @@ export const isMockMode = () => {
  */
 export const toggleMockMode = () => {
   const currentMode = localStorage.getItem('useMock') === 'true'
+  logger.debug('切换Mock模式:', { from: currentMode, to: !currentMode });
   localStorage.setItem('useMock', (!currentMode).toString())
+  logger.info('Mock模式已切换为:', !currentMode);
   return !currentMode
 }
 
@@ -73,29 +79,49 @@ export const getMockConfig = () => {
 
 /**
  * 模拟网络延迟
- * @param {number} min - 最小延迟时间（毫秒）
- * @param {number} max - 最大延迟时间（毫秒）
+ * @param {number} ms - 延迟时间（毫秒）
  * @returns {Promise} 延迟Promise
  */
-export const mockDelay = (min = 500, max = 1500) => {
-  const delay = Math.random() * (max - min) + min
-  return new Promise(resolve => setTimeout(resolve, delay))
+export const mockDelay = (ms = 500) => {
+  logger.debug('Mock延迟:', ms + 'ms');
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * 模拟API响应格式
- * @param {number} error - 错误码
+ * 创建标准化的API响应对象
+ * @param {number} error - 错误码 (0表示成功)
  * @param {any} body - 响应数据
  * @param {string} message - 响应消息
- * @returns {Object} 标准API响应格式
+ * @returns {Object} 标准化响应对象
  */
-export const createMockResponse = (error = 0, body = null, message = '') => {
-  return {
+export const createApiResponse = (error = 0, body = null, message = '') => {
+  const response = {
     error,
     body,
     message
-  }
-}
+  };
+  logger.debug('创建API响应:', response);
+  return response;
+};
+
+/**
+ * 创建Mock响应Promise
+ * @param {number} error - 错误码
+ * @param {any} body - 响应数据
+ * @param {string} message - 响应消息
+ * @param {number} delay - 延迟时间（毫秒）
+ * @returns {Promise} Mock响应Promise
+ */
+export const createMockResponse = (error = 0, body = null, message = '', delay = 500) => {
+  logger.debug('创建Mock响应:', { error, bodyType: typeof body, message, delay });
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const response = createApiResponse(error, body, message);
+      logger.trace('Mock响应已生成:', response);
+      resolve(response);
+    }, delay);
+  });
+};
 
 /**
  * 模拟成功响应
@@ -104,7 +130,7 @@ export const createMockResponse = (error = 0, body = null, message = '') => {
  * @returns {Object} 成功响应
  */
 export const createSuccessResponse = (data, message = '操作成功') => {
-  return createMockResponse(0, data, message)
+  return createApiResponse(0, data, message);
 }
 
 /**
@@ -114,7 +140,7 @@ export const createSuccessResponse = (data, message = '操作成功') => {
  * @returns {Object} 错误响应
  */
 export const createErrorResponse = (errorCode, message) => {
-  return createMockResponse(errorCode, null, message)
+  return createApiResponse(errorCode, null, message);
 }
 
 /**
@@ -232,4 +258,4 @@ export const mockSort = (data, field, order = 'asc') => {
     }
     return aValue > bValue ? 1 : -1
   })
-} 
+}

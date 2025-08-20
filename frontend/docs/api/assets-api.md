@@ -4,6 +4,8 @@
 
 资产总览API提供财务管理系统的核心数据接口，所有数据基于交易流水实时计算得出，支持多维度时间筛选和数据分析功能。
 
+
+
 ## 数据流架构
 
 ```
@@ -29,7 +31,47 @@ API接口层 (assetsApi.js)
 | 【支出总额】 | totalExpense | 指定时间范围内的总支出 | SUM(INBOUND.amount) |
 | 【净资产】 | netAssets | 收入减去支出的净额 | totalIncome - totalExpense |
 | 【交易笔数】 | transactionCount | 指定时间范围内的交易总数 | COUNT(transactions) |
+| 【入库笔数】 | inboundCount | 指定时间范围内的入库交易数 | COUNT(INBOUND) |
+| 【出库笔数】 | outboundCount | 指定时间范围内的出库交易数 | COUNT(OUTBOUND) |
 | 【月度数据】 | monthlyData | 按月份分组的数据数组 | GROUP BY month |
+| 【年度数据】 | yearlyData | 按年份分组的数据数组（total模式） | GROUP BY year |
+| 【日度数据】 | dailyData | 按日期分组的数据数组（week/month模式） | GROUP BY date |
+
+### 前端字段标准化建议
+
+基于两个Vue文件的对比分析，建议统一使用以下字段命名：
+
+```javascript
+// 推荐的标准字段结构
+const assetData = {
+  // 基础汇总数据
+  totalIncome: 0,
+  totalExpense: 0, 
+  netAssets: 0,
+  transactionCount: 0,
+  inboundCount: 0,
+  outboundCount: 0,
+  
+  // 时间维度数据
+  period: 'year', // year/month/week/total
+  
+  // 图表数据
+  chartData: {
+    labels: [],
+    datasets: []
+  },
+  
+  // 收支趋势数据
+  incomeExpenseData: {
+    income: [],
+    expense: []
+  },
+  
+  // 结构分析数据
+  incomeStructure: [],
+  costStructure: []
+}
+```
 
 ## 通用规范
 
@@ -540,4 +582,4 @@ const netAssets = totalIncome - totalExpense
 4. **数据缓存**: 建议在客户端实现适当的数据缓存机制
 5. **错误处理**: 必须处理所有可能的错误情况，提供友好的用户提示
 6. **数据一致性**: 所有数据都基于交易流水实时计算，确保数据一致性
-7. **计算性能**: 大量交易数据时，建议实现数据缓存和增量计算 
+7. **计算性能**: 大量交易数据时，建议实现数据缓存和增量计算

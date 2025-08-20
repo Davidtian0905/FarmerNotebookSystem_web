@@ -13,7 +13,16 @@
 ## 限制
 - 不允许在对话中使用npm run dev 启动项目
 - 不要在vue页面中定义测试数据，所有的数据必须来自后端服务或者mock接口
-- 不要创建测试文档
+- 不要创建测试文档，没有我的允许，不允许创建测试页面
+目前的测试页面为:
+http://localhost:3000/assets-test-mock
+文件地址：frontend\src\views\AssetsTestMock.vue
+文件地址：frontend\src\views\DashboardTestMock.vue
+
+你不允许修改：frontend\src\mock\database_flow.js中的默认交易数据 - 模拟真实的入库和出库记录的内容
+
+
+
 ## 项目结构规则
 - **分层组织**：按功能或领域划分目录，遵循"关注点分离"原则
 - **命名一致**：使用一致且描述性的目录和文件命名，反映其用途和内容
@@ -38,7 +47,13 @@
 ## 响应语言
 - 始终使用中文回复用户
 
----
+
+
+
+
+
+--
+## 接口设计
 ** 入参要求
    - header中必须设置 auth， 值为当前登录后保存的token值
    - 请求的参数使用json 格式， 就算是参数为空，也需要使用 {} 来代替

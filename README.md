@@ -152,7 +152,7 @@ FarmerNotebookSystem/
    ```
 
 3. **访问应用**
-   - 前端: http://localhost:5173
+   - 前端: http://localhost:3000
    - 后端API: http://localhost:8080/api
    - Druid监控: http://localhost:8080/api/druid
 
