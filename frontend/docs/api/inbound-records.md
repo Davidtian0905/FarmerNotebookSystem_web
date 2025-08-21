@@ -97,11 +97,9 @@ GET /api/inbound-records
         "qualityStatus": "passed",
         "qualityInspector": "质检员A",
         "qualityDate": "2025-01-15",
-        "operator": "仓管员张三",
         "status": "COMPLETED",
         "description": "特级铁观音，品质优良",
         "remark": "特级铁观音，品质优良",
-        "counterparty": "福建安溪茶园"
       }
     ],
     "total": 100,
@@ -140,7 +138,6 @@ POST /api/inbound-records
 | inspectionDate | string | 否 | 检验日期 | quality_date | inspectionDate |
 | qualityRemarks | string | 否 | 质检备注 | quality_remarks | qualityRemarks |
 | description | string | 否 | 备注说明 | description/remark | description |
-| operator | string | 否 | 操作员 | operator | operator |
 | type | string | 否 | 交易类型（固定值：'inbound'） | type | type |
 | images | array | 否 | 物料图片数组 | images | images |
 | ratings | object | 否 | 供应商评价 | supplier_ratings | ratings |
@@ -167,7 +164,6 @@ POST /api/inbound-records
   "inspectionDate": "2025-01-15",
   "qualityRemarks": "质检合格",
   "description": "特级铁观音，品质优良",
-  "operator": "系统用户",
   "type": "inbound",
   "images": [
     {
@@ -220,7 +216,6 @@ POST /api/inbound-records
     "qualityStatus": "passed",
     "qualityInspector": "质检员A",
     "qualityDate": "2025-01-15",
-    "operator": "仓管员张三",
     "status": "COMPLETED",
     "description": "特级铁观音，品质优良",
     "remark": "特级铁观音，品质优良",
@@ -417,7 +412,6 @@ GET /api/materials
 | inspectionDate | String | 否 | 检验日期 | quality_date | inspectionDate |
 | qualityRemarks | String | 否 | 质检备注 | quality_remarks | qualityRemarks |
 | description | String | 否 | 备注说明 | description | description |
-| operator | String | 否 | 操作员 | operator | operator |
 | status | String | 是 | 记录状态 | status | status |
 
 | images | Array | 否 | 物料图片 | images | images |
@@ -430,11 +424,11 @@ GET /api/materials
 | 值 | 描述 | 数据库值 | 前端显示 |
 |----|------|----------|----------|
 | 待检测 | 待检测 | 待检测 | 待检测 |
-| 已完成 | 已完成 | 已完成 | 已完成 |
+| 合格 | 合格 | 合格 | 合格 |
 | 不合格 | 不合格 | 不合格 | 不合格 |
 | 免检 | 免检 | 免检 | 免检 |
 | PENDING | 待检测（兼容） | PENDING | 待检测 |
-| PASSED | 已完成（兼容） | PASSED | 已完成 |
+| PASSED | 合格（兼容） | PASSED | 合格 |
 | FAILED | 不合格（兼容） | FAILED | 不合格 |
 | EXEMPTED | 免检（兼容） | EXEMPTED | 免检 |
 | passed | 合格（兼容） | passed | 合格 |
@@ -593,87 +587,6 @@ GET /api/materials
 | inspection_date | inspectionDate | string | 质检日期 |
 | quality_remarks | qualityRemarks | string | 质检备注 |
 | description | description | string | 备注说明 |
-| operator | operator | string | 操作员 |
 | images | images | array | 图片附件 |
 | type | type | string | 交易类型（固定值：'inbound'） |
 
-#### 显示字段映射
-- 入库记录直接使用 `materialName` 作为物料名称显示
-- 物料类型通过 `materialType` 字段获取对应的中文名称
-- 供应商信息通过 `supplier` 字段显示
-
-#### 时间字段处理
-- `inboundTime`: ISO 8601 格式 (YYYY-MM-DDTHH:mm:ss)
-- `date`: 日期部分 (YYYY-MM-DD)
-- `time`: 时间部分 (HH:mm:ss)
-
-## 注意事项
-
-1. **字段统一规范**：
-   - 使用 `materialCode` 作为唯一标识，不再使用单独的 `id` 字段
-   - 统一使用 `date` 和 `time` 字段，替代 `inboundTime`
-   - 入库记录必须包含 `type: 'INBOUND'` 标识交易类型（大写）
-   - 入库记录使用 `materialName`，不使用 `productName`（出库专用）
-   - 统一使用 `amount` 字段表示总金额，移除 `totalAmount` 重复字段
-   - 统一使用 `inspector` 和 `inspectionDate` 字段，移除 `qualityInspector` 和 `qualityDate` 重复字段
-
-2. **时间格式**：所有时间字段使用 ISO 8601 格式 (YYYY-MM-DDTHH:mm:ss)
-3. **金额字段**：保留两位小数，支持自动计算总金额
-4. **批次号**：建议保持唯一性，格式为物料编码+日期+序号
-5. **物料编码**：支持自动生成，格式为物料类型缩写+日期+序号
-6. **数据一致性**：确保前端字段与数据库字段的映射关系正确
-7. **图片上传**：支持多张图片上传，存储为 base64 格式
-8. **供应商评价**：包含产品质量、交付及时性、价格合理性、服务态度四个维度
-9. **质检状态**：支持 passed/failed/pending 三种状态，兼容 qualified/unqualified
-10. **搜索功能**：支持模糊搜索物料名称、物料编码、供应商名称
-11. **分页显示**：默认每页显示 10 条记录，支持页码跳转
-12. **兼容性**：与 `assets-api.md` 和 `dashboard-api.md` 保持字段兼容
-
-## 更新日志
-
-### v2.3.0 (2025-01-15)
-- **字段本地化更新**：
-  - 更新 `QUALITY_STATUS` 字段值为中文：待检测、已完成、不合格、免检
-  - 更新 `WAREHOUSE_LOCATIONS` 字段格式：A区-001、A区-002、B区-001、B区-002、C区-001、C区-002
-  - 保持向后兼容，支持英文状态值的兼容性映射
-- **API 文档更新**：
-  - 更新质检状态枚举定义，反映最新的中文字段值
-  - 更新仓库位置列表响应数据格式
-  - 完善字段映射关系说明
-
-### v2.2.0 (2025-01-15)
-- **新增功能**：
-  - 图片上传与本地保存功能
-  - 保质期预设选项和自动计算
-  - 供应商评价系统（质量、交付、价格、服务四维度评分）
-  - 物料编码自动生成（支持中文转拼音）
-  - 响应式布局优化
-- **API 更新**：
-  - 新增 `ratings` 字段用于供应商评价
-  - 更新 `images` 字段结构，包含文件路径信息
-  - 新增保质期预设枚举定义
-- **UI 优化**：
-  - 搜索图标样式优化，去除边框
-  - 检验状态下拉列表数据绑定修复
-  - 批次号和物料编码字段布局优化
-
-### v2.1.0 (2025-01-15)
-- **字段统一规范**：清理重复字段，统一字段命名
-  - 移除 `totalAmount` 重复字段，统一使用 `amount` 表示总金额
-  - 移除 `supplierName` 重复字段，统一使用 `supplier` 表示供应商名称
-  - 移除 `qualityInspector` 和 `qualityDate` 重复字段，统一使用 `inspector` 和 `inspectionDate`
-  - 移除 `productName`、`category`、`counterparty` 显示字段，直接使用原始字段
-  - 统一交易类型为大写 `INBOUND`
-- **API接口优化**：简化请求和响应数据结构
-- **文档完善**：更新字段映射关系和注意事项
-
-### v2.0.0 (2025-01-15)
-- 更新了完整的字段定义和数据库字段对应关系
-- 增加了物料类型、等级、质检状态等枚举值
-- 完善了API接口的请求参数和响应数据格式
-- 更新了基础数据接口的响应格式
-- 增加了前端实现的详细说明
-- 添加了字段映射关系和注意事项
-
-### v1.0.0 (2024-01-15)
-- 初始版本，包含基本的入库记录管理功能

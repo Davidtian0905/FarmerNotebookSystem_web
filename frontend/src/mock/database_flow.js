@@ -17,7 +17,8 @@ const DB_KEYS = {
 // 索引配置
 const INDEX_CONFIG = {
   // 主要索引字段
-  PRIMARY_INDEXES: ['date', 'type', 'productName', 'category', 'counterparty'],
+  PRIMARY_INDEXES: ['date', 'type', 'productName', 'category', 'supplier'],
+
   // 复合索引
   COMPOSITE_INDEXES: [
     ['date', 'type'],
@@ -201,9 +202,8 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unit: "斤",
     unitPrice: 100,
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音，品质优良",
     warehouseLocation: "仓库A区",
     expiryDate: "2027-01-15",
@@ -212,7 +212,7 @@ const DEFAULT_TRANSACTIONS = [
     inspector: "质检员A",
     inspectionDate: "2025-01-15",
     qualityRemarks: "品质优良",
-    operator: "仓管员张三"
+
   },
   {
     id: "OUT202501140001",
@@ -224,8 +224,7 @@ const DEFAULT_TRANSACTIONS = [
     unitPrice: 250,
     productName: "铁观音",
     category: "茶叶",
-    counterparty: "李茶庄",
-    status: "已完成",
+    status: "合格",
     description: "优质铁观音出库",
     // 扩展字段 - 仓库管理相关
     materialId: "MAT001",
@@ -239,7 +238,6 @@ const DEFAULT_TRANSACTIONS = [
     warehouseLocation: "A001",
     expiryDate: "2027-01-10",
     qualityStatus: "合格",
-    operator: "仓管员李四",
     remark: "优质铁观音出库"
   },
   {
@@ -250,9 +248,7 @@ const DEFAULT_TRANSACTIONS = [
     amount: 9000,
     quantity: 30,
     unitPrice: 300,
-    productName: "大红袍",
     materialName: "大红袍",
-    counterparty: "武夷山茶业公司",
     supplier: "武夷山茶业公司",
     status: "待处理",
     description: "待质检",
@@ -271,7 +267,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "待检",
     qualityInspector: null,
     qualityDate: null,
-    operator: "仓管员王五",
     remark: "待质检"
   },
   {
@@ -282,11 +277,9 @@ const DEFAULT_TRANSACTIONS = [
     amount: 2500,
     quantity: 1000,
     unitPrice: 2.5,
-    productName: "茶叶包装盒",
     materialName: "茶叶包装盒",
-    counterparty: "包装材料有限公司",
     supplier: "包装材料有限公司",
-    status: "已完成",
+    status: "合格",
     description: "包装材料免检",
     // 扩展字段 - 仓库管理相关
     materialId: "MAT003",
@@ -303,7 +296,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "免检",
     qualityInspector: null,
     qualityDate: null,
-    operator: "仓管员赵六",
     remark: "包装材料免检"
   },
   // 原有的历史交易数据
@@ -315,11 +307,9 @@ const DEFAULT_TRANSACTIONS = [
     amount: 1000,
     quantity: 50,
     unitPrice: 200,
-    productName: "铁观音",
     materialName: "铁观音",
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音采购",
     // 扩展字段 - 仓库管理相关
     materialId: "MAT004",
@@ -336,7 +326,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "合格",
     qualityInspector: "质检员B",
     qualityDate: "2025-08-20",
-    operator: "仓管员张三",
     remark: "特级铁观音采购"
   },
   {
@@ -347,11 +336,9 @@ const DEFAULT_TRANSACTIONS = [
     amount: 1000,
     quantity: 50,
     unitPrice: 200,
-    productName: "铁观音",
     materialName: "铁观音",
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音采购",
     // 扩展字段 - 仓库管理相关
     materialId: "MAT006",
@@ -368,7 +355,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "合格",
     qualityInspector: "质检员D",
     qualityDate: "2025-08-19",
-    operator: "仓管员王五",
     remark: "特级铁观音采购"
   },
   {
@@ -381,8 +367,7 @@ const DEFAULT_TRANSACTIONS = [
     unitPrice: 250,
     productName: "乌龙茶",
     category: "乌龙茶",
-    counterparty: "李茶庄",
-    status: "已完成",
+    status: "合格",
     description: "铁观音销售"
   },
   {
@@ -395,8 +380,7 @@ const DEFAULT_TRANSACTIONS = [
     unitPrice: 250,
     productName: "铁观音",
     category: "乌龙茶",
-    counterparty: "李茶庄",
-    status: "已完成",
+    status: "合格",
     description: "铁观音销售"
   },
   {
@@ -407,11 +391,9 @@ const DEFAULT_TRANSACTIONS = [
     amount: 1000,
     quantity: 50,
     unitPrice: 200,
-    productName: "铁观音",
     materialName: "铁观音",
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音采购",
     // 扩展字段 - 仓库管理相关
     materialId: "MAT007",
@@ -428,7 +410,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "合格",
     qualityInspector: "质检员C",
     qualityDate: "2025-08-18",
-    operator: "仓管员张三",
     remark: "特级铁观音采购"
   },
   {
@@ -439,12 +420,10 @@ const DEFAULT_TRANSACTIONS = [
     amount: 2000,
     quantity: 50,
     unitPrice: 100,
-    productName: "铁观音",
     materialName: "铁观音",
     category: "乌龙茶",
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音采购",
     // 补充完整字段
     materialId: "MAT008",
@@ -461,7 +440,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "合格",
     qualityInspector: "质检员A",
     qualityDate: "2025-08-12",
-    operator: "仓管员李四",
     remark: "特级铁观音采购"
   },
   {
@@ -472,12 +450,10 @@ const DEFAULT_TRANSACTIONS = [
     amount: 500,
     quantity: 50,
     unitPrice: 100,
-    productName: "铁观音",
     materialName: "铁观音",
     category: "乌龙茶",
-    counterparty: "福建安溪茶园",
     supplier: "福建安溪茶园",
-    status: "已完成",
+    status: "合格",
     description: "特级铁观音采购",
     // 补充完整字段
     materialId: "MAT009",
@@ -495,7 +471,6 @@ const DEFAULT_TRANSACTIONS = [
     qualityStatus: "合格",
     qualityInspector: "质检员B",
     qualityDate: "2024-08-11",
-    operator: "仓管员王五",
     remark: "特级铁观音采购"
   },
   {
@@ -508,8 +483,7 @@ const DEFAULT_TRANSACTIONS = [
     unitPrice: 250,
     productName: "八仙茶",
     category: "乌龙茶",
-    counterparty: "李茶庄",
-    status: "已完成",
+    status: "合格",
     description: "铁观音销售"
   }
 ]
@@ -562,8 +536,8 @@ export const addTransaction = (transaction) => {
     unitPrice: transaction.unitPrice || 0,
     productName: transaction.productName || '',
     category: transaction.category || '',
-    counterparty: transaction.counterparty || '',
-    status: transaction.status || '已完成',
+    supplier: transaction.supplier || '',
+    status: transaction.status || '合格',
     description: transaction.description || '',
     createTime: new Date().toISOString()
   }
@@ -1294,7 +1268,7 @@ export const batchInsertTransactions = (transactions) => {
         unitPrice: transaction.unitPrice || 0,
         productName: transaction.productName || '',
         category: transaction.category || '',
-        counterparty: transaction.counterparty || '',
+        supplier: transaction.supplier || '',
         status: transaction.status || 'COMPLETED',
         description: transaction.description || '',
         createTime: new Date().toISOString()
@@ -1441,7 +1415,7 @@ const VALIDATION_RULES = {
     type: 'string',
     minLength: 1
   },
-  counterparty: {
+  supplier: {
     required: false,
     type: 'string'
   },

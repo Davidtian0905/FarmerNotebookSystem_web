@@ -736,7 +736,7 @@ const fetchAssetData = async (period = 'year') => {
   unitPrice: 80,                  // 单价
   productName: "铁观音",          // 产品名称
   category: "乌龙茶",             // 产品类别
-  counterparty: "福建安溪茶园",   // 交易对手
+  supplier: "福建安溪茶园",   // 供应商
   status: "COMPLETED",            // 交易状态
   description: "特级铁观音采购"   // 交易描述
 }

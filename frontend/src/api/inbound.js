@@ -97,7 +97,6 @@ export const createInboundRecord = async (data) => {
       qualityStatus: data.qualityStatus || 'pending',
       inspector: data.inspector || null,
       inspectionDate: data.inspectionDate || null,
-      operator: data.operator || '系统用户',
       remark: data.remark || ''
     }
     

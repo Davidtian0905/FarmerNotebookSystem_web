@@ -74,7 +74,16 @@ const routes = [
     name: 'InboundForm',
     component: () => import('@/views/InboundForm.vue'),
     meta: {
-      title: '新增入库记录',
+      title: '入库表单',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/inbound-templates',
+    name: 'InboundTemplates',
+    component: () => import('@/views/InboundTemplates.vue'),
+    meta: {
+      title: '入库模板管理',
       requiresAuth: true
     }
   },

@@ -89,8 +89,9 @@
               <div class="form-group">
                 <label class="form-label">计量单位</label>
                 <select v-model="formData.unit" class="form-select">
-                  <option value="kg">kg</option>
-                  <option value="g">g</option>
+                  <option value="kg">公斤</option>
+                  <option value="斤">斤</option>
+                  <option value="g">克</option>
                   <option value="袋">袋</option>
                   <option value="盒">盒</option>
                   <option value="箱">箱</option>
@@ -435,6 +436,35 @@
         </div>
       </form>
     </div>
+
+    <!-- 模板名称输入弹窗 -->
+    <div v-if="showTemplateNameModal" class="modal-overlay" @click="closeTemplateNameModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>保存为模板</h3>
+          <button @click="closeTemplateNameModal" class="modal-close-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="templateName">模板名称</label>
+            <input 
+              id="templateName"
+              v-model="templateName" 
+              type="text" 
+              placeholder="请输入模板名称"
+              class="form-control"
+              @keyup.enter="confirmSaveTemplate"
+            >
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="closeTemplateNameModal" class="btn btn-secondary">取消</button>
+          <button @click="confirmSaveTemplate" class="btn btn-primary" :disabled="!templateName.trim()">保存</button>
+        </div>
+      </div>
+    </div>
   </Layout>
 </template>
 
@@ -447,9 +477,11 @@ import {
   getMaterialTypeOptions, 
   getMaterialGradeOptions, 
   getWarehouseLocationOptions, 
-  getSupplierOptions,
-  getQualityStatusOptions 
-} from '@/mock/warehouse_data'
+  getSupplierOptions, 
+  getQualityStatusOptions,
+  saveInboundTemplate,
+  getAllTemplateIds 
+} from '@/mock/warehouse_data.js'
 
 const router = useRouter()
 const fileInput = ref(null)
@@ -478,7 +510,6 @@ const formData = reactive({
   inspectionDate: '',
   qualityRemarks: '',
   images: [],
-  operator: '系统用户',
   type: 'inbound'
 })
 
@@ -495,6 +526,10 @@ const baseData = reactive({
 
 // 加载状态
 const loading = ref(false)
+
+// 模板名称弹窗相关
+const showTemplateNameModal = ref(false)
+const templateName = ref('')
 
 // 供应商评价
 const showSupplierRating = ref(false)
@@ -589,8 +624,17 @@ const setRating = (type, value) => {
 
 // 选择模板
 const selectTemplate = () => {
-  console.log('选择物料模板')
-  // 这里可以打开模板选择弹窗
+  try {
+    // 获取所有模板ID
+    const templateIds = getAllTemplateIds()
+    console.log('所有模板ID:', templateIds)
+    
+    // 导航到模板选择页面
+    router.push('/inbound-templates')
+  } catch (error) {
+    console.error('获取模板ID时出错:', error)
+    alert('获取模板列表失败，请重试')
+  }
 }
 
 // 触发文件选择
@@ -643,8 +687,71 @@ const removeImage = (index) => {
 
 // 保存为模板
 const saveAsTemplate = () => {
-  console.log('保存为模板', formData)
-  // 这里可以保存当前表单数据为模板
+  // 验证必填字段
+  if (!formData.materialName || !formData.materialType) {
+    alert('请填写物料名称和类型')
+    return
+  }
+  
+  // 设置默认模板名称
+  templateName.value = `${formData.materialName}入库模板`
+  showTemplateNameModal.value = true
+}
+
+// 关闭模板名称弹窗
+const closeTemplateNameModal = () => {
+  showTemplateNameModal.value = false
+  templateName.value = ''
+}
+
+// 确认保存模板
+const confirmSaveTemplate = async () => {
+  try {
+    if (!templateName.value.trim()) {
+      alert('请输入模板名称')
+      return
+    }
+    
+    // 准备模板数据
+    const templateData = {
+      inboundTempname: templateName.value.trim(),
+      materialName: formData.materialName,
+      materialType: formData.materialType,
+      materialGrade: formData.materialGrade,
+      unit: formData.unit,
+      quantity: formData.quantity,
+      batchNumber: formData.batchNumber,
+      materialCode: formData.materialCode,
+      unitPrice: formData.unitPrice,
+      supplier: formData.supplier,
+      date: formData.date,
+      time: formData.time,
+      expiryDate: formData.expiryDate,
+      shelfLifeDays: formData.shelfLifeDays,
+      warehouseLocation: formData.warehouseLocation,
+      description: formData.description,
+      qualityStatus: formData.qualityStatus,
+      inspector: formData.inspector,
+      inspectionDate: formData.inspectionDate,
+      qualityRemarks: formData.qualityRemarks,
+      images: formData.images,
+      type: formData.type
+    }
+    
+    // 保存模板
+    const result = saveInboundTemplate(templateData)
+    
+    if (result.success) {
+      alert(`模板保存成功！模板ID: ${result.templateId}`)
+      console.log('保存的模板:', result.template)
+      closeTemplateNameModal()
+    } else {
+      alert('模板保存失败')
+    }
+  } catch (error) {
+    console.error('保存模板时出错:', error)
+    alert('保存模板时出错，请重试')
+  }
 }
 
 // 加载基础数据
@@ -771,6 +878,36 @@ const refreshBaseData = () => {
 onMounted(() => {
   // 加载基础数据
   loadBaseData()
+  
+  // 处理模板数据
+  const route = router.currentRoute.value
+  if (route.query.templateData) {
+    try {
+      const templateData = JSON.parse(route.query.templateData)
+      // 填充表单数据
+      Object.keys(templateData).forEach(key => {
+        if (formData.hasOwnProperty(key)) {
+          formData[key] = templateData[key]
+        }
+      })
+      // 生成物料编码
+      generateMaterialCode()
+      
+      // 如果有供应商数据，显示供应商评价
+      if (templateData.supplier) {
+        showSupplierRating.value = true
+      }
+      
+      // 如果有保质期时长数据，自动计算保质期日期
+      if (templateData.shelfLifeDays) {
+        calculateExpiryDate()
+      }
+      
+      console.log('模板数据已加载:', templateData)
+    } catch (error) {
+      console.error('解析模板数据失败:', error)
+    }
+  }
   
   // 监听数据更新事件
   window.addEventListener('warehouse-data-updated', refreshBaseData)
@@ -1349,52 +1486,67 @@ onUnmounted(() => {
   border-radius: 0 0 12px 12px;
 }
 
-.btn-outline {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.btn-outline:hover {
-  background: #f9fafb;
-  border-color: #10b981;
-}
-
-/* 快捷数量按钮样式 */
-.quick-amount {
-  display: inline-flex;
+/* 模态框样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  z-index: 1000;
+}
+
+.modal-content {
   background: white;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6b7280;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 80px;
+  padding: 4px;
+  border-radius: 4px;
 }
 
-.quick-amount:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #1d4ed8;
-  transform: translateY(-1px);
+.modal-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.quick-amount.active {
-  border-color: #3b82f6;
-  background: #3b82f6;
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+.modal-body {
+  padding: 20px;
 }
 
-/* 图标样式 */
-.icon-arrow-left::before { content: '←'; }
-.icon-save::before { content: '💾'; }
-.icon-mic::before { content: '🎤'; }
-.icon-camera::before { content: '📷'; }
-.icon-zap::before { content: '⚡'; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+}
 </style>

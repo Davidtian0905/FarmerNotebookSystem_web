@@ -569,8 +569,7 @@ export default {
     }
 
     const handleCustomTemplate = () => {
-      // TODO: 实现自定义模板功能
-      console.log('打开自定义模板')
+      router.push('/inbound-templates')
     }
 
     const viewRecord = (record) => {

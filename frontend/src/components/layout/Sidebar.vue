@@ -21,7 +21,7 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <router-link to="/inbound-records" class="nav-link" :class="{ 'active': $route.path === '/inbound-records' }">
+          <router-link to="/inbound-records" class="nav-link" :class="{ 'active': $route.path === '/inbound-records' || $route.path === '/inbound-templates' || $route.path === '/inbound-form' }">
             <i class="nav-icon fas fa-arrow-down"></i>
             <span>入库记录</span>
           </router-link>
