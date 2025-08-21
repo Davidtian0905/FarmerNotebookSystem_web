@@ -9,8 +9,10 @@ declare module 'vue' {
   export interface GlobalComponents {
     ChartWidget: typeof import('./src/components/dashboard/ChartWidget.vue')['default']
     Header: typeof import('./src/components/layout/Header.vue')['default']
+    InboundForm: typeof import('./src/components/InboundForm.vue')['default']
     Layout: typeof import('./src/components/layout/Layout.vue')['default']
     MockModeToggle: typeof import('./src/components/common/MockModeToggle.vue')['default']
+    OutboundForm: typeof import('./src/components/OutboundForm.vue')['default']
     QuickAction: typeof import('./src/components/dashboard/QuickAction.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

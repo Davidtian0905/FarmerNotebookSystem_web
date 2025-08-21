@@ -21,9 +21,15 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <router-link to="/warehouse" class="nav-link" :class="{ 'active': $route.path === '/warehouse' }">
-            <i class="nav-icon fas fa-coins"></i>
-            <span>入库出库</span>
+          <router-link to="/inbound-records" class="nav-link" :class="{ 'active': $route.path === '/inbound-records' }">
+            <i class="nav-icon fas fa-arrow-down"></i>
+            <span>入库记录</span>
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/outbound-records" class="nav-link" :class="{ 'active': $route.path === '/outbound-records' }">
+            <i class="nav-icon fas fa-arrow-up"></i>
+            <span>出库记录</span>
           </router-link>
         </li>
         <li class="nav-item">
@@ -173,4 +179,4 @@ watch(() => props.collapsed, (newVal) => {
     transform: translateX(-100%);
   }
 }
-</style> 
+</style>

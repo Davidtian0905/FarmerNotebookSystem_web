@@ -187,7 +187,127 @@ const queryByCompositeIndex = (fields, values) => {
 
 // 默认交易数据 - 模拟真实的入库和出库记录
 const DEFAULT_TRANSACTIONS = [
-          {
+  // 来自warehouse_data.js的详细仓库交易记录
+  {
+    type: "INBOUND",
+    date: "2025-01-15",
+    time: "09:30:00",
+    materialName: "铁观音",
+    materialCode: "TGY001",
+    batchNumber: "TGY20250115001",
+    materialType: "茶叶",
+    materialGrade: "特级",
+    amount: 5000,
+    quantity: 50,
+    unit: "斤",
+    unitPrice: 100,
+    counterparty: "福建安溪茶园",
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音，品质优良",
+    warehouseLocation: "仓库A区",
+    expiryDate: "2027-01-15",
+    shelfLifeDays: 730,
+    qualityStatus: "合格",
+    inspector: "质检员A",
+    inspectionDate: "2025-01-15",
+    qualityRemarks: "品质优良",
+    operator: "仓管员张三"
+  },
+  {
+    id: "OUT202501140001",
+    type: "OUTBOUND",
+    date: "2025-01-14",
+    time: "14:30:00",
+    amount: 5000,
+    quantity: 20,
+    unitPrice: 250,
+    productName: "铁观音",
+    category: "茶叶",
+    counterparty: "李茶庄",
+    status: "已完成",
+    description: "优质铁观音出库",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT001",
+    materialCode: "TGY001",
+    materialType: "茶叶",
+    materialGrade: "特级",
+    batchNumber: "TGY20250110001",
+    unit: "斤",
+    customerId: "CUS001",
+    customerName: "李茶庄",
+    warehouseLocation: "A001",
+    expiryDate: "2027-01-10",
+    qualityStatus: "合格",
+    operator: "仓管员李四",
+    remark: "优质铁观音出库"
+  },
+  {
+    id: "IN202501130001",
+    type: "INBOUND",
+    date: "2025-01-13",
+    time: "10:15:00",
+    amount: 9000,
+    quantity: 30,
+    unitPrice: 300,
+    productName: "大红袍",
+    materialName: "大红袍",
+    counterparty: "武夷山茶业公司",
+    supplier: "武夷山茶业公司",
+    status: "待处理",
+    description: "待质检",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT002",
+    materialCode: "DHP002",
+    materialType: "茶叶",
+    materialGrade: "一级",
+    batchNumber: "DHP20250113001",
+    unit: "斤",
+    supplierId: "SUP002",
+    supplierName: "武夷山茶业公司",
+    warehouseLocation: "A002",
+    inboundTime: "2025-01-13T10:15:00",
+    expiryDate: "2028-01-13",
+    qualityStatus: "待检",
+    qualityInspector: null,
+    qualityDate: null,
+    operator: "仓管员王五",
+    remark: "待质检"
+  },
+  {
+    id: "IN202501120001",
+    type: "INBOUND",
+    date: "2025-01-12",
+    time: "11:00:00",
+    amount: 2500,
+    quantity: 1000,
+    unitPrice: 2.5,
+    productName: "茶叶包装盒",
+    materialName: "茶叶包装盒",
+    counterparty: "包装材料有限公司",
+    supplier: "包装材料有限公司",
+    status: "已完成",
+    description: "包装材料免检",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT003",
+    materialCode: "CYBZH003",
+    materialType: "包装材料",
+    materialGrade: "标准",
+    batchNumber: "BZH20250112001",
+    unit: "个",
+    supplierId: "SUP003",
+    supplierName: "包装材料有限公司",
+    warehouseLocation: "B001",
+    inboundTime: "2025-01-12T11:00:00",
+    expiryDate: null,
+    qualityStatus: "免检",
+    qualityInspector: null,
+    qualityDate: null,
+    operator: "仓管员赵六",
+    remark: "包装材料免检"
+  },
+  // 原有的历史交易数据
+  {
     id: "IN202508200001",
     type: "INBOUND",
     date: "2025-08-20",
@@ -196,26 +316,62 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unitPrice: 200,
     productName: "铁观音",
-    category: "乌龙茶",
+    materialName: "铁观音",
     counterparty: "福建安溪茶园",
-    status: "COMPLETED",
-    description: "特级铁观音采购"
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音采购",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT004",
+    materialCode: "TGY004",
+    materialType: "茶叶",
+    materialGrade: "特级",
+    batchNumber: "TGY20250820001",
+    unit: "斤",
+    supplierId: "SUP001",
+    supplierName: "福建安溪茶园",
+    warehouseLocation: "A003",
+    inboundTime: "2025-08-20T09:30:00",
+    expiryDate: "2027-08-20",
+    qualityStatus: "合格",
+    qualityInspector: "质检员B",
+    qualityDate: "2025-08-20",
+    operator: "仓管员张三",
+    remark: "特级铁观音采购"
   },
-        {
+  {
     id: "IN202508190002",
     type: "INBOUND",
     date: "2025-08-19",
     time: "09:30:00",
-    amount: 400,
+    amount: 1000,
     quantity: 50,
     unitPrice: 200,
     productName: "铁观音",
-    category: "乌龙茶",
+    materialName: "铁观音",
     counterparty: "福建安溪茶园",
-    status: "COMPLETED",
-    description: "特级铁观音采购"
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音采购",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT006",
+    materialCode: "TGY006",
+    materialType: "茶叶",
+    materialGrade: "特级",
+    batchNumber: "TGY20250819002",
+    unit: "斤",
+    supplierId: "SUP001",
+    supplierName: "福建安溪茶园",
+    warehouseLocation: "A005",
+    inboundTime: "2025-08-19T09:30:00",
+    expiryDate: "2027-08-19",
+    qualityStatus: "合格",
+    qualityInspector: "质检员D",
+    qualityDate: "2025-08-19",
+    operator: "仓管员王五",
+    remark: "特级铁观音采购"
   },
-    {
+  {
     id: "OUT202508190001",
     type: "OUTBOUND",
     date: "2025-08-19",
@@ -226,7 +382,7 @@ const DEFAULT_TRANSACTIONS = [
     productName: "乌龙茶",
     category: "乌龙茶",
     counterparty: "李茶庄",
-    status: "COMPLETED",
+    status: "已完成",
     description: "铁观音销售"
   },
   {
@@ -240,10 +396,10 @@ const DEFAULT_TRANSACTIONS = [
     productName: "铁观音",
     category: "乌龙茶",
     counterparty: "李茶庄",
-    status: "COMPLETED",
+    status: "已完成",
     description: "铁观音销售"
   },
-      {
+  {
     id: "IN202508180001",
     type: "INBOUND",
     date: "2025-08-18",
@@ -252,12 +408,30 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unitPrice: 200,
     productName: "铁观音",
-    category: "乌龙茶",
+    materialName: "铁观音",
     counterparty: "福建安溪茶园",
-    status: "COMPLETED",
-    description: "特级铁观音采购"
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音采购",
+    // 扩展字段 - 仓库管理相关
+    materialId: "MAT007",
+    materialCode: "TGY007",
+    materialType: "tea_leaf",
+    materialGrade: "premium",
+    batchNumber: "TGY20250818001",
+    unit: "斤",
+    supplierId: "SUP001",
+    supplierName: "福建安溪茶园",
+    warehouseLocation: "A001",
+    inboundTime: "2025-08-18T09:30:00",
+    expiryDate: "2027-08-18",
+    qualityStatus: "合格",
+    qualityInspector: "质检员C",
+    qualityDate: "2025-08-18",
+    operator: "仓管员张三",
+    remark: "特级铁观音采购"
   },
-    {
+  {
     id: "IN202508120001",
     type: "INBOUND",
     date: "2025-08-12",
@@ -266,10 +440,29 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unitPrice: 100,
     productName: "铁观音",
+    materialName: "铁观音",
     category: "乌龙茶",
     counterparty: "福建安溪茶园",
-    status: "COMPLETED",
-    description: "特级铁观音采购"
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音采购",
+    // 补充完整字段
+    materialId: "MAT008",
+    materialCode: "TGY008",
+    materialType: "tea_leaf",
+    materialGrade: "一级",
+    batchNumber: "TGY20250812001",
+    unit: "斤",
+    supplierId: "SUP001",
+    supplierName: "福建安溪茶园",
+    warehouseLocation: "A002",
+    inboundTime: "2025-08-12T09:30:00",
+    expiryDate: "2027-08-12",
+    qualityStatus: "合格",
+    qualityInspector: "质检员A",
+    qualityDate: "2025-08-12",
+    operator: "仓管员李四",
+    remark: "特级铁观音采购"
   },
   {
     id: "IN202408110001",
@@ -280,10 +473,30 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unitPrice: 100,
     productName: "铁观音",
+    materialName: "铁观音",
     category: "乌龙茶",
     counterparty: "福建安溪茶园",
-    status: "COMPLETED",
-    description: "特级铁观音采购"
+    supplier: "福建安溪茶园",
+    status: "已完成",
+    description: "特级铁观音采购",
+    // 补充完整字段
+    materialId: "MAT009",
+    materialCode: "TGY009",
+    materialType: "茶叶",
+    materialGrade: "标准",
+    batchNumber: "TGY20240811001",
+    unit: "斤",
+
+    supplierId: "SUP001",
+    supplierName: "福建安溪茶园",
+    warehouseLocation: "A005",
+    inboundTime: "2024-08-11T09:30:00",
+    expiryDate: "2026-08-11",
+    qualityStatus: "合格",
+    qualityInspector: "质检员B",
+    qualityDate: "2024-08-11",
+    operator: "仓管员王五",
+    remark: "特级铁观音采购"
   },
   {
     id: "OUT202308100001",
@@ -296,9 +509,9 @@ const DEFAULT_TRANSACTIONS = [
     productName: "八仙茶",
     category: "乌龙茶",
     counterparty: "李茶庄",
-    status: "COMPLETED",
+    status: "已完成",
     description: "铁观音销售"
-  },
+  }
 ]
 
 /**
@@ -350,7 +563,7 @@ export const addTransaction = (transaction) => {
     productName: transaction.productName || '',
     category: transaction.category || '',
     counterparty: transaction.counterparty || '',
-    status: transaction.status || 'COMPLETED',
+    status: transaction.status || '已完成',
     description: transaction.description || '',
     createTime: new Date().toISOString()
   }
@@ -1816,4 +2029,11 @@ export const debugTransactionData = () => {
   })
 }
 // 导出 getWeekNumber 函数
+// 兼容性函数 - 为了保持与warehouse_data.js的兼容性
+export const getWarehouseData = () => {
+  return {
+    records: getAllTransactions()
+  }
+}
+
 export { getWeekNumber }

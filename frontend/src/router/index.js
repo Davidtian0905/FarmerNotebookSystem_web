@@ -61,11 +61,29 @@ const routes = [
     }
   },
   {
-    path: '/warehouse',
-    name: 'Warehouse',
-    component: () => import('@/views/Warehouse.vue'),
+    path: '/inbound-records',
+    name: 'InboundRecords',
+    component: () => import('@/views/InboundRecords.vue'),
     meta: {
-      title: '入库出库',
+      title: '入库记录',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/inbound-form',
+    name: 'InboundForm',
+    component: () => import('@/views/InboundForm.vue'),
+    meta: {
+      title: '新增入库记录',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/outbound-records',
+    name: 'OutboundRecords',
+    component: () => import('@/views/OutboundRecords.vue'),
+    meta: {
+      title: '出库记录',
       requiresAuth: true
     }
   },
