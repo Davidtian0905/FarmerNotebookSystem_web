@@ -14,7 +14,7 @@
           </button>
           <button class="btn btn-primary" @click="handleSave">
             <i class="icon-save"></i>
-            保存记录
+            确定入库
           </button>
         </div>
       </div>
@@ -50,11 +50,31 @@
                     v-model="formData.materialName" 
                     type="text" 
                     placeholder="请输入或搜索物料名称" 
-                    class="form-input pr-10"
+                    class="form-input"
                     required
                     @input="updateMaterialCode"
+                    @focus="formData.materialName && searchMaterials(formData.materialName)"
+                    @blur="handleInputBlur"
                   >
-                  <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 pointer-events-none"></i>
+                  
+                  <!-- 搜索结果下拉列表 -->
+                  <div v-if="showSearchResults && searchResults.length > 0" class="search-results-dropdown">
+                    <div 
+                      v-for="(material, index) in searchResults" 
+                      :key="index"
+                      class="search-result-item"
+                      @click="selectMaterial(material)"
+                    >
+                      <div class="material-info">
+                        <div class="material-name">{{ material.materialName }}</div>
+                        <div class="material-details">
+                          <span class="material-code">编号: {{ material.materialCode }}</span>
+                          <span v-if="material.materialType" class="material-type">类型: {{ material.materialType }}</span>
+                          <span v-if="material.supplier" class="material-supplier">供应商: {{ material.supplier }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -482,6 +502,7 @@ import {
   saveInboundTemplate,
   getAllTemplateIds 
 } from '@/mock/warehouse_data.js'
+import { getAllTransactions } from '@/mock/database_flow.js'
 
 const router = useRouter()
 const fileInput = ref(null)
@@ -540,6 +561,11 @@ const ratings = reactive({
   service: 0
 })
 
+// 物料搜索相关
+const showSearchResults = ref(false)
+const searchResults = ref([])
+const searchKeyword = ref('')
+
 // 计算总金额
 const amount = computed(() => {
   return (formData.quantity * formData.unitPrice).toFixed(2)
@@ -593,9 +619,82 @@ function generateMaterialCode() {
   return `${prefix}${year}${month}${day}${hour}${minute}${second}`
 }
 
-// 监听物料名称变化，自动生成编号
+// 搜索物料
+const searchMaterials = (keyword) => {
+  if (!keyword || keyword.trim().length < 1) {
+    searchResults.value = []
+    showSearchResults.value = false
+    return
+  }
+  
+  const transactions = getAllTransactions()
+  const materials = new Map()
+  
+  // 从交易记录中提取物料信息
+  transactions.forEach(transaction => {
+    if (transaction.type === 'INBOUND' && transaction.materialName && transaction.materialCode) {
+      const key = `${transaction.materialName}_${transaction.materialCode}`
+      if (!materials.has(key)) {
+        materials.set(key, {
+          materialName: transaction.materialName,
+          materialCode: transaction.materialCode,
+          materialType: transaction.materialType || '',
+          materialGrade: transaction.materialGrade || '',
+          unit: transaction.unit || 'kg',
+          supplier: transaction.supplier || transaction.supplierName || ''
+        })
+      }
+    }
+  })
+  
+  // 搜索匹配
+  const keyword_lower = keyword.toLowerCase()
+  const results = Array.from(materials.values()).filter(material => {
+    return material.materialName.toLowerCase().includes(keyword_lower) ||
+           material.materialCode.toLowerCase().includes(keyword_lower)
+  })
+  
+  searchResults.value = results.slice(0, 10) // 限制显示10条结果
+  showSearchResults.value = results.length > 0
+}
+
+// 选择搜索结果
+const selectMaterial = (material) => {
+  formData.materialName = material.materialName
+  formData.materialCode = material.materialCode
+  formData.materialType = material.materialType
+  formData.materialGrade = material.materialGrade
+  formData.unit = material.unit
+  formData.supplier = material.supplier
+  
+  searchResults.value = []
+  showSearchResults.value = false
+  searchKeyword.value = material.materialName
+}
+
+// 处理输入框失焦事件
+const handleInputBlur = () => {
+  setTimeout(() => {
+    showSearchResults.value = false
+  }, 200)
+}
+
+// 监听物料名称变化
 const updateMaterialCode = () => {
-  formData.materialCode = generateMaterialCode()
+  searchKeyword.value = formData.materialName
+  
+  // 如果是手动输入，进行搜索
+  if (formData.materialName) {
+    searchMaterials(formData.materialName)
+  } else {
+    searchResults.value = []
+    showSearchResults.value = false
+  }
+  
+  // 自动生成编号（仅在没有选择已有物料时）
+  if (!searchResults.value.some(item => item.materialName === formData.materialName)) {
+    formData.materialCode = generateMaterialCode()
+  }
 }
 
 // 计算总金额
@@ -884,12 +983,23 @@ onMounted(() => {
   if (route.query.templateData) {
     try {
       const templateData = JSON.parse(route.query.templateData)
+      
       // 填充表单数据
       Object.keys(templateData).forEach(key => {
         if (formData.hasOwnProperty(key)) {
-          formData[key] = templateData[key]
+          // 特殊处理供应商字段：将供应商名称转换为供应商ID
+          if (key === 'supplier' && templateData[key]) {
+            // 查找对应的供应商ID
+            const supplierOption = baseData.suppliers.find(supplier => 
+              supplier.label === templateData[key] || supplier.value === templateData[key]
+            )
+            formData[key] = supplierOption ? supplierOption.value : templateData[key]
+          } else {
+            formData[key] = templateData[key]
+          }
         }
       })
+      
       // 生成物料编码
       generateMaterialCode()
       
@@ -904,6 +1014,7 @@ onMounted(() => {
       }
       
       console.log('模板数据已加载:', templateData)
+      console.log('处理后的表单数据:', formData)
     } catch (error) {
       console.error('解析模板数据失败:', error)
     }
@@ -1333,6 +1444,80 @@ onUnmounted(() => {
 .star:hover {
   color: #f59e0b;
   transform: scale(1.1);
+}
+
+/* 搜索结果下拉列表样式 */
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.search-result-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background-color: #f8fafc;
+}
+
+.material-info {
+  width: 100%;
+}
+
+.material-name {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.material-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.material-code,
+.material-type,
+.material-supplier {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.material-code {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.material-type {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.material-supplier {
+  background: #e9d5ff;
+  color: #7c2d12;
 }
 
 .rating-text {

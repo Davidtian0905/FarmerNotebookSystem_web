@@ -36,13 +36,8 @@ export const calculateNetAssets = (transactions) => {
  * @returns {number} 净利润
  */
 export const calculateNetProfit = (transactions) => {
-  const income = transactions
-    .filter(t => t.type === 'INBOUND')
-    .reduce((sum, t) => sum + t.amount, 0)
-    
-  const expense = transactions
-    .filter(t => t.type === 'OUTBOUND')
-    .reduce((sum, t) => sum + t.amount, 0)
+  const income = calculateTotalIncome(transactions)
+  const expense = calculateTotalExpense(transactions)
     
   return income - expense
 }
@@ -54,7 +49,7 @@ export const calculateNetProfit = (transactions) => {
  */
 export const calculateTotalIncome = (transactions) => {
   return transactions
-    .filter(t => t.type === 'INBOUND')
+    .filter(t => t.type === 'OUTBOUND')  // OUTBOUND = 出库/销售 = 收入
     .reduce((sum, t) => sum + t.amount, 0)
 }
 
@@ -65,7 +60,7 @@ export const calculateTotalIncome = (transactions) => {
  */
 export const calculateTotalExpense = (transactions) => {
   return transactions
-    .filter(t => t.type === 'OUTBOUND')
+    .filter(t => t.type === 'INBOUND')   // INBOUND = 入库/采购 = 支出
     .reduce((sum, t) => sum + t.amount, 0)
 }
 
@@ -90,8 +85,8 @@ export const calculateTransactionStats = (transactions) => {
   const expense = calculateTotalExpense(transactions)
   const netProfit = income - expense
   
-  const incomeTransactions = transactions.filter(t => t.type === 'INBOUND')
-  const expenseTransactions = transactions.filter(t => t.type === 'OUTBOUND')
+  const incomeTransactions = transactions.filter(t => t.type === 'OUTBOUND')  // OUTBOUND = 出库/销售 = 收入
+  const expenseTransactions = transactions.filter(t => t.type === 'INBOUND')   // INBOUND = 入库/采购 = 支出
   const incomeCount = incomeTransactions.length
   const expenseCount = expenseTransactions.length
   

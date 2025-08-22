@@ -60,7 +60,7 @@
           :value="dashboardStore.totalIncome"
           icon="fas fa-wallet"
           icon-bg-color="#10B981"
-          :trend="dashboardStore.inboundTrend"
+          :trend="dashboardStore.incomeTrend"
           type="success"
         />
         
@@ -70,7 +70,7 @@
           icon="fas fa-credit-card"
           icon-bg-color="#EF4444"
           subtitle="支出较昨日增长"
-          :trend="dashboardStore.salesTrend"
+          :trend="dashboardStore.expenseTrend"
           type="danger"
         />
         

@@ -201,9 +201,9 @@
               <th>物料信息</th>
               <th>物料编码</th>
               <th>入库时间</th>
-              <th>数量</th>
+              <th>物料总量</th>
               <th>单价</th>
-              <th>总价</th>
+              <th>物料总价值</th>
               <th>供应商</th>
               <th>仓库位置</th>
               <th>保质期</th>
@@ -211,33 +211,33 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredRecords" :key="record.id" class="table-row">
+            <tr v-for="summary in materialSummary" :key="summary.materialCode" class="table-row">
               <td class="material-info">
                 <div class="material-main">
-                  <span class="material-name">{{ record.materialName }}</span>
-                  <span class="material-type">{{ getMaterialTypeName(record.materialType) }}</span>
+                  <span class="material-name">{{ summary.materialName }}</span>
+                  <span class="material-type">{{ getMaterialTypeName(summary.materialType) }}</span>
                 </div>
                 <div class="material-meta">
-                  <span class="material-grade">{{ getMaterialGradeName(record.materialGrade) }}</span>
+                  <span class="material-grade">{{ getMaterialGradeName(summary.materialGrade) }}</span>
                 </div>
               </td>
               <td class="material-code">
-                <div class="code-main">{{ record.materialCode }}</div>
-                <div class="batch-number">批次: {{ record.batchNumber }}</div>
+                <div class="code-main">{{ summary.materialCode }}</div>
+                <div class="batch-number">批次: {{ summary.batchNumber }}</div>
               </td>
-              <td class="inbound-time">{{ formatDateTime(record.date, record.time) }}</td>
+              <td class="inbound-time">{{ formatDateTime(summary.latestDate, summary.latestTime) }}</td>
               <td class="quantity">
-                <span class="quantity-value">{{ record.quantity }}</span>
-                <span class="material-unit">{{ record.unit }}</span>
+                <span class="quantity-value">{{ summary.totalQuantity }}</span>
+                <span class="material-unit">{{ summary.unit }}</span>
               </td>
-              <td class="unit-price">¥{{ record.unitPrice.toFixed(2) }}</td>
-              <td class="total-price">¥{{ record.amount.toFixed(2) }}</td>
-              <td class="supplier">{{ getSupplierName(record.supplierId) }}</td>
-              <td class="warehouse-location">{{ getWarehouseLocationName(record.warehouseLocation) }}</td>
-              <td class="expiry-date">{{ formatDate(record.expiryDate) }}</td>
+              <td class="unit-price">¥{{ (summary.totalAmount / summary.totalQuantity).toFixed(2) }}</td>
+              <td class="total-price">¥{{ summary.totalAmount.toFixed(2) }}</td>
+              <td class="supplier">{{ getSupplierName(summary.supplier) }}</td>
+              <td class="warehouse-location">{{ getWarehouseLocationName(summary.warehouseLocation) }}</td>
+              <td class="expiry-date">{{ formatDate(summary.expiryDate) }}</td>
               <td class="quality-status">
-                <span :class="['status-badge', getQualityStatusClass(record.qualityStatus)]">
-                  {{ getQualityStatusName(record.qualityStatus) }}
+                <span :class="['status-badge', getQualityStatusClass(summary.qualityStatus)]">
+                  {{ getQualityStatusName(summary.qualityStatus) }}
                 </span>
               </td>
 
@@ -424,7 +424,50 @@ export default {
       return finalResult
     })
     
-    const totalRecords = computed(() => filteredRecords.value.length)
+    // 按物料编码分组汇总数据
+    const materialSummary = computed(() => {
+      const summary = {}
+      
+      filteredRecords.value.forEach(record => {
+        const materialCode = record.materialCode
+        if (!summary[materialCode]) {
+          summary[materialCode] = {
+            materialCode,
+            materialName: record.materialName,
+            materialType: record.materialType,
+            materialGrade: record.materialGrade,
+            unit: record.unit,
+            totalQuantity: 0,
+            totalAmount: 0,
+            supplier: record.supplier,
+            warehouseLocation: record.warehouseLocation,
+            latestDate: record.date,
+            latestTime: record.time,
+            expiryDate: record.expiryDate,
+            qualityStatus: record.qualityStatus,
+            batchNumber: record.batchNumber
+          }
+        }
+        
+        // 累加数量和金额
+        summary[materialCode].totalQuantity += record.quantity || 0
+        summary[materialCode].totalAmount += record.amount || 0
+        
+        // 更新最新日期
+        if (new Date(record.date) > new Date(summary[materialCode].latestDate)) {
+          summary[materialCode].latestDate = record.date
+          summary[materialCode].latestTime = record.time
+          summary[materialCode].expiryDate = record.expiryDate
+          summary[materialCode].qualityStatus = record.qualityStatus
+          summary[materialCode].supplier = record.supplier
+          summary[materialCode].warehouseLocation = record.warehouseLocation
+        }
+      })
+      
+      return Object.values(summary)
+    })
+    
+    const totalRecords = computed(() => materialSummary.value.length)
     const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize.value))
     const visiblePages = computed(() => {
       const pages = []
@@ -489,14 +532,9 @@ export default {
       return gradeName || '未知等级'
     }
 
-    const getSupplierName = (supplierId) => {
-      // 从warehouse_data.js导入的SUPPLIERS中查找
-      const suppliersData = {
-        'SUP001': '福建安溪茶园',
-        'SUP002': '武夷山茶业公司',
-        'SUP003': '包装材料有限公司'
-      }
-      return suppliersData[supplierId] || '未知供应商'
+    const getSupplierName = (supplier) => {
+      // 直接返回供应商名称，因为数据中supplier字段存储的是供应商名称
+      return supplier || '未知供应商'
     }
 
     const getWarehouseLocationName = (locationId) => {
@@ -748,6 +786,7 @@ export default {
       
       // 计算属性
       filteredRecords,
+      materialSummary,
       totalRecords,
       totalPages,
       visiblePages,

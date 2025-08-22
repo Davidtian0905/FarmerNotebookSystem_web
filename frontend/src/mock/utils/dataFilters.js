@@ -164,7 +164,7 @@ export const filterTransactionsByPeriod = (transactions, period, params = {}) =>
  * @returns {Array} 收入交易记录
  */
 export const getIncomeTransactions = (transactions) => {
-  return filterTransactionsByType(transactions, 'INBOUND')
+  return filterTransactionsByType(transactions, 'OUTBOUND')  // OUTBOUND = 出库/销售 = 收入
 }
 
 /**
@@ -173,5 +173,5 @@ export const getIncomeTransactions = (transactions) => {
  * @returns {Array} 支出交易记录
  */
 export const getExpenseTransactions = (transactions) => {
-  return filterTransactionsByType(transactions, 'OUTBOUND')
+  return filterTransactionsByType(transactions, 'INBOUND')   // INBOUND = 入库/采购 = 支出
 }

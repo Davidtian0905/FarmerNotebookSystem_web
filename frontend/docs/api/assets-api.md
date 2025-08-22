@@ -727,18 +727,15 @@ const fetchAssetData = async (period = 'year') => {
 **核心字段**:
 ```javascript
 {
-  id: "IN202501160001",           // 交易ID
-  type: "INBOUND|OUTBOUND",       // 交易类型：入库/出库
+  type: "INBOUND|OUTBOUND",       // 交易类型：支出/收入
   date: "2025-08-01",            // 交易日期
   time: "09:30:00",              // 交易时间
   amount: 4000,                   // 交易金额
   quantity: 50,                   // 交易数量
   unitPrice: 80,                  // 单价
-  productName: "铁观音",          // 产品名称
-  category: "乌龙茶",             // 产品类别
-  supplier: "福建安溪茶园",   // 供应商
-  status: "COMPLETED",            // 交易状态
-  description: "特级铁观音采购"   // 交易描述
+  productName|materialName: "铁观音",          // 物料名称/产品名称
+  materialType|productType: "乌龙茶",             // 物料类别/产品类别
+  supplier|customer: "福建安溪茶园",   // 供应商/客户名称 
 }
 ```
 

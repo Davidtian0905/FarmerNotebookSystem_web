@@ -140,7 +140,6 @@ export const MATERIALS = {
     specification: '500g/包',
     origin: '福建武夷山',
     shelfLife: 36,
-    storageConditions: '阴凉干燥，避光保存'
   },
   MAT003: {
     id: 'MAT003',
@@ -152,7 +151,6 @@ export const MATERIALS = {
     specification: '20cm×15cm×8cm',
     origin: '广东东莞',
     shelfLife: null,
-    storageConditions: '常温保存，防潮'
   }
 }
 
@@ -318,7 +316,6 @@ export const getProductCombos = () => {
       price: 880.00,
       profitRate: 22.73,
       productCount: 1,
-      status: 'active',
       description: '精装铁观音茶叶礼盒'
     },
     {
@@ -347,7 +344,6 @@ export const getProductCombos = () => {
       price: 580.00,
       profitRate: 24.14,
       productCount: 1,
-      status: 'active',
       description: '武夷山大红袍茶叶套装'
     }
   ]
@@ -355,19 +351,18 @@ export const getProductCombos = () => {
 
 // 入库模板数据
 export const INBOUND_TEMPLATES = {
-  TPL001: {
-    inboundTempcode: 'TPL001',
-    inboundTempname: '铁观音茶叶入库标准模板',
+  'TPL001': {
+    inboundTempname: '铁观音模板',
     materialName: '铁观音',
     materialType: '茶叶',
     materialGrade: '特级',
     unit: '斤',
     quantity: 50,
     batchNumber: '第一批春茶',
+    materialCode: 'M_TGY20250820093000',
     unitPrice: 280.00,
-    supplier: 'SUP001',
+    supplier: '福建安溪茶园',
     warehouseLocation: 'A区仓库',
-    storageConditions: '阴凉干燥，避光保存',
     shelfLifeDays: 90,
     expiryDate: '2025-01-15',
     qualityStatus: '合格',
@@ -376,108 +371,26 @@ export const INBOUND_TEMPLATES = {
     createdAt: '2024-01-15 10:30:00',
     updatedAt: '2024-01-15 10:30:00',
   },
-  TPL002: {
-    id: 'TPL002',
-    inboundTempname: '大红袍茶叶入库标准模板',
-    description: '武夷山大红袍茶叶标准入库模板',
-    // 物料信息
-    materialName: '大红袍',
+  'TPL002': {
+    inboundTempname: '乌龙茶模板',
+    materialName: '乌龙茶',
     materialType: '茶叶',
-    materialGrade: '一级',
+    materialGrade: '特级',
     unit: '斤',
-    quantity: 30,
-    batchNumber: '第一批',
-    // 价格信息
-    unitPrice: 350.00,
-    // 供应商信息
-    supplier: 'SUP002',
-    // 仓储信息
+    quantity: 50,
+    batchNumber: '第一批春茶',
+    materialCode: 'M_WLC20250820093000',
+    unitPrice: 280.00,
+    supplier: '福建安溪茶园',
     warehouseLocation: 'A区仓库',
-    storageConditions: '阴凉干燥，避光保存',
-    shelfLifeDays: 180,
-    expiryDate: '2026-01-10',
-    // 质量检验
-    qualityStatus: '待检测',
-    inspector: '李经理',
-    qualityRemarks: '品质上乘，香气持久',
-    // 其他信息
-    specification: '500g/包',
-    origin: '福建武夷山',
-    remarks: '武夷山大红袍，岩韵明显',
-    // 创建信息
-    createdAt: '2024-01-10 14:20:00',
-    updatedAt: '2024-01-20 09:15:00',
-    usageCount: 8,
-    status: 'active'
-  },
-  TPL003: {
-    id: 'TPL003',
-    inboundTempname: '茶叶包装盒入库标准模板',
-    description: '茶叶包装盒标准入库模板',
-    // 物料信息
-    materialName: '茶叶包装盒',
-    materialType: '包装材料',
-    materialGrade: '标准',
-    unit: '个',
-    quantity: 1000,
-    batchNumber: '第一批',
-    // 价格信息
-    unitPrice: 5.50,
-    // 供应商信息
-    supplier: 'SUP003',
-    // 仓储信息
-    warehouseLocation: 'B区仓库',
-    storageConditions: '常温保存，防潮',
-    shelfLife: null,
-    expiryDate: null,
-    // 质量检验
-    qualityStatus: '免检',
-    inspector: '王总',
-    qualityRemarks: '包装完好，质量达标',
-    // 其他信息
-    specification: '20cm×15cm×8cm',
-    origin: '广东东莞',
-    remarks: '环保包装盒，印刷精美',
-    // 创建信息
-    createdAt: '2024-01-08 16:45:00',
-    updatedAt: '2024-01-08 16:45:00',
-    usageCount: 22,
-    status: 'active'
-  },
-  TPL004: {
-    id: 'TPL004',
-    inboundTempname: '茶叶储存罐入库标准模板',
-    description: '茶叶储存罐标准入库模板',
-    // 物料信息
-    materialName: '茶叶储存罐',
-    materialType: '茶叶罐',
-    materialGrade: '一级',
-    unit: '个',
-    quantity: 500,
-    batchNumber: '第一批',
-    // 价格信息
-    unitPrice: 25.00,
-    // 供应商信息
-    supplier: 'SUP003',
-    // 仓储信息
-    warehouseLocation: 'C区仓库',
-    storageConditions: '常温保存',
-    shelfLife: null,
-    expiryDate: null,
-    // 质量检验
+    shelfLifeDays: 90,
+    expiryDate: '2025-01-15',
     qualityStatus: '合格',
-    inspector: '王总',
-    qualityRemarks: '密封性测试通过',
-    // 其他信息
-    specification: '直径12cm，高15cm',
-    origin: '江西景德镇',
-    remarks: '密封性好的茶叶罐',
-    // 创建信息
-    createdAt: '2024-01-05 11:20:00',
-    updatedAt: '2024-01-18 14:30:00',
-    usageCount: 5,
-    status: 'active'
-  }
+    inspector: '张师傅',
+    qualityRemarks: '品质优良，符合标准',
+    createdAt: '2024-01-15 10:30:00',
+    updatedAt: '2024-01-15 10:30:00',
+  },
 }
 
 // 获取入库模板选项
@@ -516,8 +429,7 @@ export const saveInboundTemplate = (templateData) => {
     ...templateData,
     createdAt: new Date().toLocaleString('zh-CN'),
     updatedAt: new Date().toLocaleString('zh-CN'),
-    usageCount: 0,
-    status: 'active'
+    usageCount: 0
   }
   
   // 保存到INBOUND_TEMPLATES

@@ -8,6 +8,7 @@
 **路由路径**: `/inbound-records`  
 **组件文件**: `src/views/InboundRecords.vue`  
 **表单组件**: `src/components/InboundForm.vue`  
+**模板组件**: `src/components/InboundTemplate.vue`  
 
 ## 功能描述
 
@@ -64,7 +65,7 @@ GET /api/inbound-records
 | qualityStatus | string | 否 | 质量状态筛选 | quality_status |
 | warehouseLocation | string | 否 | 仓库位置筛选 | warehouse_location |
 | dateRange | array | 否 | 日期范围筛选 [startDate, endDate] | inbound_time |
-| keyword | string | 否 | 关键词搜索（物料名称、批次号、供应商） | material_name, batch_number, supplier_name |
+| keyword | string | 否 | 关键词搜索（物料名称、批次号、供应商） | material_name, batch_number, supplier |
 
 **响应数据：**
 
@@ -400,7 +401,7 @@ GET /api/materials
 | unitPrice | Number | 是 | 单价 | unit_price | unitPrice |
 | amount | Number | 是 | 总金额 | amount | amount |
 | supplierId | String | 是 | 供应商ID | supplier_id | supplierId |
-| supplier | String | 是 | 供应商名称 | supplier_name | supplier |
+| supplier | String | 是 | 供应商名称 | supplier | supplier |
 | warehouseLocation | String | 是 | 仓库位置ID | warehouse_location | warehouseLocation |
 | inboundTime | DateTime | 是 | 入库时间（ISO格式） | inbound_time | inboundTime |
 | date | String | 是 | 入库日期 | inbound_date | date |

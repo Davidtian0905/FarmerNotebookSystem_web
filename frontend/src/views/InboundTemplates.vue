@@ -98,6 +98,14 @@
                     @click.stop
                   />
                 </div>
+                <div class="edit-field-row">
+                  <input 
+                    v-model="editForm.materialCode" 
+                    class="edit-input material-code-input"
+                    placeholder="物料编码"
+                    @click.stop
+                  />
+                </div>
               </div>
               <!-- 查看模式下的物料信息 -->
               <div v-else class="template-description">
@@ -105,6 +113,7 @@
                 <span v-if="template.materialType" class="separator">{{ template.materialName ? ' | ' : '' }}{{ getMaterialTypeLabel(template.materialType) }}</span>
                 <span v-if="template.materialGrade" class="separator">{{ (template.materialName || template.materialType) ? ' | ' : '' }}{{ getMaterialGradeLabel(template.materialGrade) }}</span>
                 <span v-if="template.batchNumber" class="separator">{{ (template.materialName || template.materialType || template.materialGrade) ? ' | ' : '' }}批号: {{ template.batchNumber }}</span>
+                <span v-if="template.materialCode" class="separator material-code-line"><br>编码: {{ template.materialCode }}</span>
               </div>
             </div>
 
@@ -394,10 +403,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">存储条件</label>
-                  <input v-model="templateForm.storageConditions" type="text" class="form-input">
-                </div>
+
               </div>
 
               <!-- 质量检验 -->
@@ -499,7 +505,6 @@ const templateForm = ref({
   expiryDate: '',
   shelfLifeDays: '',
   warehouseLocation: '',
-  storageConditions: '',
   description: '',
   qualityStatus: '',
   inspector: '',
@@ -548,9 +553,9 @@ const goBack = () => {
   router.push('/inbound-records')
 }
 
-const getSupplierName = (supplierId) => {
-  const supplier = SUPPLIERS[supplierId]
-  return supplier ? supplier.name : '未知供应商'
+const getSupplierName = (supplier) => {
+  // 直接返回供应商名称，因为模板数据中supplier字段存储的是供应商名称
+  return supplier || '未知供应商'
 }
 
 const getShelfLifeText = (days) => {
@@ -598,6 +603,7 @@ const useTemplate = (template) => {
         unit: template.unit,
         materialGrade: template.materialGrade,
         batchNumber: template.batchNumber,
+        materialCode: template.materialCode,
         unitPrice: template.unitPrice,
         supplier: template.supplier,
         shelfLifeDays: template.shelfLifeDays,
@@ -625,6 +631,7 @@ const startEditTemplate = (template) => {
     materialType: template.materialType || '',
     materialGrade: template.materialGrade || '',
     batchNumber: template.batchNumber || '',
+    materialCode: template.materialCode || '',
     unitPrice: template.unitPrice || 0,
     quantity: template.quantity || 0,
     unit: template.unit || 'kg',
@@ -706,7 +713,6 @@ const resetForm = () => {
     expiryDate: '',
     shelfLifeDays: '',
     warehouseLocation: '',
-    storageConditions: '',
     description: '',
     qualityStatus: '',
     inspector: '',

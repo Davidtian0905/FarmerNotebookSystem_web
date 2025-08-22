@@ -89,12 +89,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   // 增长率计算属性
-  const inboundTrend = computed(() => {
-    return calculateTrendRate('total_income')
+  const incomeTrend = computed(() => {
+    return calculateTrendRate('total_income')  // 收入趋势
   })
 
-  const salesTrend = computed(() => {
-    return calculateTrendRate('total_expense')
+  const expenseTrend = computed(() => {
+    return calculateTrendRate('total_expense')  // 支出趋势
   })
 
   const profitTrend = computed(() => {
@@ -230,8 +230,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     avgDailyIncome,
     avgDailyExpense,
     avgDailyProfit,
-    inboundTrend,
-    salesTrend,
+    incomeTrend,
+    expenseTrend,
     profitTrend,
 
     // 动作
