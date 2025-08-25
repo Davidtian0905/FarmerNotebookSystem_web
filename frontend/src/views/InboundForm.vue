@@ -144,7 +144,7 @@
                 >
               </div>
               <div class="form-group">
-                <label class="form-label">编号</label>
+                <label class="form-label">物料编号</label>
                 <input 
                   v-model="formData.materialCode" 
                   type="text" 
@@ -492,7 +492,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Layout from '@/components/layout/Layout.vue'
-import { createInboundRecord, getInboundBaseData } from '@/api/inbound'
+import { createInboundRecord } from '@/api/inbound'
 import { 
   getMaterialTypeOptions, 
   getMaterialGradeOptions, 
@@ -540,9 +540,7 @@ const baseData = reactive({
   materialGrades: [],
   warehouseLocations: [],
   suppliers: [],
-  materials: [],
-  qualityStatuses: [],
-  recordStatuses: []
+  qualityStatuses: []
 })
 
 // 加载状态
@@ -566,9 +564,11 @@ const showSearchResults = ref(false)
 const searchResults = ref([])
 const searchKeyword = ref('')
 
-// 计算总金额
+// 计算属性
 const amount = computed(() => {
-  return (formData.quantity * formData.unitPrice).toFixed(2)
+  const qty = Number(formData.quantity) || 0
+  const price = Number(formData.unitPrice) || 0
+  return (qty * price).toFixed(2)
 })
 
 // 计算综合评分
@@ -589,14 +589,14 @@ function generateMaterialCode() {
     if (/[\u4e00-\u9fa5]/.test(char)) {
       const pinyinMap = {
         '乌': 'W', '龙': 'L', '茶': 'C', '绿': 'L', '红': 'H', '白': 'B', 
-        '黄': 'H', '黑': 'H', '青': 'Q', '花': 'H', '铁': 'T', '观': 'G',
-        '音': 'Y', '大': 'D', '红': 'H', '袍': 'P', '碧': 'B', '螺': 'L',
+        '黄': 'H', '黑': 'HE', '青': 'Q', '花': 'H', '铁': 'T', '观': 'G',
+        '音': 'Y', '大': 'D', '袍': 'P', '碧': 'B', '螺': 'L',
         '春': 'C', '毛': 'M', '尖': 'J', '银': 'Y', '针': 'Z', '寿': 'S',
-        '眉': 'M', '贡': 'G', '眉': 'M', '安': 'A', '吉': 'J', '白': 'B',
-        '片': 'P', '六': 'L', '安': 'A', '瓜': 'G', '片': 'P', '太': 'T',
-        '平': 'P', '猴': 'H', '魁': 'K', '信': 'X', '阳': 'Y', '毛': 'M',
-        '尖': 'J', '庐': 'L', '山': 'S', '云': 'Y', '雾': 'W', '竹': 'Z',
-        '叶': 'Y', '青': 'Q', '都': 'D', '匀': 'Y', '毛': 'M', '尖': 'J'
+        '眉': 'M', '贡': 'G', '安': 'A', '吉': 'J',
+        '片': 'P', '六': 'L', '瓜': 'G', '太': 'T',
+        '平': 'P', '猴': 'H', '魁': 'K', '信': 'X', '阳': 'Y',
+        '庐': 'LU', '山': 'S', '云': 'Y', '雾': 'W', '竹': 'Z',
+        '叶': 'Y', '都': 'D', '匀': 'Y'
       }
       prefix += pinyinMap[char] || char.toUpperCase()
     } else {
@@ -616,7 +616,7 @@ function generateMaterialCode() {
   const minute = String(now.getMinutes()).padStart(2, '0')
   const second = String(now.getSeconds()).padStart(2, '0')
   
-  return `${prefix}${year}${month}${day}${hour}${minute}${second}`
+  return `M_${prefix}${year}${month}${day}${hour}${minute}${second}`
 }
 
 // 搜索物料
@@ -659,7 +659,7 @@ const searchMaterials = (keyword) => {
 }
 
 // 选择搜索结果
-const selectMaterial = (material) => {
+const selectMaterial = async (material) => {
   formData.materialName = material.materialName
   formData.materialCode = material.materialCode
   formData.materialType = material.materialType
@@ -667,9 +667,82 @@ const selectMaterial = (material) => {
   formData.unit = material.unit
   formData.supplier = material.supplier
   
+  // 自动导入对应物料编码的图片
+  await loadMaterialImages(material.materialCode)
+  
   searchResults.value = []
   showSearchResults.value = false
   searchKeyword.value = material.materialName
+}
+
+// 加载物料图片
+const loadMaterialImages = async (materialCode) => {
+  if (!materialCode) return
+  
+  try {
+    // 清空现有图片
+    formData.images = []
+    
+    // 检查物料编码对应的文件夹是否存在
+    const basePath = `/Inbound/${materialCode}`
+    
+    // 尝试加载图片文件（image0.png, image1.png, etc.）
+    const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp']
+    let imageIndex = 0
+    let consecutiveNotFound = 0 // 连续未找到图片的计数
+    
+    while (imageIndex < 20 && consecutiveNotFound < 3) { // 最多尝试20张图片，连续3次未找到则停止
+      let imageFound = false
+      
+      // 尝试所有扩展名
+      for (const ext of imageExtensions) {
+        const imageName = `image${imageIndex}.${ext}`
+        const imagePath = `${basePath}/${imageName}`
+        
+        try {
+          // 直接尝试获取图片，不使用HEAD请求
+          const response = await fetch(imagePath)
+          if (response.ok && response.headers.get('content-type')?.startsWith('image/')) {
+            const blob = await response.blob()
+            const imageUrl = URL.createObjectURL(blob)
+            
+            formData.images.push({
+              name: imageName,
+              url: imageUrl,
+              path: imagePath,
+              fileName: imageName,
+              materialCode: materialCode,
+              isThumbnail: imageIndex === 0,
+              isAutoLoaded: true // 标记为自动加载的图片
+            })
+            
+            imageFound = true
+            consecutiveNotFound = 0 // 重置连续未找到计数
+            console.log(`自动加载图片: ${imagePath}`)
+            break // 找到图片后跳出扩展名循环
+          }
+        } catch (error) {
+          // 图片不存在或无法访问，继续尝试下一个扩展名
+          continue
+        }
+      }
+      
+      if (!imageFound) {
+        consecutiveNotFound++
+        console.log(`未找到图片: image${imageIndex}.*，连续未找到次数: ${consecutiveNotFound}`)
+      }
+      
+      imageIndex++
+    }
+    
+    if (formData.images.length > 0) {
+      console.log(`成功加载 ${formData.images.length} 张图片，物料编码: ${materialCode}`)
+    } else {
+      console.log(`物料编码 ${materialCode} 没有找到任何图片文件`)
+    }
+  } catch (error) {
+    console.log(`物料编码 ${materialCode} 对应的图片文件夹不存在或无法访问:`, error)
+  }
 }
 
 // 处理输入框失焦事件
@@ -697,21 +770,24 @@ const updateMaterialCode = () => {
   }
 }
 
-// 计算总金额
-const calculateTotal = () => {
-  // 总金额通过computed自动计算
-}
+// 删除了重复的计算总金额函数，因为已经有computed属性处理
 
 // 计算保质期日期
 const calculateExpiryDate = () => {
-  if (!formData.shelfLifeDays || formData.shelfLifeDays === '9999') {
+  if (!formData.shelfLifeDays || formData.shelfLifeDays === '9999' || formData.shelfLifeDays === '') {
+    formData.expiryDate = ''
+    return
+  }
+  
+  const shelfLifeDaysNum = parseInt(formData.shelfLifeDays)
+  if (isNaN(shelfLifeDaysNum) || shelfLifeDaysNum <= 0) {
     formData.expiryDate = ''
     return
   }
   
   const today = new Date()
   const expiryDate = new Date(today)
-  expiryDate.setDate(today.getDate() + parseInt(formData.shelfLifeDays))
+  expiryDate.setDate(today.getDate() + shelfLifeDaysNum)
   
   formData.expiryDate = expiryDate.toISOString().split('T')[0]
 }
@@ -759,19 +835,30 @@ const processFiles = (files) => {
     if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        // 生成唯一文件名
-        const timestamp = Date.now()
-        const randomStr = Math.random().toString(36).substring(2, 8)
-        const fileExtension = file.name.split('.').pop()
-        const newFileName = `material_${timestamp}_${randomStr}.${fileExtension}`
-        const imagePath = `/src/assets/images/${newFileName}`
+        // 使用物料编码作为文件夹名称，如果没有物料编码则使用默认值
+        const materialCode = formData.materialCode || 'default'
+        
+        // 计算当前图片索引
+        const currentIndex = formData.images.length
+        
+        // 第一张图片作为缩略图，命名为image0，其他图片从image1开始
+        let fileName
+        if (currentIndex === 0) {
+          fileName = 'image0.png' // 缩略图统一为PNG格式
+        } else {
+          fileName = `image${currentIndex}.png` // 其他图片也转换为PNG格式
+        }
+        
+        const imagePath = `/public/Inbound/${materialCode}/${fileName}`
         
         formData.images.push({
           name: file.name,
           url: e.target.result,
           file: file,
           path: imagePath,
-          fileName: newFileName
+          fileName: fileName,
+          materialCode: materialCode,
+          isThumbnail: currentIndex === 0 // 标记是否为缩略图
         })
       }
       reader.readAsDataURL(file)
@@ -863,14 +950,7 @@ const loadBaseData = async () => {
     baseData.suppliers = getSupplierOptions()
     baseData.qualityStatuses = getQualityStatusOptions()
     
-    // 其他数据仍从API获取
-    const response = await getInboundBaseData()
-    if (response.error === 0) {
-      baseData.materials = response.body.materials || []
-      baseData.recordStatuses = response.body.recordStatuses || []
-    } else {
-      console.error('加载基础数据失败:', response.message)
-    }
+    console.log('基础数据加载完成')
   } catch (error) {
     console.error('加载基础数据失败:', error)
     // 即使API失败，也要确保基础选项可用
@@ -936,17 +1016,18 @@ const saveImagesToLocal = async () => {
   
   for (const image of formData.images) {
     try {
-      // 这里模拟保存图片到本地路径的过程
-      // 在实际应用中，可能需要调用文件系统API或上传到服务器
+      const materialCode = image.materialCode || formData.materialCode || 'default'
       const savedImage = {
         name: image.name,
         path: image.path,
         fileName: image.fileName,
-        url: image.url // 保留预览URL
+        materialCode: materialCode,
+        url: image.url, // 保留预览URL
+        isThumbnail: image.isThumbnail || false // 保留缩略图标记
       }
       savedImages.push(savedImage)
       
-      console.log(`图片已保存到: ${image.path}`)
+      console.log(`图片已保存到: ${image.path} (物料编码: ${materialCode}) ${image.isThumbnail ? '[缩略图]' : ''}`)
     } catch (error) {
       console.error('保存图片失败:', error)
     }
@@ -954,6 +1035,8 @@ const saveImagesToLocal = async () => {
   
   return savedImages
 }
+
+// 删除了loadMaterialImages函数，因为它包含无效的模拟数据且不符合实际需求
 
 // 处理保存操作
 const handleSave = async () => {
@@ -963,14 +1046,13 @@ const handleSave = async () => {
 // 处理取消操作
 const handleCancel = () => {
   if (confirm('确定要取消吗？未保存的数据将丢失。')) {
-    router.push('/warehouse/inbound-records')
+    router.push('/inbound-records')
   }
 }
 
 // 刷新基础数据的方法
 const refreshBaseData = () => {
   loadBaseData()
-  console.log('基础数据已刷新')
 }
 
 // 生命周期
@@ -987,8 +1069,7 @@ onMounted(() => {
       // 填充表单数据
       Object.keys(templateData).forEach(key => {
         if (formData.hasOwnProperty(key)) {
-          // 特殊处理供应商字段：将供应商名称转换为供应商ID
-          if (key === 'supplier' && templateData[key]) {
+    if (key === 'supplier' && templateData[key]) {
             // 查找对应的供应商ID
             const supplierOption = baseData.suppliers.find(supplier => 
               supplier.label === templateData[key] || supplier.value === templateData[key]
@@ -1000,9 +1081,6 @@ onMounted(() => {
         }
       })
       
-      // 生成物料编码
-      generateMaterialCode()
-      
       // 如果有供应商数据，显示供应商评价
       if (templateData.supplier) {
         showSupplierRating.value = true
@@ -1013,8 +1091,7 @@ onMounted(() => {
         calculateExpiryDate()
       }
       
-      console.log('模板数据已加载:', templateData)
-      console.log('处理后的表单数据:', formData)
+console.log('模板数据已加载')
     } catch (error) {
       console.error('解析模板数据失败:', error)
     }
@@ -1213,14 +1290,6 @@ onUnmounted(() => {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
-.lg\:grid-cols-2 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.lg\:grid-cols-3 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
 @media (min-width: 1024px) {
   .lg\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1278,6 +1347,7 @@ onUnmounted(() => {
   position: relative;
 }
 
+/* 位置和变换工具类 */
 .absolute {
   position: absolute;
 }
@@ -1298,38 +1368,17 @@ onUnmounted(() => {
   top: 0.75rem;
 }
 
-.transform {
-  transform: var(--tw-transform);
+.transform.-translate-y-1\/2 {
+  transform: translateY(-50%);
 }
 
-.-translate-y-1\/2 {
-  --tw-translate-y: -50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.text-gray-400 {
-  color: #9ca3af;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-gray-600 {
-  color: #4b5563;
-}
-
-.text-gray-700 {
-  color: #374151;
-}
-
-.text-gray-800 {
-  color: #1f2937;
-}
-
-.hover\:text-gray-600:hover {
-  color: #4b5563;
-}
+/* 文本颜色工具类 */
+.text-gray-400 { color: #9ca3af; }
+.text-gray-500 { color: #6b7280; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-800 { color: #1f2937; }
+.hover\:text-gray-600:hover { color: #4b5563; }
 
 .pl-8 {
   padding-left: 2rem;
@@ -1383,25 +1432,12 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.flex {
-  display: flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.space-x-4 > * + * {
-  margin-left: 1rem;
-}
-
-.space-y-4 > * + * {
-  margin-top: 1rem;
-}
-
-.space-y-6 > * + * {
-  margin-top: 1.5rem;
-}
+/* 布局工具类 */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.space-x-4 > * + * { margin-left: 1rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
 
 /* 供应商评价样式 */
 .supplier-rating {
@@ -1527,17 +1563,9 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-.text-yellow-400 {
-  color: #fbbf24;
-}
-
-.text-gray-300 {
-  color: #d1d5db;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
+/* 颜色工具类 */
+.text-yellow-400 { color: #fbbf24; }
+.text-gray-300 { color: #d1d5db; }
 
 .overall-rating {
   display: flex;
@@ -1548,37 +1576,15 @@ onUnmounted(() => {
   margin-top: 12px;
 }
 
-.text-sm {
-  font-size: 0.875rem;
-}
-
-.text-md {
-  font-size: 1rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-}
-
-.font-medium {
-  font-weight: 500;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.text-green-600 {
-  color: #059669;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-4 {
-  margin-bottom: 1rem;
-}
+/* 文本和间距工具类 */
+.text-sm { font-size: 0.875rem; }
+.text-md { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+.text-green-600 { color: #059669; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
 
 /* 文件上传样式 */
 .upload-area {
@@ -1610,13 +1616,10 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.text-4xl {
-  font-size: 2.25rem;
-}
-
-.hidden {
-  display: none;
-}
+/* 其他工具类 */
+.text-4xl { font-size: 2.25rem; }
+.hidden { display: none; }
+.cursor-pointer { cursor: pointer; }
 
 .image-preview-grid {
   display: grid;

@@ -197,11 +197,11 @@
                             <div class="relative">
                                 <select id="productName" name="productName" class="form-input" required onchange="updateProductInfo()">
                                     <option value="">请选择商品</option>
-                                    <option value="精品红茶礼盒">精品红茶礼盒</option>
-                                    <option value="有机绿茶散装">有机绿茶散装</option>
-                                    <option value="白茶特级礼盒">白茶特级礼盒</option>
-                                    <option value="茶具套装">茶具套装</option>
-                                    <option value="混合茶叶礼盒">混合茶叶礼盒</option>
+                                    <option value="精品红茶礼盒">精品红茶礼盒 产品编码：1001</option>
+                                    <option value="有机绿茶散装">有机绿茶散装 产品编码：1002</option>
+                                    <option value="白茶特级礼盒">白茶特级礼盒  产品编码：1003</option>
+                                    <option value="茶具套装">茶具套装 产品编码：1004</option>
+                                    <option value="混合茶叶礼盒">混合茶叶礼盒 产品编码：1005</option>
                                 </select>
                                 <button type="button" class="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500" onclick="window.location.href='product-composition.html'">
                                     <i class="fas fa-plus" title="创建新商品"></i>
@@ -215,6 +215,43 @@
                                        class="form-input" placeholder="1" min="1" value="1" 
                                        oninput="updateTotalAmount()">
                                 <span class="text-sm text-gray-500" id="productUnit">件</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+           <!-- 价格信息 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">销售价格</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="form-group">
+                            <label for="unitPrice" class="form-label">销售单价</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
+                                <input type="number" id="unitPrice" name="unitPrice" 
+                                       class="form-input pl-8" placeholder="0.00" step="0.01"
+                                       oninput="updateTotalAmount()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="discountAmount" class="form-label">销售数量</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
+                                <input type="number" id="discountAmount" name="discountAmount" 
+                                       class="form-input pl-8 bg-gray-50" placeholder="0.00" step="0.01" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="finalPrice" class="form-label">销售总价</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
+                                <input type="number" id="finalPrice" name="finalPrice" 
+                                       class="form-input pl-8 font-bold text-green-600" placeholder="0.00" step="0.01"
+                                       oninput="updateDiscountFromFinal()">
                             </div>
                         </div>
                     </div>
@@ -269,42 +306,7 @@
                 </div>
             </div>
 
-            <!-- 价格信息 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">价格信息</h3>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="form-group">
-                            <label for="unitPrice" class="form-label">商品单价</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
-                                <input type="number" id="unitPrice" name="unitPrice" 
-                                       class="form-input pl-8" placeholder="0.00" step="0.01"
-                                       oninput="updateTotalAmount()">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="discountAmount" class="form-label">折扣金额</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
-                                <input type="number" id="discountAmount" name="discountAmount" 
-                                       class="form-input pl-8 bg-gray-50" placeholder="0.00" step="0.01" readonly>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="finalPrice" class="form-label">最终销售价格</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
-                                <input type="number" id="finalPrice" name="finalPrice" 
-                                       class="form-input pl-8 font-bold text-green-600" placeholder="0.00" step="0.01"
-                                       oninput="updateDiscountFromFinal()">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+ 
 
             <!-- 其他信息 -->
             <div class="card">

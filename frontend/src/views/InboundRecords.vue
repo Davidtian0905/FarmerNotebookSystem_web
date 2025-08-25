@@ -213,12 +213,22 @@
           <tbody>
             <tr v-for="summary in materialSummary" :key="summary.materialCode" class="table-row">
               <td class="material-info">
-                <div class="material-main">
-                  <span class="material-name">{{ summary.materialName }}</span>
-                  <span class="material-type">{{ getMaterialTypeName(summary.materialType) }}</span>
-                </div>
-                <div class="material-meta">
-                  <span class="material-grade">{{ getMaterialGradeName(summary.materialGrade) }}</span>
+                <div class="material-layout">
+                  <div class="material-thumbnail-container">
+                    <div class="material-thumbnail" v-if="getMaterialImages(summary.materialCode).length > 0" @click="openImagePreview(summary.materialCode, summary.materialName)">
+                      <img :src="getMaterialImages(summary.materialCode)[0]" :alt="summary.materialName" class="thumbnail-image">
+                    </div>
+                    <div class="material-placeholder" v-else>
+                      <i class="fas fa-image"></i>
+                    </div>
+                  </div>
+                  <div class="material-info-right">
+                    <div class="material-name">{{ summary.materialName }}</div>
+                    <div class="material-tags">
+                      <span class="material-type">{{ getMaterialTypeName(summary.materialType) }}</span>
+                      <span class="material-grade">{{ getMaterialGradeName(summary.materialGrade) }}</span>
+                    </div>
+                  </div>
                 </div>
               </td>
               <td class="material-code">
@@ -295,12 +305,59 @@
         </div>
       </div>
     </div>
+
     </div>
   </Layout>
+  
+  <!-- 图片预览模态框 - 移到Layout外部确保显示在最上层 -->
+  <div v-if="showImagePreview" class="image-preview-modal" @click="closeImagePreview">
+    <div class="image-preview-content" @click.stop>
+      <button class="image-close-btn" @click="closeImagePreview">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <!-- 左右切换按钮 -->
+      <button 
+        v-if="previewImages.length > 1" 
+        class="image-nav-btn prev" 
+        @click="prevImage"
+        :disabled="currentImageIndex === 0"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      
+      <button 
+        v-if="previewImages.length > 1" 
+        class="image-nav-btn next" 
+        @click="nextImage"
+        :disabled="currentImageIndex === previewImages.length - 1"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      
+      <!-- 图片显示区域 -->
+      <div class="image-display">
+        <img 
+          v-if="previewImages[currentImageIndex]" 
+          :src="previewImages[currentImageIndex]" 
+          :alt="currentMaterialName" 
+          class="preview-image"
+        >
+      </div>
+      
+      <!-- 图片信息 -->
+      <div class="image-info">
+        <div class="image-title">{{ currentMaterialName }}</div>
+        <div class="image-counter" v-if="previewImages.length > 1">
+          {{ currentImageIndex + 1 }} / {{ previewImages.length }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getWarehouseData } from '@/mock/database_flow.js'
 import { getMaterialTypeOptions, getMaterialGradeOptions, getWarehouseLocationOptions, getSupplierOptions } from '@/mock/warehouse_data.js'
@@ -352,76 +409,37 @@ export default {
     const currentPage = ref(1)
     const pageSize = ref(20)
     
-    // 筛选条件
-    const filters = reactive({
-      materialType: '',
-      materialGrade: '',
-      warehouseLocation: '',
-      startDate: '',
-      endDate: ''
-    })
+    // 图片预览相关数据
+    const showImagePreview = ref(false)
+const previewImages = ref([])
+const currentImageIndex = ref(0)
+const currentMaterialName = ref('')
+
+// 物料图片缓存
+const materialImagesCache = ref({})
+    
+
 
     // 计算属性
     const filteredRecords = computed(() => {
-      console.log('🔍 [DEBUG] filteredRecords 计算开始')
-      console.log('🔍 [DEBUG] records.value 当前值:', records.value)
-      console.log('🔍 [DEBUG] records.value 长度:', records.value.length)
-      
-      let result = [...records.value] // 由于loadData已经筛选了入库记录，这里不需要再次筛选
-      console.log('🔍 [DEBUG] 初始result长度:', result.length)
+      let result = [...records.value]
       
       // 搜索过滤
       if (searchQuery.value) {
-        console.log('🔍 [DEBUG] 应用搜索过滤，查询词:', searchQuery.value)
         const query = searchQuery.value.toLowerCase()
         result = result.filter(record => 
           (record.materialName && record.materialName.toLowerCase().includes(query)) ||
           (record.materialCode && record.materialCode.toLowerCase().includes(query)) ||
           (record.batchNumber && record.batchNumber.toLowerCase().includes(query))
         )
-        console.log('🔍 [DEBUG] 搜索过滤后result长度:', result.length)
-      }
-      
-      // 类型过滤
-      if (filters.materialType) {
-        result = result.filter(record => record.materialType === filters.materialType)
-      }
-      
-      // 等级过滤
-      if (filters.materialGrade) {
-        result = result.filter(record => record.materialGrade === filters.materialGrade)
-      }
-      
-      // 仓库位置过滤
-      if (filters.warehouseLocation) {
-        result = result.filter(record => record.warehouseLocation === filters.warehouseLocation)
-      }
-      
-      // 时间范围过滤
-      if (filters.startDate) {
-        result = result.filter(record => {
-          const recordDate = record.date
-          return new Date(recordDate) >= new Date(filters.startDate)
-        })
-      }
-      if (filters.endDate) {
-        result = result.filter(record => {
-          const recordDate = record.date
-          return new Date(recordDate) <= new Date(filters.endDate)
-        })
       }
 
-      // 按入库时间排序（最新的在前）- 使用date字段
-      const finalResult = result.sort((a, b) => {
+      // 按入库时间排序（最新的在前）
+      return result.sort((a, b) => {
         const dateA = a.date
         const dateB = b.date
         return new Date(dateB) - new Date(dateA)
       })
-      
-      console.log('✅ [DEBUG] filteredRecords 最终结果长度:', finalResult.length)
-      console.log('✅ [DEBUG] filteredRecords 最终结果:', finalResult)
-      
-      return finalResult
     })
     
     // 按物料编码分组汇总数据
@@ -515,6 +533,15 @@ export default {
         // 初始化自定义设置数据
         initializeCustomSettings()
         
+        // 预加载所有物料的图片信息
+        const uniqueMaterialCodes = [...new Set(records.value.map(record => record.materialCode))]
+        console.log('🖼️ [DEBUG] 开始预加载图片，物料编码数量:', uniqueMaterialCodes.length)
+        
+        for (const materialCode of uniqueMaterialCodes) {
+          await loadMaterialImages(materialCode)
+        }
+        
+        console.log('🖼️ [DEBUG] 图片预加载完成，缓存内容:', materialImagesCache.value)
         console.log('🎉 [DEBUG] 数据加载完成！')
       } catch (error) {
         console.error('❌ [ERROR] 加载数据失败:', error)
@@ -573,9 +600,7 @@ export default {
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
-    const applyFilters = () => {
-      currentPage.value = 1
-    }
+
 
     const handleSearch = () => {
       currentPage.value = 1
@@ -635,6 +660,133 @@ export default {
     const closeModal = () => {
       showAddInboundModal.value = false
     }
+
+    // 图片预览方法
+const openImagePreview = async (materialCode, materialName) => {
+  // 根据物料编码获取该文件夹内所有预览图片路径（image1-N，不包含image0）
+  const imagePaths = await getAllMaterialImages(materialCode)
+  
+  // 只有当存在预览图片时才显示预览框
+  if (imagePaths.length > 0) {
+    previewImages.value = imagePaths
+    currentImageIndex.value = 0
+    currentMaterialName.value = materialName
+    showImagePreview.value = true
+    
+    // 强制重渲染机制：使用nextTick确保DOM更新
+    await nextTick()
+    console.log('图片预览模态框已显示，共', imagePaths.length, '张预览图片')
+  } else {
+    console.log('该物料没有预览图片（image1-N），不显示预览框')
+  }
+}
+
+    const closeImagePreview = () => {
+      showImagePreview.value = false
+      previewImages.value = []
+      currentImageIndex.value = 0
+      currentMaterialName.value = ''
+    }
+
+    const prevImage = () => {
+      if (currentImageIndex.value > 0) {
+        currentImageIndex.value--
+      }
+    }
+
+    const nextImage = () => {
+      if (currentImageIndex.value < previewImages.value.length - 1) {
+        currentImageIndex.value++
+      }
+    }
+
+// 预加载物料缩略图信息（只加载image0）
+const loadMaterialImages = async (materialCode) => {
+  if (!materialCode || materialImagesCache.value[materialCode]) return
+  
+  try {
+    // 只检查image0的各种格式作为缩略图
+    const thumbnailFormats = [
+      `/Inbound/${materialCode}/image0.jpg`,
+      `/Inbound/${materialCode}/image0.png`,
+      `/Inbound/${materialCode}/image0.jpeg`
+    ]
+    
+    let found = false
+    for (const thumbnailPath of thumbnailFormats) {
+      try {
+        await new Promise((resolve, reject) => {
+          const img = new Image()
+          img.onload = () => resolve()
+          img.onerror = () => reject()
+          img.src = thumbnailPath
+        })
+        materialImagesCache.value[materialCode] = [thumbnailPath]
+        found = true
+        break
+      } catch {
+        continue
+      }
+    }
+    
+    // 如果image0不存在，设置为空数组
+    if (!found) {
+      materialImagesCache.value[materialCode] = []
+    }
+  } catch (error) {
+    console.error('加载物料缩略图失败:', error)
+    materialImagesCache.value[materialCode] = []
+  }
+}
+
+// 获取物料图片的方法（同步）
+const getMaterialImages = (materialCode) => {
+  if (!materialCode) return []
+  return materialImagesCache.value[materialCode] || []
+}
+
+// 获取物料文件夹内预览图片的方法（image1-N，不包含image0）
+const getAllMaterialImages = async (materialCode) => {
+  if (!materialCode) {
+    return []
+  }
+  
+  try {
+    const images = []
+    const baseUrl = `/Inbound/${materialCode}/`
+    
+    // 预览图片文件名模式（从image1开始，不包含image0）
+    const imagePatterns = [
+      'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg', 'image9.jpg',
+      'image1.png', 'image2.png', 'image3.png', 'image4.png', 'image5.png', 'image6.png', 'image7.png', 'image8.png', 'image9.png',
+      'image1.jpeg', 'image2.jpeg', 'image3.jpeg', 'image4.jpeg', 'image5.jpeg', 'image6.jpeg', 'image7.jpeg', 'image8.jpeg', 'image9.jpeg'
+    ]
+    
+    // 检查每个可能的图片文件是否存在
+    for (const pattern of imagePatterns) {
+      const imagePath = baseUrl + pattern
+      try {
+        // 创建一个Image对象来测试图片是否存在
+        await new Promise((resolve, reject) => {
+          const img = new Image()
+          img.onload = () => resolve()
+          img.onerror = () => reject()
+          img.src = imagePath
+        })
+        images.push(imagePath)
+      } catch {
+        // 图片不存在，跳过
+        continue
+      }
+    }
+    
+    // 如果没有找到任何预览图片，返回空数组（不再返回image0作为默认）
+    return images
+  } catch (error) {
+    console.error('获取物料图片失败:', error)
+    return []
+  }
+}
 
     // 自定义设置方法
     const addMaterialType = () => {
@@ -777,7 +929,12 @@ export default {
       searchQuery,
       currentPage,
       pageSize,
-      filters,
+      
+      // 图片预览数据
+      showImagePreview,
+      previewImages,
+      currentImageIndex,
+      currentMaterialName,
       
       // 自定义设置数据
       customMaterialTypes,
@@ -800,7 +957,6 @@ export default {
       getQualityStatusClass,
       formatDate,
       formatDateTime,
-      applyFilters,
       handleSearch,
       goToPage,
       refreshRecords,
@@ -813,6 +969,14 @@ export default {
       deleteRecord,
       handleAddInbound,
       closeModal,
+      
+      // 图片预览方法
+    getMaterialImages,
+    getAllMaterialImages,
+    openImagePreview,
+    closeImagePreview,
+    prevImage,
+    nextImage,
       
       // 自定义设置方法
       initializeCustomSettings,
@@ -926,41 +1090,7 @@ export default {
   margin: 0;
 }
 
-/* 筛选区域 */
-.filter-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
-.filter-row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-size: 14px;
-  color: #333;
-  white-space: nowrap;
-}
-
-.filter-group select,
-.filter-group input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-}
 
 /* 表格区域 */
 .records-table {
@@ -1043,17 +1173,37 @@ export default {
   min-width: 200px;
 }
 
-.material-main {
+.material-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.material-thumbnail-container {
+  flex-shrink: 0;
+}
+
+.material-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 50px; /* 与缩略图高度一致 */
+}
+
+.material-tags {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .material-name {
   font-weight: 600;
   color: #1a1a1a;
   font-size: 16px;
+  line-height: 1.2;
+  margin-bottom: 4px;
 }
 
 .material-type {
@@ -1064,19 +1214,12 @@ export default {
   font-size: 12px;
 }
 
-.material-meta {
-  display: flex;
-  gap: 8px;
-  font-size: 12px;
-  color: #666;
-  margin-top: 4px;
-}
-
 .material-grade {
   background: #f3e5f5;
   color: #7b1fa2;
   padding: 2px 6px;
   border-radius: 3px;
+  font-size: 12px;
 }
 
 .material-code {
@@ -1444,49 +1587,155 @@ export default {
   content: "🗑";
 }
 
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .lg\:grid-cols-3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* 图片预览模态框样式 */
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000000;
+  margin: 0;
+  padding: 0;
+  padding-top: 80px;
 }
 
-@media (max-width: 768px) {
-  .inbound-records {
-    padding: 16px;
-  }
-  
-  .page-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  
-  .action-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .filter-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .table-actions {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  
-  .search-box {
-    width: 100%;
-  }
-  
-  .lg\:grid-cols-3 {
-    grid-template-columns: 1fr;
-  }
-  
-  .gap-6 {
-    gap: 16px;
-  }
+.image-preview-content {
+  position: relative;
+  width: 1080px;
+  height: 720px;
+  margin-left: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+  transition: all 0.3s ease;
+  z-index: 1000001;
+}
+
+.image-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav-btn.prev {
+  left: 15px;
+}
+
+.image-nav-btn.next {
+  right: 15px;
+}
+
+.image-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  transition: all 0.3s ease;
+  z-index: 1000001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.image-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+
+.image-info {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  z-index: 1000001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.material-thumbnail {
+  margin-right: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.material-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  border: 1px solid #e0e0e0;
+}
+
+.material-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+}
+
 </style>

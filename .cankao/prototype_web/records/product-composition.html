@@ -244,12 +244,13 @@
                                     <td class="p-3">
                                         <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateMaterial(this, 0)">
                                             <option value="">请选择物料</option>
-                                            <option value="成品红茶">成品红茶</option>
-                                            <option value="成品绿茶">成品绿茶</option>
-                                            <option value="成品白茶">成品白茶</option>
-                                            <option value="礼品袋">礼品袋</option>
-                                            <option value="罐子">罐子</option>
-                                            <option value="包装盒">包装盒</option>
+                                            <option value="成品红茶">成品红茶 物料编码：M_DHP20250820093000</option>
+                                            <option value="成品绿茶">成品绿茶 物料编码：M_DHP20250820093001</option>
+                                            <option value="成品白茶">成品白茶 物料编码：M_DHP20250820093002</option>
+                                            <option value="礼品袋">礼品袋 物料编码：M_DHP20250820093000</option>
+                                            <option value="罐子">罐子 物料编码：M_DHP20250820093003</option>
+                                            <option value="包装盒">包装盒 物料编码：M_DHP20250820093004</option>
+
                                         </select>
                                     </td>
                                     <td class="p-3 text-center">
@@ -300,16 +301,6 @@
                         </div>
 
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600">物流成本</span>
-                            <div class="relative w-32">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
-                                <input type="number" placeholder="0.00" step="0.01" id="logisticsCostInput"
-                                       class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg text-right"
-                                       oninput="updateCostSummary()">
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">商品利润率</span>
                             <div class="relative w-32">
                                 <input type="number" placeholder="25" step="0.1" id="profitMarginInput"
@@ -332,12 +323,12 @@
             <!-- 销售总价和预计利润 -->
             <div class="card profit-display">
                 <div class="card-header">
-                    <h3 class="card-title">销售定价</h3>
+                    <h3 class="card-title">商品定价</h3>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
-                            <label for="finalPrice" class="form-label">最终销售价格</label>
+                            <label for="finalPrice" class="form-label">商品价格</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">¥</span>
                                 <input type="number" id="finalPrice" name="finalPrice" 
@@ -359,7 +350,8 @@
             <!-- 组合成本数量和库存扣除 -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">产品设置</h3>
+                    <h3 class="card-title">商品数量设置及物料库存扣除</h3>
+
                 </div>
                 <div class="p-6">
                     <!-- 产品数量 -->
