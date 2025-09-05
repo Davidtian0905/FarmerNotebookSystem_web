@@ -190,15 +190,34 @@ const queryByCompositeIndex = (fields, values) => {
 const DEFAULT_TRANSACTIONS = [
   // 来自warehouse_data.js的详细仓库交易记录
 
-   {
-    type: "INBOUND",
+ {
+    type: "OUTBOUND",
     date: "2025-08-22",
     time: "09:30:00",
-    materialName: "大红袍",
-    materialCode: "M_DHP20250820093000",
-    batchNumber: "第一批春茶",
+    productName: '铁观音套装',
+    productCode: 'P_TGY20250820093000',
+    unit: '盒',
+    quantity: 50,
+    unitPrice: 280.00,
+    totalPrice: 14000.00,
+    customerId: 'C001',
+    customerName: '李茶庄',
+    customerPhone: '13800138001',
+    customerAddress: '福建省厦门市思明区茶叶街123号',
+    customerDiscountRate: 0.1,
+    channel: '线上',
+    tags: ['VIP客户', '礼品'],
+    notes: '客户要求包装精美'
+  },
+   {
+    type: "INBOUND",
+    date: "2025-08-23",
+    time: "09:30:00",
+    materialName: "大红袍01",
+    materialCode: "M_DHP20250820093001",
+    batchNumber: "第二批春茶",
     materialType: "茶叶",
-    materialGrade: "特级",
+    materialGrade: "A级",
     amount: 5000,
     quantity: 50,
     unit: "斤",
@@ -304,16 +323,17 @@ export const addTransaction = (transaction) => {
     type: transaction.type,
     date: transaction.date || new Date().toISOString().split('T')[0],
     time: transaction.time || new Date().toTimeString().split(' ')[0],
-    amount: transaction.amount || 0,
-    quantity: transaction.quantity || 0,
-    unitPrice: transaction.unitPrice || 0,
-    productName: transaction.productName || '',
-    category: transaction.category || '',
-    supplier: transaction.supplier || '',
-    status: transaction.status || '合格',
-    description: transaction.description || '',
-    createTime: new Date().toISOString()
+    createTime: new Date().toISOString(),
+    ...transaction // 保留所有原始字段
   }
+  
+  // 移除不需要的字段
+  delete newTransaction.id
+  delete newTransaction.createTime
+  
+  // 重新设置必要字段
+  newTransaction.id = id
+  newTransaction.createTime = new Date().toISOString()
   
   // 添加到交易列表
   transactions.push(newTransaction)

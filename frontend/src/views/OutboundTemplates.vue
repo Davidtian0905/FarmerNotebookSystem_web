@@ -1,6 +1,6 @@
 <template>
   <Layout>
-    <div class="inbound-templates-page">
+    <div class="outbound-templates-page">
       <!-- 页面头部 -->
       <div class="page-header">
         <div class="header-left">
@@ -8,12 +8,12 @@
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="header-info">
-            <h1 class="page-title">入库模板管理</h1>
-            <p class="page-subtitle">管理和使用入库模板，提高入库效率</p>
+            <h1 class="page-title">产品模板管理</h1>
+            <p class="page-subtitle">管理和使用产品模板，提高产品效率</p>
           </div>
         </div>
         <div class="header-actions">
-          <button @click="$router.push('/inbound-form')" class="btn btn-primary">
+          <button @click="$router.push('/outbound-form')" class="btn btn-primary">
             <i class="fas fa-plus"></i>
             新建模板
           </button>
@@ -32,11 +32,11 @@
           >
         </div>
         <div class="filter-controls">
-          <select v-model="filterType" class="filter-select">
-            <option value="">全部类型</option>
-            <option v-for="type in materialTypes" :key="type.value || type" :value="type.value || type">
-              {{ type.label || type }}
-            </option>
+          <select v-model="filterChannel" class="filter-select">
+            <option value="">全部渠道</option>
+            <option v-for="channel in channelOptions" :key="channel.value" :value="channel.label">
+                      {{ channel.label }}
+                    </option>
           </select>
         </div>
       </div>
@@ -59,64 +59,38 @@
               <!-- 编辑模式下的模板名称 -->
               <div v-if="editingTemplateId === template.id" class="edit-field">
                 <input 
-                  v-model="editForm.inboundTempname" 
+                  v-model="editForm.outboundTempname" 
                   class="edit-input template-name-input"
                   placeholder="模板名称"
                   @click.stop
                 />
               </div>
-              <!-- 查看模式下的模板名称 -->
-              <h3 v-else class="template-name">{{ template.inboundTempname || template.materialName }}</h3>
+              <!-- 非编辑模式下的模板名称 -->
+              <h3 v-else class="template-name">{{ template.outboundTempname || template.productName }}</h3>
               
-              <!-- 编辑模式下的物料信息 -->
+              <!-- 编辑模式下的产品信息 -->
               <div v-if="editingTemplateId === template.id" class="template-description edit-mode">
                 <div class="edit-field-row">
                   <input 
-                    v-model="editForm.materialName" 
-                    class="edit-input material-name-input"
-                    placeholder="物料名称"
+                    v-model="editForm.productName" 
+                    class="edit-input product-name-input"
+                    placeholder="产品名称"
                     disabled
                     @click.stop
                   />
-                  <select v-model="editForm.materialType" class="edit-select material-type-select" disabled @click.stop>
-                    <option value="">请选择类型</option>
-                    <option v-for="type in baseData.materialTypes" :key="type.value || type" :value="type.value || type">
-                      {{ type.label || type }}
-                    </option>
-                  </select>
-                </div>
-                <div class="edit-field-row">
-                  <select v-model="editForm.materialGrade" class="edit-select material-grade-select" disabled @click.stop>
-                    <option value="">请选择等级</option>
-                    <option v-for="grade in materialGrades" :key="grade.value || grade" :value="grade.value || grade">
-                      {{ grade.label || grade }}
-                    </option>
-                  </select>
                   <input 
-                    v-model="editForm.batchNumber" 
-                    class="edit-input batch-number-input"
-                    placeholder="批号"
-                    disabled
-                    @click.stop
-                  />
-                </div>
-                <div class="edit-field-row">
-                  <input 
-                    v-model="editForm.materialCode" 
-                    class="edit-input material-code-input"
-                    placeholder="物料编码"
+                    v-model="editForm.productCode" 
+                    class="edit-input product-code-input"
+                    placeholder="产品编码"
                     disabled
                     @click.stop
                   />
                 </div>
               </div>
-              <!-- 查看模式下的物料信息 -->
+              <!-- 查看模式下的产品信息 -->
               <div v-else class="template-description">
-                <span v-if="template.materialName">{{ template.materialName }}</span>
-                <span v-if="template.materialType" class="separator">{{ template.materialName ? ' | ' : '' }}{{ getMaterialTypeLabel(template.materialType) }}</span>
-                <span v-if="template.materialGrade" class="separator">{{ (template.materialName || template.materialType) ? ' | ' : '' }}{{ getMaterialGradeLabel(template.materialGrade) }}</span>
-                <span v-if="template.batchNumber" class="separator">{{ (template.materialName || template.materialType || template.materialGrade) ? ' | ' : '' }}批号: {{ template.batchNumber }}</span>
-                <span v-if="template.materialCode" class="separator material-code-line"><br>编码: {{ template.materialCode }}</span>
+                <span v-if="template.productName">{{ template.productName }}</span>
+                <span v-if="template.productCode" class="separator product-code-line"><br>编码: {{ template.productCode }}</span>
               </div>
             </div>
 
@@ -167,56 +141,39 @@
                 </span>
               </div>
               <div class="preview-item">
-                <span class="preview-label">供应商:</span>
+                <span class="preview-label">客户:</span>
                 <div v-if="editingTemplateId === template.id" class="edit-field">
-                  <select v-model="editForm.supplier" class="edit-select" @click.stop>
-                    <option v-for="supplier in supplierOptions" :key="supplier.value" :value="supplier.value">
-                      {{ supplier.label }}
+                  <select v-model="editForm.customerId" class="edit-select" @click.stop>
+                    <option value="">请选择客户</option>
+                    <option v-for="customer in customerOptions" :key="customer.value" :value="customer.value">
+                      {{ customer.label }}
                     </option>
                   </select>
                 </div>
-                <span v-else class="preview-value">{{ getSupplierName(template.supplier) }}</span>
+                <span v-else class="preview-value">{{ template.customerName }}</span>
               </div>
-
               <div class="preview-item">
-                <span class="preview-label">存放位置:</span>
+                <span class="preview-label">销售渠道:</span>
                 <div v-if="editingTemplateId === template.id" class="edit-field">
-                  <select v-model="editForm.warehouseLocation" class="edit-select" @click.stop>
-                    <option v-for="location in warehouseLocations" :key="location.value" :value="location.value">
-                      {{ location.label }}
+                  <select v-model="editForm.channel" class="edit-select" @click.stop>
+                    <option value="">请选择渠道</option>
+                    <option v-for="channel in channelOptions" :key="channel.value" :value="channel.label">
+                      {{ channel.label }}
                     </option>
                   </select>
                 </div>
-                <span v-else class="preview-value">{{ template.warehouseLocation }}</span>
+                <span v-else class="preview-value">{{ getChannelLabel(template.channel) }}</span>
               </div>
-              <div class="preview-item">
-                <span class="preview-label">保质期:</span>
+              <div class="preview-item" v-if="template.notes">
+                <span class="preview-label">备注:</span>
                 <div v-if="editingTemplateId === template.id" class="edit-field">
-                  <select v-model="editForm.shelfLifeDays" class="edit-select shelf-life-select" @click.stop>
-                    <option value="">请选择保质期时长</option>
-                    <option value="90">3个月</option>
-                    <option value="180">6个月</option>
-                    <option value="270">9个月</option>
-                    <option value="365">12个月</option>
-                    <option value="540">18个月</option>
-                    <option value="730">24个月</option>
-                    <option value="1095">36个月</option>
-                    <option value="9999">长期</option>
-                  </select>
+                  <textarea 
+                    v-model="editForm.notes" 
+                    class="edit-textarea"
+                    @click.stop
+                  ></textarea>
                 </div>
-                <span v-else class="preview-value">{{ getShelfLifeText(template.shelfLifeDays) }}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-label">质量状态:</span>
-                <div v-if="editingTemplateId === template.id" class="edit-field">
-                  <select v-model="editForm.qualityStatus" class="edit-select" @click.stop>
-                    <option value="待检测">待检测</option>
-                    <option value="合格">合格</option>
-                    <option value="不合格">不合格</option>
-                    <option value="免检">免检</option>
-                  </select>
-                </div>
-                <span v-else class="preview-value">{{ template.qualityStatus }}</span>
+                <span v-else class="preview-value">{{ template.notes }}</span>
               </div>
             </div>
 
@@ -232,6 +189,7 @@
               </div>
             </div>
           </div>
+  
 
           <!-- 操作按钮 -->
           <div class="template-actions">
@@ -274,9 +232,9 @@
         </div>
         <h3 class="empty-title">暂无模板</h3>
         <p class="empty-description">
-          {{ searchKeyword || filterType ? '没有找到符合条件的模板' : '还没有创建任何入库模板' }}
+          {{ searchKeyword || filterChannel ? '没有找到符合条件的模板' : '还没有创建任何出库模板' }}
         </p>
-        <button v-if="!searchKeyword && !filterType" @click="showCreateModal = true" class="btn btn-primary">
+        <button v-if="!searchKeyword && !filterChannel" @click="showCreateModal = true" class="btn btn-primary">
           <i class="fas fa-plus"></i>
           创建第一个模板
         </button>
@@ -298,7 +256,7 @@
                 <h4 class="section-title">基本信息</h4>
                 <div class="form-group">
                   <label class="form-label required">模板名称</label>
-                  <input v-model="templateForm.inboundTempname" type="text" class="form-input" required>
+                  <input v-model="templateForm.outboundTempname" type="text" class="form-input" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">模板描述</label>
@@ -306,27 +264,22 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label required">物料名称</label>
-                    <input v-model="templateForm.materialName" type="text" class="form-input" required>
+                    <label class="form-label required">产品名称</label>
+                    <input v-model="templateForm.productName" type="text" class="form-input" required>
                   </div>
                   <div class="form-group">
-                    <label class="form-label required">物料类型</label>
-                    <select v-model="templateForm.materialType" class="form-select" required>
-                      <option value="">请选择类型</option>
-                      <option v-for="type in materialTypes" :key="type.value || type" :value="type.value || type">
-                        {{ type.label || type }}
-                      </option>
-                    </select>
+                    <label class="form-label">产品编码</label>
+                    <input v-model="templateForm.productCode" type="text" class="form-input">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label required">数量</label>
-                    <input v-model.number="templateForm.quantity" type="number" step="0.01" class="form-input" required>
+                    <label class="form-label">数量</label>
+                    <input v-model.number="templateForm.quantity" type="number" class="form-input">
                   </div>
                   <div class="form-group">
-                    <label class="form-label required">单位</label>
-                    <select v-model="templateForm.unit" class="form-select" required>
+                    <label class="form-label">单位</label>
+                    <select v-model="templateForm.unit" class="form-select">
                       <option value="">请选择单位</option>
                       <option value="kg">公斤</option>
                       <option value="斤">斤</option>
@@ -338,94 +291,79 @@
                     </select>
                   </div>
                 </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">物料等级</label>
-                    <select v-model="templateForm.materialGrade" class="form-select">
-                      <option value="">请选择等级</option>
-                      <option v-for="grade in materialGrades" :key="grade.value || grade" :value="grade.value || grade">
-                        {{ grade.label || grade }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">批次号</label>
-                    <input v-model="templateForm.batchNumber" type="text" class="form-input">
-                  </div>
-                </div>
               </div>
 
               <!-- 价格信息 -->
               <div class="form-section">
                 <h4 class="section-title">价格信息</h4>
-                <div class="form-group">
-                  <label class="form-label">单价</label>
-                  <input v-model.number="templateForm.unitPrice" type="number" step="0.01" class="form-input">
-                </div>
-              </div>
-
-              <!-- 供应商信息 -->
-              <div class="form-section">
-                <h4 class="section-title">供应商信息</h4>
-                <div class="form-group">
-                  <label class="form-label">供应商</label>
-                  <select v-model="templateForm.supplier" class="form-select">
-                    <option value="">请选择供应商</option>
-                    <option v-for="supplier in supplierOptions" :key="supplier.value" :value="supplier.value">
-                      {{ supplier.label }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- 仓储信息 -->
-              <div class="form-section">
-                <h4 class="section-title">仓储信息</h4>
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">保质期时长</label>
-                    <select v-model="templateForm.shelfLifeDays" class="form-select">
-                      <option value="">请选择保质期时长</option>
-                      <option value="90">3个月</option>
-                      <option value="180">6个月</option>
-                      <option value="270">9个月</option>
-                      <option value="365">12个月</option>
-                      <option value="540">18个月</option>
-                      <option value="730">24个月</option>
-                      <option value="1095">36个月</option>
-                      <option value="9999">长期</option>
-                    </select>
+                    <label class="form-label">单价</label>
+                    <input v-model.number="templateForm.unitPrice" type="number" step="0.01" class="form-input">
                   </div>
                   <div class="form-group">
-                    <label class="form-label">仓库位置</label>
-                    <select v-model="templateForm.warehouseLocation" class="form-select">
-                      <option value="">请选择位置</option>
-                      <option v-for="location in warehouseLocations" :key="location.value" :value="location.value">
-                        {{ location.label }}
-                      </option>
-                    </select>
+                    <label class="form-label">总价</label>
+                    <input v-model.number="templateForm.totalPrice" type="number" step="0.01" class="form-input">
                   </div>
                 </div>
-
               </div>
 
-              <!-- 质量检验 -->
+              <!-- 客户信息 -->
               <div class="form-section">
-                <h4 class="section-title">质量检验</h4>
+                <h4 class="section-title">客户信息</h4>
                 <div class="form-group">
-                  <label class="form-label">质量状态</label>
-                  <select v-model="templateForm.qualityStatus" class="form-select">
-                    <option value="">请选择状态</option>
-                    <option v-for="status in qualityStatusOptions" :key="status" :value="status">
-                      {{ status }}
+                  <label class="form-label">客户</label>
+                  <select v-model="templateForm.customerId" class="form-select">
+                    <option value="">请选择客户</option>
+                    <option v-for="customer in customerOptions" :key="customer.value" :value="customer.value">
+                      {{ customer.label }}
                     </option>
                   </select>
                 </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">客户姓名</label>
+                    <input v-model="templateForm.customerName" type="text" class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">客户电话</label>
+                    <input v-model="templateForm.customerPhone" type="text" class="form-input">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">客户地址</label>
+                  <input v-model="templateForm.customerAddress" type="text" class="form-input">
+                </div>
               </div>
 
-              <div class="modal-actions">
-                <button type="button" @click="closeModal" class="btn btn-secondary">取消</button>
-                <button type="submit" class="btn btn-primary">保存</button>
+              <!-- 销售信息 -->
+              <div class="form-section">
+                <h4 class="section-title">销售信息</h4>
+                <div class="form-group">
+                  <label class="form-label">销售渠道</label>
+                  <select v-model="templateForm.channel" class="form-select">
+                    <option value="">请选择渠道</option>
+                    <option v-for="channel in channelOptions" :key="channel.value" :value="channel.label">
+                      {{ channel.label }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">备注说明</label>
+                  <textarea v-model="templateForm.notes" class="form-textarea" rows="3"></textarea>
+                </div>
+              </div>
+
+              <!-- 表单按钮 -->
+              <div class="modal-footer">
+                <button type="button" @click="closeModal" class="btn btn-secondary">
+                  <i class="fas fa-times"></i>
+                  取消
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i>
+                  {{ showCreateModal ? '创建模板' : '保存修改' }}
+                </button>
               </div>
             </form>
           </div>
@@ -440,41 +378,41 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Layout from '@/components/layout/Layout.vue'
 import { 
-  getInboundTemplates, 
-  getSupplierOptions, 
-  getMaterialTypeOptions,
-  getMaterialGradeOptions,
-  getQualityStatusOptions,
-  getWarehouseLocationOptions,
-  deleteInboundTemplate,
-  SUPPLIERS
-} from '@/mock/warehouse_data.js'
+  getOutboundTemplates,
+  createOutboundTemplate,
+  updateOutboundTemplate,
+  deleteOutboundTemplate,
+  getCustomerOptions,
+  getSalesChannelOptions
+} from '@/mock/outbound_data.js'
 
 const router = useRouter()
 
 // 响应式数据
 const templates = ref([])
 const searchKeyword = ref('')
-const filterType = ref('')
+const filterChannel = ref('')
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const editingTemplate = ref(null)
 const selectedTemplate = ref(null)
 const editingTemplateId = ref(null)
 const editForm = ref({
-  inboundTempname: '',
-  materialName: '',
-  materialType: '',
-  materialGrade: '',
-  batchNumber: '',
-  unitPrice: 0,
+  outboundTempname: '',
+  productName: '',
+  productCode: '',
   quantity: 0,
   unit: 'kg',
+  unitPrice: 0,
   totalPrice: 0,
-  supplier: '',
-  warehouseLocation: '',
-  shelfLifeDays: 365,
-  qualityStatus: '待检测'
+  customerId: '',
+  customerName: '',
+  customerPhone: '',
+  customerAddress: '',
+  customerDiscountRate: 0,
+  channel: '',
+  tags: [],
+  notes: ''
 })
 
 // 基础数据
@@ -487,34 +425,31 @@ const materialTypes = computed(() => {
 const materialGrades = computed(() => {
   return baseData.value.materialGrades || []
 })
-const supplierOptions = ref([])
-const warehouseLocations = ref([])
-const qualityStatusOptions = ref([])
+const customsOptions = ref([])
+const customerOptions = ref([])
+const channelOptions = ref([])
 
 // 模板表单数据
 const templateForm = ref({
-  inboundTempname: '',
-  materialName: '',
-  materialType: '',
+  outboundTempname: '',
+  productName: '',
+  productCode: '',
   quantity: 0,
   unit: 'kg',
-  materialGrade: '',
-  batchNumber: '',
-  materialCode: '',
   unitPrice: 0,
-  supplier: '',
+  totalPrice: 0,
+  customerId: '',
+  customerName: '',
+  customerPhone: '',
+  customerAddress: '',
+  customerDiscountRate: 0,
+  channel: '',
+  tags: [],
+  notes: '',
   date: new Date().toISOString().split('T')[0],
   time: new Date().toTimeString().split(' ')[0],
-  expiryDate: '',
-  shelfLifeDays: '',
-  warehouseLocation: '',
   description: '',
-  qualityStatus: '',
-  inspector: '',
-  inspectionDate: '',
-  qualityRemarks: '',
-  images: [],
-  type: 'inbound'
+  type: 'outbound'
 })
 
 // 计算属性
@@ -525,14 +460,18 @@ const filteredTemplates = computed(() => {
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
     result = result.filter(template => 
-      template.materialName.toLowerCase().includes(keyword) ||
-      template.materialType.toLowerCase().includes(keyword)
+      template.outboundTempname.toLowerCase().includes(keyword) ||
+      template.productName.toLowerCase().includes(keyword)
     )
   }
   
-  // 类型过滤
-  if (filterType.value) {
-    result = result.filter(template => template.materialType === filterType.value)
+  // 渠道过滤
+  if (filterChannel.value) {
+    // filterChannel.value 是中文标签，需要找到对应的英文键进行比较
+    const channelOption = channelOptions.value.find(option => option.label === filterChannel.value)
+    if (channelOption) {
+      result = result.filter(template => template.channel === channelOption.value)
+    }
   }
   
   return result
@@ -541,24 +480,24 @@ const filteredTemplates = computed(() => {
 // 方法
 const loadData = async () => {
   try {
-    templates.value = getInboundTemplates()
-    baseData.value.materialTypes = getMaterialTypeOptions()
-    baseData.value.materialGrades = getMaterialGradeOptions()
-    supplierOptions.value = getSupplierOptions()
-    warehouseLocations.value = getWarehouseLocationOptions()
-    qualityStatusOptions.value = getQualityStatusOptions()
+    // 加载模板数据
+    templates.value = await getOutboundTemplates()
+    
+    // 加载基础数据
+    customerOptions.value = await getCustomerOptions()
+    channelOptions.value = await getSalesChannelOptions()
   } catch (error) {
     console.error('加载数据失败:', error)
   }
 }
 
 const goBack = () => {
-  router.push('/inbound-records')
+  router.push('/outbound-records')
 }
 
-const getSupplierName = (supplier) => {
-  // 直接返回供应商名称，因为模板数据中supplier字段存储的是供应商名称
-  return supplier || '未知供应商'
+const getcustomsName = (customs) => {
+  // 直接返回客户名称，因为模板数据中customs字段存储的是客户名称
+  return customs || '未知客户'
 }
 
 const getShelfLifeText = (days) => {
@@ -593,28 +532,33 @@ const formatDate = (dateStr) => {
   return date.toLocaleDateString('zh-CN')
 }
 
+const getChannelLabel = (channelValue) => {
+  if (!channelValue) return ''
+  const channel = channelOptions.value.find(option => option.value === channelValue)
+  return channel ? channel.label : channelValue
+}
+
 const useTemplate = (template) => {
-  // 跳转到入库表单页面并传递模板数据
+  // 跳转到出库表单页面并传递模板数据
   router.push({
-    path: '/inbound-form',
+    path: '/outbound-form',
     query: {
       templateId: template.id,
       templateData: JSON.stringify({
-        materialName: template.materialName,
-        materialType: template.materialType,
+        productName: template.productName,
+        productCode: template.productCode,
         quantity: template.quantity,
         unit: template.unit,
-        materialGrade: template.materialGrade,
-        batchNumber: template.batchNumber,
-        materialCode: template.materialCode,
         unitPrice: template.unitPrice,
-        supplier: template.supplier,
-        shelfLifeDays: template.shelfLifeDays,
-        warehouseLocation: template.warehouseLocation,
-        description: template.remarks,
-        qualityStatus: template.qualityStatus,
-        inspector: template.inspector,
-        qualityRemarks: template.qualityRemarks
+        totalPrice: template.totalPrice,
+        customerId: template.customerId,
+        customerName: template.customerName,
+        customerPhone: template.customerPhone,
+        customerAddress: template.customerAddress,
+        customerDiscountRate: template.customerDiscountRate,
+        channel: template.channel,
+        tags: template.tags || [],
+        notes: template.notes
       })
     }
   })
@@ -629,20 +573,21 @@ const startEditTemplate = (template) => {
   event.stopPropagation()
   editingTemplateId.value = template.id
   editForm.value = {
-    inboundTempname: template.inboundTempname || '',
-    materialName: template.materialName || '',
-    materialType: template.materialType || '',
-    materialGrade: template.materialGrade || '',
-    batchNumber: template.batchNumber || '',
-    materialCode: template.materialCode || '',
-    unitPrice: template.unitPrice || 0,
+    outboundTempname: template.outboundTempname || '',
+    productName: template.productName || '',
+    productCode: template.productCode || '',
     quantity: template.quantity || 0,
     unit: template.unit || 'kg',
+    unitPrice: template.unitPrice || 0,
     totalPrice: template.totalPrice || 0,
-    supplier: template.supplier || '',
-    warehouseLocation: template.warehouseLocation || '',
-    shelfLifeDays: template.shelfLifeDays || 365,
-    qualityStatus: template.qualityStatus || '待检测'
+    customerId: template.customerId || '',
+    customerName: template.customerName || '',
+    customerPhone: template.customerPhone || '',
+    customerAddress: template.customerAddress || '',
+    customerDiscountRate: template.customerDiscountRate || 0,
+    channel: getChannelLabel(template.channel) || '',
+    tags: template.tags || [],
+    notes: template.notes || ''
   }
 }
 
@@ -650,8 +595,13 @@ const saveTemplateEdit = (template) => {
   event.stopPropagation()
   const index = templates.value.findIndex(t => t.id === template.id)
   if (index > -1) {
+    // 将中文渠道标签转换回英文键
+    const channelOption = channelOptions.value.find(option => option.label === editForm.value.channel)
+    const channelValue = channelOption ? channelOption.value : editForm.value.channel
+    
     templates.value[index] = {
       ...editForm.value,
+      channel: channelValue,
       id: template.id,
       createdAt: template.createdAt,
       updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -671,21 +621,25 @@ const cancelTemplateEdit = () => {
 
 const editTemplate = (template) => {
   editingTemplate.value = template
-  templateForm.value = { ...template }
+  templateForm.value = { 
+    ...template,
+    channel: getChannelLabel(template.channel) || template.channel
+  }
   showEditModal.value = true
 }
 
-const deleteTemplate = (template) => {
-  if (confirm(`确定要删除模板"${template.inboundTempname || template.materialName}"吗？`)) {
-    const result = deleteInboundTemplate(template.id)
-    if (result.success) {
+const deleteTemplate = async (template) => {
+  if (confirm(`确定要删除模板"${template.outboundTempname || template.materialName}"吗？`)) {
+    try {
+      await deleteOutboundTemplate(template.id)
       const index = templates.value.findIndex(t => t.id === template.id)
       if (index > -1) {
         templates.value.splice(index, 1)
       }
       alert('模板删除成功')
-    } else {
-      alert(result.message || '删除失败')
+    } catch (error) {
+      console.error('删除模板失败:', error)
+      alert('删除失败')
     }
   }
 }
@@ -696,64 +650,61 @@ const closeModal = () => {
   showCreateModal.value = false
   showEditModal.value = false
   editingTemplate.value = null
-  resetForm()
+  resetTemplateForm()
 }
 
-const resetForm = () => {
+const resetTemplateForm = () => {
   templateForm.value = {
-    inboundTempname: '',
-    materialName: '',
-    materialType: '',
-    quantity: 0,
-    unit: 'kg',
-    materialGrade: '',
-    batchNumber: '',
-    materialCode: '',
-    unitPrice: 0,
-    supplier: '',
-    date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().split(' ')[0],
-    expiryDate: '',
-    shelfLifeDays: '',
-    warehouseLocation: '',
+    outboundTempname: '',
     description: '',
-    qualityStatus: '',
-    inspector: '',
-    inspectionDate: '',
-    qualityRemarks: '',
-    images: [],
-    type: 'inbound'
+    productName: '',
+    productCode: '',
+    quantity: null,
+    unit: '',
+    unitPrice: null,
+    totalPrice: null,
+    customerId: '',
+    customerName: '',
+    customerPhone: '',
+    customerAddress: '',
+    customerDiscountRate: null,
+    channel: '',
+    tags: [],
+    notes: ''
   }
 }
 
-const saveTemplate = () => {
-  if (showCreateModal.value) {
-    // 创建新模板
-    const newTemplate = {
+const saveTemplate = async () => {
+  try {
+    // 将中文渠道标签转换回英文键
+    const channelOption = channelOptions.value.find(option => option.label === templateForm.value.channel)
+    const formData = {
       ...templateForm.value,
-      id: `TPL${String(templates.value.length + 1).padStart(3, '0')}`,
-      createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      usageCount: 0,
-      status: 'active'
+      channel: channelOption ? channelOption.value : templateForm.value.channel
     }
-    templates.value.push(newTemplate)
-  } else if (showEditModal.value && editingTemplate.value) {
-    // 更新现有模板
-    const index = templates.value.findIndex(t => t.id === editingTemplate.value.id)
-    if (index > -1) {
-      templates.value[index] = {
-        ...templateForm.value,
-        id: editingTemplate.value.id,
-        createdAt: editingTemplate.value.createdAt,
-        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        usageCount: editingTemplate.value.usageCount,
-        status: editingTemplate.value.status
+    
+    if (editingTemplate.value) {
+      // 编辑模式
+      const result = await updateOutboundTemplate(editingTemplate.value.id, formData)
+      if (result.success) {
+        console.log('模板更新成功')
+      }
+    } else {
+      // 创建模式
+      const result = await createOutboundTemplate(formData)
+      if (result.success) {
+        console.log('模板创建成功')
       }
     }
+    
+    showCreateModal.value = false
+    showEditModal.value = false
+    editingTemplate.value = null
+    resetTemplateForm()
+    await loadData()
+  } catch (error) {
+    console.error('保存模板失败:', error)
   }
-  
-  closeModal()
 }
 
 // 生命周期
@@ -763,7 +714,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.inbound-templates-page {
+.outbound-templates-page {
   padding: 24px;
   background-color: #f5f7fa;
   min-height: 100vh;

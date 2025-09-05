@@ -1,19 +1,18 @@
 <template>
   <Layout>
     <div class="outbound-records">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <div class="header-left">
-          <h1 class="page-title">出库记录</h1>
-          <p class="page-subtitle">管理和查看所有出库记录</p>
-        </div>
-        <div class="header-right">
-           <button class="btn btn-primary" @click="showAddOutboundModal = true">
-             <i class="icon-plus"></i>
-             新增出库
-           </button>
-         </div>
-       </div>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">出库记录</h1>
+        <p class="page-subtitle">管理和查看所有出库记录</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" @click="handleAddoutbound">
+          <i class="icon-plus"></i>
+          新增出库
+        </button>
+      </div>
     </div>
 
     <!-- 快捷操作区 -->
@@ -29,155 +28,42 @@
           </div>
         </div>
         
-        <div class="action-card" @click="handleCustomCombo">
-          <div class="card-icon combo">
-            <i class="icon-package"></i>
+        <div class="action-card" @click="handleProductMix">
+          <div class="card-icon ocr">
+            <i class="icon-camera"></i>
           </div>
           <div class="card-content">
-            <h3>自定义商品组合</h3>
-            <p>创建商品组合套餐</p>
+            <h3>商品组合</h3>
+            <p>从物料中组合一个新商品，并用于出库销售</p>
           </div>
         </div>
         
-        <div class="action-card" @click="handleComboTemplate">
+        <div class="action-card" @click="handleTemplates">
           <div class="card-icon template">
             <i class="icon-template"></i>
           </div>
           <div class="card-content">
-            <h3>商品组合模板</h3>
-            <p>使用预设组合模板</p>
+            <h3>商品出库模板管理</h3>
+            <p>管理商品出库模板</p>
           </div>
         </div>
       </div>
     </div>
+
 
     <!-- 商品组合列表 -->
-    <div class="combo-section" v-if="showComboList">
-      <div class="section-header">
-        <h2>商品组合列表</h2>
-        <button class="btn btn-outline" @click="toggleComboList">
-          <i class="icon-eye-off"></i>
-          隐藏组合
-        </button>
-      </div>
-      
-      <div class="combo-grid">
-        <div 
-          v-for="combo in productCombos" 
-          :key="combo.id" 
-          class="combo-card"
-          @click="selectCombo(combo)"
-        >
-          <div class="combo-header">
-            <h3>{{ combo.name }}</h3>
-            <span class="combo-code">{{ combo.code }}</span>
-          </div>
-          <div class="combo-materials">
-            <div v-for="material in combo.materials" :key="material.id" class="material-item">
-              <span class="material-name">{{ material.name }}</span>
-              <span class="material-quantity">{{ material.quantity }}{{ material.unit }}</span>
-            </div>
-          </div>
-          <div class="combo-pricing">
-            <div class="pricing-row">
-              <span class="label">总成本:</span>
-              <span class="cost">¥{{ combo.totalCost.toFixed(2) }}</span>
-            </div>
-            <div class="pricing-row">
-              <span class="label">利润率:</span>
-              <span class="profit-rate">{{ combo.profitRate }}%</span>
-            </div>
-            <div class="pricing-row">
-              <span class="label">定价:</span>
-              <span class="price">¥{{ combo.price.toFixed(2) }}</span>
-            </div>
-          </div>
-          <div class="combo-footer">
-            <span class="product-count">{{ combo.productCount }}个产品</span>
-            <div class="combo-actions">
-              <button class="btn-icon" @click.stop="editCombo(combo)">
-                <i class="icon-edit"></i>
-              </button>
-              <button class="btn-icon" @click.stop="deleteCombo(combo)">
-                <i class="icon-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 筛选和设置区 -->
-    <div class="filter-section">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>物料类型:</label>
-          <select v-model="filters.materialType" @change="applyFilters">
-            <option value="">全部类型</option>
-            <option v-for="type in materialTypes" :key="type.value || type" :value="type.value || type">
-              {{ type.label || type }}
-            </option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>客户:</label>
-          <select v-model="filters.customerId" @change="applyFilters">
-            <option value="">全部客户</option>
-            <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-              {{ customer.name }}
-            </option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>仓库位置:</label>
-          <select v-model="filters.warehouseLocation" @change="applyFilters">
-            <option value="">全部位置</option>
-            <option v-for="location in warehouseLocations" :key="location" :value="location">
-              {{ location }}
-            </option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>时间范围:</label>
-          <input type="date" v-model="filters.startDate" @change="applyFilters">
-          <span>至</span>
-          <input type="date" v-model="filters.endDate" @change="applyFilters">
-        </div>
-        
-        <div class="filter-group">
-          <button class="btn btn-outline" @click="toggleComboList">
-            <i :class="showComboList ? 'icon-eye-off' : 'icon-eye'"></i>
-            {{ showComboList ? '隐藏' : '显示' }}组合
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 出库记录表格 -->
     <div class="records-table">
       <div class="table-header">
-        <div class="table-actions">
+        <h4 class="text-lg font-semibold text-gray-900">商品组合列表</h4>
+        <div class="table-actions">         
           <div class="search-box">
             <i class="icon-search"></i>
             <input 
               type="text" 
-              placeholder="搜索物料名称、编码、客户..."
+              placeholder="搜索商品组合名称或编码"
               v-model="searchQuery"
               @input="handleSearch"
             >
-          </div>
-          <div class="table-controls">
-            <button class="btn btn-outline" @click="exportRecords">
-              <i class="icon-download"></i>
-              导出
-            </button>
-            <button class="btn btn-outline" @click="refreshRecords">
-              <i class="icon-refresh"></i>
-              刷新
-            </button>
           </div>
         </div>
       </div>
@@ -186,59 +72,76 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>物料信息</th>
-              <th>物料编码</th>
-              <th>批次号</th>
-              <th>出库时间</th>
-              <th>数量</th>
-              <th>单价</th>
-              <th>总价</th>
-              <th>客户</th>
-              <th>仓库位置</th>
-              <th>出库类型</th>
-              <th>状态</th>
+              <th>商品名称</th>
+              <th>商品编号</th>
+              <th>物料组合信息</th>
+              <th>物料总成本</th>
+              <th>产品定价</th>
+              <th>利润率</th>
+              <th>产品数量</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredRecords" :key="record.id" class="table-row">
-              <td class="material-info">
-                <div class="material-main">
-                  <span class="material-name">{{ record.materialName }}</span>
-                  <span class="material-type">{{ getMaterialTypeName(record.materialType) }}</span>
+            <tr v-if="filteredRecords.length === 0">
+              <td colspan="8" class="text-center text-gray-500 py-8">
+                暂无出库记录
+              </td>
+            </tr>
+            <tr v-for="record in paginatedRecords" :key="record.id" class="table-row">
+              <!-- 商品名称 -->
+              <td class="product-info">
+                <div class="material-thumbnail" @click="openImagePreview(record.productCode, record.productName)">
+                  <img 
+                    v-if="getMaterialImages(record.productCode).length > 0" 
+                    :src="getMaterialImages(record.productCode)[0]" 
+                    :alt="record.productName" 
+                    class="thumbnail-image"
+                  >
+                  <div v-else class="no-image">
+                    <i class="fas fa-image"></i>
+                  </div>
                 </div>
-                <div class="material-meta">
-                  <span class="material-grade">{{ getMaterialGradeName(record.materialGrade) }}</span>
-                  <span class="material-unit">{{ record.unit }}</span>
+                <div class="product-details">
+                  <div class="product-name">{{ record.productName || '未知商品' }}</div>
+                  <div class="product-description" v-if="record.description">
+                    {{ record.description.length > 10 ? record.description.substring(0, 10) + '...' : record.description }}
+                  </div>
                 </div>
               </td>
-              <td class="material-code">{{ record.materialCode }}</td>
-              <td class="batch-number">{{ record.batchNumber }}</td>
-              <td class="outbound-time">{{ formatDateTime(record.outboundTime) }}</td>
-              <td class="quantity">{{ record.quantity }}</td>
-              <td class="unit-price">¥{{ record.unitPrice.toFixed(2) }}</td>
-              <td class="total-price">¥{{ record.totalPrice.toFixed(2) }}</td>
-              <td class="customer">{{ getCustomerName(record.customerId) }}</td>
-              <td class="warehouse-location">{{ getWarehouseLocationName(record.warehouseLocation) }}</td>
-              <td class="outbound-type">
-                <span :class="['type-badge', getOutboundTypeClass(record.outboundType)]">
-                  {{ getOutboundTypeName(record.outboundType) }}
-                </span>
+              <!-- 商品编号 -->
+              <td class="product-code">{{ record.productCode || '-' }}</td>
+              <!-- 物料组合信息 -->
+              <td class="materials-info">
+                <div v-if="record.materials && record.materials.length > 0" class="materials-list">
+                  <div v-for="material in record.materials" :key="material.materialCode" class="material-item">
+                    {{ material.materialName }} {{ material.quantity }}{{ material.unit }}
+                  </div>
+                </div>
+                <div v-else class="no-materials">-</div>
               </td>
-              <td class="status">
-                <span :class="['status-badge', getStatusClass(record.status)]">
-                  {{ getStatusName(record.status) }}
-                </span>
+              <!-- 总成本 -->
+              <td class="total-cost">¥{{ (record.totalMaterialCost || 0).toFixed(2) }}</td>
+              <!-- 定价 -->
+              <td class="product-price">¥{{ (record.productPrice || 0).toFixed(2) }}</td>
+              <!-- 利润率 -->
+              <td class="profit-rate">{{ calculateProfitRate(record).toFixed(1) }}%</td>
+              <!-- 产品数量 -->
+              <td class="product-quantity">
+                <div class="quantity-info">
+                  <div class="quantity-value">{{ record.productQuantity || 0 }} {{ record.unit || '件' }}</div>
+                  <div class="status-info" v-if="record.stockDeductionPreview && record.stockDeductionPreview.length > 0">
+                    <span class="status-badge" :class="getStatusClass(getOverallStatus(record.stockDeductionPreview))">{{ getOverallStatus(record.stockDeductionPreview) }}</span>
+                  </div>
+                </div>
               </td>
+              <!-- 操作 -->
               <td class="actions">
-                <button class="btn-icon" @click="viewRecord(record)" title="查看详情">
-                  <i class="icon-eye"></i>
+                <button class="btn btn-sm btn-outline" @click="editRecord(record)" title="编辑">
+                  <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn-icon" @click="editRecord(record)" title="编辑">
-                  <i class="icon-edit"></i>
-                </button>
-                <button class="btn-icon danger" @click="deleteRecord(record)" title="删除">
-                  <i class="icon-trash"></i>
+                <button class="btn btn-sm btn-outline btn-danger" @click="deleteRecord(record)" title="删除">
+                  <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
             </tr>
@@ -282,7 +185,7 @@
     </div>
 
     <!-- 新增出库模态框 -->
-    <div v-if="showAddOutboundModal" class="modal-overlay" @click="closeModal">
+    <div v-if="showAddoutboundModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h2>新增出库记录</h2>
@@ -291,191 +194,195 @@
           </button>
         </div>
         <div class="modal-body">
-          <OutboundForm @submit="handleAddOutbound" @cancel="closeModal" />
+          <OutboundForm @submit="handleAddoutbound" @cancel="closeModal" />
         </div>
       </div>
     </div>
+
+    </div>
   </Layout>
+  
+  <!-- 图片预览模态框 - 移到Layout外部确保显示在最上层 -->
+  <div v-if="showImagePreview" class="image-preview-modal" @click="closeImagePreview">
+    <div class="image-preview-content" @click.stop>
+      <button class="image-close-btn" @click="closeImagePreview">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <!-- 左右切换按钮 -->
+      <button 
+        v-if="previewImages.length > 1" 
+        class="image-nav-btn prev" 
+        @click="prevImage"
+        :disabled="currentImageIndex === 0"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      
+      <button 
+        v-if="previewImages.length > 1" 
+        class="image-nav-btn next" 
+        @click="nextImage"
+        :disabled="currentImageIndex === previewImages.length - 1"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      
+      <!-- 图片显示区域 -->
+      <div class="image-display">
+        <img 
+          v-if="previewImages[currentImageIndex]" 
+          :src="previewImages[currentImageIndex]" 
+          :alt="currentMaterialName" 
+          class="preview-image"
+        >
+      </div>
+      
+      <!-- 图片信息 -->
+      <div class="image-info">
+        <div class="image-title">{{ currentMaterialName }}</div>
+        <div class="image-counter" v-if="previewImages.length > 1">
+          {{ currentImageIndex + 1 }} / {{ previewImages.length }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { getWarehouseData } from '@/mock/database_flow.js'
-import { getMaterialTypeOptions, getMaterialGradeOptions, getWarehouseLocationOptions, getCustomerOptions, getProductCombos } from '@/mock/warehouse_data.js'
-import OutboundForm from '@/components/OutboundForm.vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+// 动态导入商品组合数据
 import Layout from '@/components/layout/Layout.vue'
+import OutboundForm from '@/views/OutboundForm.vue'
 
 export default {
-  name: 'OutboundRecords',
+  name: 'outboundRecords',
   components: {
     OutboundForm,
     Layout
   },
   setup() {
+    // 路由
+    const router = useRouter()
+    
     // 响应式数据
     const records = ref([])
-    const materialTypes = ref([])
-    const materialGrades = ref([])
-    const warehouseLocations = ref([])
-    const customers = ref([])
-    const productCombos = ref([])
-    const showAddOutboundModal = ref(false)
-    const showComboList = ref(true)
+    
+    const showAddoutboundModal = ref(false)
     const searchQuery = ref('')
     const currentPage = ref(1)
     const pageSize = ref(20)
     
-    // 筛选条件
-    const filters = reactive({
-      materialType: '',
-      customerId: '',
-      warehouseLocation: '',
-      startDate: '',
-      endDate: ''
-    })
+    // 图片预览相关数据
+    const showImagePreview = ref(false)
+    const previewImages = ref([])
+    const currentImageIndex = ref(0)
+    const currentMaterialName = ref('')
+
+    // 物料图片缓存
+    const materialImagesCache = ref({})
+    
+
+    
+
 
     // 计算属性
     const filteredRecords = computed(() => {
-      let result = records.value.filter(record => record.type === 'outbound')
+      let result = [...records.value]
       
       // 搜索过滤
       if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
         result = result.filter(record => 
-          record.materialName.toLowerCase().includes(query) ||
-          record.materialCode.toLowerCase().includes(query) ||
-          getCustomerName(record.customerId).toLowerCase().includes(query)
+          (record.productName && record.productName.toLowerCase().includes(query)) ||
+          (record.productCode && record.productCode.toLowerCase().includes(query)) ||
+          (record.customer && record.customer.toString().toLowerCase().includes(query))
         )
       }
-      
-      // 类型过滤
-      if (filters.materialType) {
-        result = result.filter(record => record.materialType === filters.materialType)
-      }
-      
-      // 客户过滤
-      if (filters.customerId) {
-        result = result.filter(record => record.customerId === filters.customerId)
-      }
-      
-      // 仓库位置过滤
-      if (filters.warehouseLocation) {
-        result = result.filter(record => record.warehouseLocation === filters.warehouseLocation)
-      }
-      
-      // 时间范围过滤
-      if (filters.startDate) {
-        result = result.filter(record => new Date(record.outboundTime) >= new Date(filters.startDate))
-      }
-      if (filters.endDate) {
-        result = result.filter(record => new Date(record.outboundTime) <= new Date(filters.endDate))
-      }
-      
-      return result
+
+      // 按出库时间排序（最新的在前）
+      return result.sort((a, b) => {
+        const dateA = a.date
+        const dateB = b.date
+        return new Date(dateB) - new Date(dateA)
+      })
+    })
+
+    // 分页数据
+    const paginatedRecords = computed(() => {
+      const start = (currentPage.value - 1) * pageSize.value
+      const end = start + pageSize.value
+      return filteredRecords.value.slice(start, end)
     })
     
+    // 总记录数和分页计算
     const totalRecords = computed(() => filteredRecords.value.length)
-    const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize.value))
+    const totalPages = computed(() => {
+      const total = totalRecords.value
+      return total > 0 ? Math.ceil(total / pageSize.value) : 1
+    })
     const visiblePages = computed(() => {
       const pages = []
-      const start = Math.max(1, currentPage.value - 2)
-      const end = Math.min(totalPages.value, currentPage.value + 2)
-      for (let i = start; i <= end; i++) {
-        pages.push(i)
+      const totalPagesValue = totalPages.value || 1
+      const currentPageValue = currentPage.value || 1
+      const start = Math.max(1, currentPageValue - 2)
+      const end = Math.min(totalPagesValue, currentPageValue + 2)
+      
+      // 确保start和end都是有效数字
+      if (start <= end && !isNaN(start) && !isNaN(end)) {
+        for (let i = start; i <= end; i++) {
+          pages.push(i)
+        }
       }
-      return pages
+      return pages.length > 0 ? pages : [1]
     })
+
+    // 计算利润率的方法
+    const calculateProfitRate = (record) => {
+      if (!record.totalMaterialCost || !record.productPrice) {
+        return 0
+      }
+      const profit = record.productPrice - record.totalMaterialCost
+      return (profit / record.totalMaterialCost) * 100
+    }
 
     // 方法
     const loadData = async () => {
       try {
-        const warehouseData = await getWarehouseData()
-        records.value = warehouseData.records
-        materialTypes.value = await getMaterialTypeOptions()
-        materialGrades.value = await getMaterialGradeOptions()
-        warehouseLocations.value = await getWarehouseLocationOptions()
-        customers.value = await getCustomerOptions()
-        productCombos.value = await getProductCombos()
+        // 从outbound_data.js获取商品组合数据
+        const { getProductCombos } = await import('@/mock/outbound_data.js')
+        const productCombos = getProductCombos()
+        records.value = productCombos
+        
+        // 预加载所有商品的缩略图
+        for (const record of productCombos) {
+          if (record.productCode) {
+            await loadMaterialImages(record.productCode)
+          }
+        }
+
       } catch (error) {
         console.error('加载数据失败:', error)
       }
     }
 
-    const getMaterialTypeName = (typeName) => {
-      // 现在直接返回中文名称，因为数据已经是中文
-      return typeName || '未知类型'
-    }
 
-    const getMaterialGradeName = (gradeName) => {
-      // 现在直接返回中文名称，因为数据已经是中文
-      return gradeName || '未知等级'
-    }
-
-    const getCustomerName = (customerId) => {
-      const customer = customers.value.find(c => c.id === customerId)
-      return customer ? customer.name : '未知客户'
-    }
-
-    const getWarehouseLocationName = (locationId) => {
-      // 直接返回位置名称，因为现在使用简化的字符串数组
-      return locationId || '未知位置'
-    }
-
-    const getOutboundTypeName = (type) => {
-      const typeMap = {
-        'sale': '销售出库',
-        'transfer': '调拨出库',
-        'return': '退货出库',
-        'loss': '损耗出库',
-        'sample': '样品出库'
-      }
-      return typeMap[type] || '未知类型'
-    }
-
-    const getOutboundTypeClass = (type) => {
-      const classMap = {
-        'sale': 'success',
-        'transfer': 'info',
-        'return': 'warning',
-        'loss': 'danger',
-        'sample': 'default'
-      }
-      return classMap[type] || 'default'
-    }
-
-    const getStatusName = (status) => {
-      const statusMap = {
-        'pending': '待出库',
-        'processing': '处理中',
-        'completed': '已完成',
-        'cancelled': '已取消'
-      }
-      return statusMap[status] || '未知状态'
-    }
-
-    const getStatusClass = (status) => {
-      const classMap = {
-        'pending': 'warning',
-        'processing': 'info',
-        'completed': 'success',
-        'cancelled': 'danger'
-      }
-      return classMap[status] || 'default'
-    }
 
     const formatDate = (dateString) => {
       if (!dateString) return '-'
       return new Date(dateString).toLocaleDateString('zh-CN')
     }
 
-    const formatDateTime = (dateString) => {
+    const formatDateTime = (dateString, timeString) => {
       if (!dateString) return '-'
+      if (timeString) {
+        return new Date(`${dateString}T${timeString}`).toLocaleString('zh-CN')
+      }
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
-    const applyFilters = () => {
-      currentPage.value = 1
-    }
+
 
     const handleSearch = () => {
       currentPage.value = 1
@@ -484,27 +391,6 @@ export default {
     const goToPage = (page) => {
       if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page
-      }
-    }
-
-    const toggleComboList = () => {
-      showComboList.value = !showComboList.value
-    }
-
-    const selectCombo = (combo) => {
-      // TODO: 实现选择商品组合功能
-      console.log('选择商品组合:', combo)
-    }
-
-    const editCombo = (combo) => {
-      // TODO: 实现编辑商品组合功能
-      console.log('编辑商品组合:', combo)
-    }
-
-    const deleteCombo = (combo) => {
-      // TODO: 实现删除商品组合功能
-      if (confirm('确定要删除这个商品组合吗？')) {
-        console.log('删除商品组合:', combo)
       }
     }
 
@@ -522,41 +408,274 @@ export default {
       console.log('启动语音记账')
     }
 
-    const handleCustomCombo = () => {
-      // TODO: 实现自定义商品组合功能
-      console.log('打开自定义商品组合')
-    }
-
-    const handleComboTemplate = () => {
-      // TODO: 实现商品组合模板功能
-      console.log('打开商品组合模板')
-    }
-
-    const viewRecord = (record) => {
-      // TODO: 实现查看详情功能
-      console.log('查看记录:', record)
-    }
-
-    const editRecord = (record) => {
-      // TODO: 实现编辑功能
-      console.log('编辑记录:', record)
-    }
-
     const deleteRecord = (record) => {
-      // TODO: 实现删除功能
-      if (confirm('确定要删除这条出库记录吗？')) {
-        console.log('删除记录:', record)
+      // 构建确认消息
+      let confirmMessage = `确定要删除出库记录「${record.productName || '未知商品'}」吗？\n\n`
+      
+      // 如果有物料组合信息，显示将要撤销的物料扣除
+      if (record.materials && record.materials.length > 0) {
+        confirmMessage += '删除后将撤销以下物料的扣除数量：\n'
+        record.materials.forEach(material => {
+          confirmMessage += `• ${material.materialName}: ${material.quantity}${material.unit}\n`
+        })
+        confirmMessage += '\n是否确认删除？'
+      } else {
+        confirmMessage += '是否确认删除？'
+      }
+      
+      if (confirm(confirmMessage)) {
+        try {
+          // TODO: 调用API删除记录并恢复物料库存
+          console.log('删除记录:', record)
+          
+          // 从本地数据中移除该记录
+          const index = records.value.findIndex(r => r.id === record.id)
+          if (index > -1) {
+            records.value.splice(index, 1)
+          }
+          
+          // 显示成功消息
+          alert('出库记录已删除，物料库存已恢复')
+        } catch (error) {
+          console.error('删除记录失败:', error)
+          alert('删除失败，请重试')
+        }
       }
     }
 
-    const handleAddOutbound = (formData) => {
-      // TODO: 实现新增出库功能
-      console.log('新增出库:', formData)
-      closeModal()
+    // 销售渠道相关方法
+    const getChannelName = (channel) => {
+      const channelMap = {
+        'online': '线上销售',
+        'offline': '线下门店',
+        'wholesale': '批发',
+        'retail': '零售',
+        'export': '出口',
+        'other': '其他'
+      }
+      return channelMap[channel] || channel || '未知渠道'
+    }
+
+    const getChannelClass = (channel) => {
+       const classMap = {
+         'online': 'online',
+         'offline': 'offline',
+         'wholesale': 'wholesale',
+         'retail': 'retail',
+         'export': 'export',
+         'other': 'other'
+       }
+       return classMap[channel] || 'default'
+     }
+
+     // 记录操作方法
+     const viewRecord = (record) => {
+       console.log('查看记录:', record)
+       // TODO: 实现查看记录详情的逻辑
+     }
+
+     const editRecord = (record) => {
+       console.log('编辑记录:', record)
+       // 跳转到商品组合编辑页面，传递记录ID作为参数
+       router.push({
+         path: '/outbound-product-mix',
+         query: {
+           id: record.id,
+           mode: 'edit'
+         }
+       })
+     }
+
+    const handleAddoutbound = () => {
+      // 跳转到新增出库页面
+      router.push('/outbound-form')
+    }
+
+    const handleProductMix = () => {
+      // 跳转到商品组合页面
+      router.push('/outbound-product-mix')
+    }
+
+    const handleTemplates = () => {
+      // 跳转到出库模板管理页面
+      router.push('/outbound-templates')
     }
 
     const closeModal = () => {
-      showAddOutboundModal.value = false
+      showAddoutboundModal.value = false
+    }
+
+    // 图片预览方法
+    const openImagePreview = async (productCode, productName) => {
+      // 根据商品编码获取该文件夹内所有预览图片路径（image1-N，不包含image0）
+      const imagePaths = await getAllMaterialImages(productCode)
+      
+      // 只有当存在预览图片时才显示预览框
+      if (imagePaths.length > 0) {
+        previewImages.value = imagePaths
+        currentImageIndex.value = 0
+        currentMaterialName.value = productName
+        showImagePreview.value = true
+        
+        // 强制重渲染机制：使用nextTick确保DOM更新
+        await nextTick()
+        console.log('图片预览模态框已显示，共', imagePaths.length, '张预览图片')
+      } else {
+        console.log('该商品没有预览图片（image1-N），不显示预览框')
+      }
+    }
+
+    const closeImagePreview = () => {
+      showImagePreview.value = false
+      previewImages.value = []
+      currentImageIndex.value = 0
+      currentMaterialName.value = ''
+    }
+
+    const prevImage = () => {
+      if (currentImageIndex.value > 0) {
+        currentImageIndex.value--
+      }
+    }
+
+    const nextImage = () => {
+      if (currentImageIndex.value < previewImages.value.length - 1) {
+        currentImageIndex.value++
+      }
+    }
+
+    // 预加载商品缩略图信息（只加载image0）
+    const loadMaterialImages = async (productCode) => {
+      if (!productCode || materialImagesCache.value[productCode]) return
+      
+      try {
+        // 只检查image0的各种格式作为缩略图
+        const thumbnailFormats = [
+          `/Outbound/${productCode}/image0.jpg`,
+          `/Outbound/${productCode}/image0.png`,
+          `/Outbound/${productCode}/image0.jpeg`
+        ]
+        
+        let found = false
+        for (const thumbnailPath of thumbnailFormats) {
+          try {
+            await new Promise((resolve, reject) => {
+              const img = new Image()
+              img.onload = () => resolve()
+              img.onerror = () => reject()
+              img.src = thumbnailPath
+            })
+            materialImagesCache.value[productCode] = [thumbnailPath]
+            found = true
+            break
+          } catch {
+            continue
+          }
+        }
+        
+        // 如果image0不存在，设置为空数组
+        if (!found) {
+          materialImagesCache.value[productCode] = []
+        }
+      } catch (error) {
+        console.error('加载商品缩略图失败:', error)
+        materialImagesCache.value[productCode] = []
+      }
+    }
+
+    // 获取商品图片的方法（同步）
+    const getMaterialImages = (productCode) => {
+      if (!productCode) return []
+      return materialImagesCache.value[productCode] || []
+    }
+
+    // 获取商品文件夹内预览图片的方法（image1-N，不包含image0）
+    const getAllMaterialImages = async (productCode) => {
+      if (!productCode) {
+        return []
+      }
+      
+      try {
+        const images = []
+        const baseUrl = `/Outbound/${productCode}/`
+        
+        // 预览图片文件名模式（从image1开始，不包含image0）
+        const imagePatterns = [
+          'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg', 'image9.jpg',
+          'image1.png', 'image2.png', 'image3.png', 'image4.png', 'image5.png', 'image6.png', 'image7.png', 'image8.png', 'image9.png',
+          'image1.jpeg', 'image2.jpeg', 'image3.jpeg', 'image4.jpeg', 'image5.jpeg', 'image6.jpeg', 'image7.jpeg', 'image8.jpeg', 'image9.jpeg'
+        ]
+        
+        // 确保 images 数组已正确初始化
+        if (!Array.isArray(images)) {
+          console.error('images 数组初始化失败')
+          return []
+        }
+        
+        // 检查每个可能的图片文件是否存在
+        for (const pattern of imagePatterns) {
+          const imagePath = baseUrl + pattern
+          try {
+            // 创建一个Image对象来测试图片是否存在
+            await new Promise((resolve, reject) => {
+              const img = new Image()
+              img.onload = () => resolve()
+              img.onerror = () => reject()
+              img.src = imagePath
+            })
+            // 确保 images 数组仍然存在且为数组类型
+            if (Array.isArray(images)) {
+              images.push(imagePath)
+            } else {
+              console.error('images 数组在循环中变为非数组类型')
+              return []
+            }
+          } catch {
+            // 图片不存在，跳过
+            continue
+          }
+        }
+        
+        // 如果没有找到任何预览图片，返回空数组（不再返回image0作为默认）
+        return Array.isArray(images) ? images : []
+      } catch (error) {
+        console.error('获取商品图片失败:', error)
+        return []
+      }
+    }
+
+    // 获取整体状态
+    const getOverallStatus = (stockDeductionPreview) => {
+      if (!stockDeductionPreview || stockDeductionPreview.length === 0) {
+        return '未知'
+      }
+      
+      // 检查是否有缺货
+      if (stockDeductionPreview.some(material => material.status === '缺货')) {
+        return '缺货'
+      }
+      
+      // 检查是否有不足
+      if (stockDeductionPreview.some(material => material.status === '不足')) {
+        return '不足'
+      }
+      
+      // 所有物料都充足
+      return '充足'
+    }
+
+    // 获取状态样式类
+    const getStatusClass = (status) => {
+      switch (status) {
+        case '充足':
+          return 'status-sufficient'
+        case '不足':
+          return 'status-insufficient'
+        case '缺货':
+          return 'status-out-of-stock'
+        default:
+          return 'status-unknown'
+      }
     }
 
     // 生命周期
@@ -567,52 +686,55 @@ export default {
     return {
       // 数据
       records,
-      materialTypes,
-      materialGrades,
-      warehouseLocations,
-      customers,
-      productCombos,
-      showAddOutboundModal,
-      showComboList,
+      showAddoutboundModal,
       searchQuery,
       currentPage,
       pageSize,
-      filters,
+      
+      // 图片预览相关
+      showImagePreview,
+      previewImages,
+      currentImageIndex,
+      currentMaterialName,
       
       // 计算属性
       filteredRecords,
+      paginatedRecords,
       totalRecords,
       totalPages,
       visiblePages,
       
       // 方法
-      getMaterialTypeName,
-      getMaterialGradeName,
-      getCustomerName,
-      getWarehouseLocationName,
-      getOutboundTypeName,
-      getOutboundTypeClass,
-      getStatusName,
-      getStatusClass,
       formatDate,
       formatDateTime,
-      applyFilters,
       handleSearch,
       goToPage,
-      toggleComboList,
-      selectCombo,
-      editCombo,
-      deleteCombo,
       refreshRecords,
       exportRecords,
       handleVoiceRecord,
-      handleCustomCombo,
-      handleComboTemplate,
+      deleteRecord,
+      getChannelName,
+      getChannelClass,
       viewRecord,
       editRecord,
-      deleteRecord,
-      handleAddOutbound,
-      closeModal
+      handleAddoutbound,
+      handleProductMix,
+      handleTemplates,
+      closeModal,
+      calculateProfitRate,
+      
+      // 图片预览方法
+      openImagePreview,
+      closeImagePreview,
+      prevImage,
+      nextImage,
+      loadMaterialImages,
+      getMaterialImages,
+      getAllMaterialImages,
+      
+      // 状态相关方法
+      getOverallStatus,
+      getStatusClass
     }
   }
 }
@@ -693,12 +815,12 @@ export default {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.card-icon.combo {
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+.card-icon.ocr {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .card-icon.template {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
 .card-content h3 {
@@ -714,176 +836,6 @@ export default {
   margin: 0;
 }
 
-/* 商品组合区域 */
-.combo-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.combo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-}
-
-.combo-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.combo-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
-}
-
-.combo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.combo-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.combo-code {
-  font-size: 12px;
-  color: #666;
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-.combo-materials {
-  margin-bottom: 12px;
-}
-
-.material-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-  font-size: 14px;
-}
-
-.material-name {
-  color: #333;
-}
-
-.material-quantity {
-  color: #666;
-  font-size: 12px;
-}
-
-.combo-pricing {
-  border-top: 1px solid #f0f0f0;
-  padding-top: 12px;
-  margin-bottom: 12px;
-}
-
-.pricing-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-
-.pricing-row .label {
-  color: #666;
-}
-
-.cost {
-  color: #f57c00;
-  font-weight: 500;
-}
-
-.profit-rate {
-  color: #4caf50;
-  font-weight: 500;
-}
-
-.price {
-  color: #1976d2;
-  font-weight: 600;
-}
-
-.combo-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.product-count {
-  font-size: 12px;
-  color: #666;
-}
-
-.combo-actions {
-  display: flex;
-  gap: 4px;
-}
-
-/* 筛选区域 */
-.filter-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.filter-row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-size: 14px;
-  color: #333;
-  white-space: nowrap;
-}
-
-.filter-group select,
-.filter-group input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
 /* 表格区域 */
 .records-table {
   background: white;
@@ -895,11 +847,14 @@ export default {
 .table-header {
   padding: 20px;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .table-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -962,77 +917,234 @@ export default {
   min-width: 200px;
 }
 
-.material-main {
+.material-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.material-thumbnail-container {
+  flex-shrink: 0;
+}
+
+.material-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 50px; /* 与缩略图高度一致 */
+}
+
+.material-tags {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .material-name {
   font-weight: 600;
   color: #1a1a1a;
+  font-size: 16px;
+  line-height: 1.2;
+  margin-bottom: 4px;
 }
 
-.material-type {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
 
-.material-meta {
-  display: flex;
-  gap: 8px;
-  font-size: 12px;
-  color: #666;
-}
 
-.material-grade {
-  background: #f3e5f5;
-  color: #7b1fa2;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
 
-.type-badge,
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+.code-main {
   font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
 }
 
-.type-badge.success,
-.status-badge.success {
+.batch-number {
   background: #e8f5e8;
   color: #2e7d32;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
 }
 
-.type-badge.info,
-.status-badge.info {
-  background: #e3f2fd;
-  color: #1976d2;
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.type-badge.warning,
-.status-badge.warning {
-  background: #fff3e0;
-  color: #f57c00;
+.quantity-value {
+  font-weight: 600;
+  color: #333;
 }
 
-.type-badge.danger,
-.status-badge.danger {
-  background: #ffebee;
-  color: #d32f2f;
-}
-
-.type-badge.default,
-.status-badge.default {
+.material-unit {
+  font-size: 12px;
+  color: #666;
   background: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* 物料组合信息样式 */
+.materials-info {
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.materials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.material-item {
+  padding: 4px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #333;
+  border-left: 3px solid #4CAF50;
+  line-height: 1.3;
+}
+
+.no-materials {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+}
+
+/* 商品信息样式 */
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.material-thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.material-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 18px;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.product-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.2;
+  font-style: italic;
+}
+
+.product-code {
+  font-family: 'Courier New', monospace;
+  color: #666;
+  font-size: 13px;
+}
+
+.total-cost, .product-price {
+  font-weight: 600;
+  color: #2e7d32;
+  font-size: 14px;
+}
+
+.profit-rate {
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 14px;
+}
+
+.product-quantity {
+  font-weight: 500;
+  color: #333;
+}
+
+.quantity-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.quantity-value {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.status-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.status-item {
+  display: inline-block;
+}
+
+.status-badge {
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.status-badge.status-sufficient {
+  background-color: #52c41a;
+}
+
+.status-badge.status-insufficient {
+  background-color: #faad14;
+}
+
+.status-badge.status-out-of-stock {
+  background-color: #ff4d4f;
+}
+
+.status-badge.status-unknown {
+  background-color: #d9d9d9;
   color: #666;
 }
+
 
 .actions {
   display: flex;
@@ -1181,39 +1293,228 @@ export default {
   overflow-y: auto;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .outbound-records {
-    padding: 16px;
-  }
-  
-  .page-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  
-  .action-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .combo-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .filter-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .table-actions {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  
-  .search-box {
-    width: 100%;
-  }
+
+
+/* 图片预览模态框样式 */
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000000;
+  margin: 0;
+  padding: 0;
+  padding-top: 80px;
 }
+
+.image-preview-content {
+  position: relative;
+  width: 1080px;
+  height: 720px;
+  margin-left: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+  transition: all 0.3s ease;
+  z-index: 1000001;
+}
+
+.image-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav-btn.prev {
+  left: 15px;
+}
+
+.image-nav-btn.next {
+  right: 15px;
+}
+
+.image-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  transition: all 0.3s ease;
+  z-index: 1000001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.image-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+
+.image-info {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  z-index: 1000001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.material-thumbnail {
+  margin-right: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.material-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  border: 1px solid #e0e0e0;
+}
+
+.material-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+}
+
+/* 销售渠道标签样式 */
+.channel-tag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.channel-tag.online {
+  background-color: #3b82f6;
+}
+
+.channel-tag.offline {
+  background-color: #10b981;
+}
+
+.channel-tag.wholesale {
+  background-color: #f59e0b;
+}
+
+.channel-tag.retail {
+  background-color: #8b5cf6;
+}
+
+.channel-tag.export {
+  background-color: #ef4444;
+}
+
+.channel-tag.other,
+.channel-tag.default {
+  background-color: #6b7280;
+}
+
+/* 操作按钮样式 */
+.actions {
+  white-space: nowrap;
+}
+
+.actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.actions .btn:last-child {
+  margin-right: 0;
+}
+
+.actions .btn i {
+  font-size: 14px;
+}
+
+.actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actions .btn-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
 </style>

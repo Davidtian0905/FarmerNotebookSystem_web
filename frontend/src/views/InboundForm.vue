@@ -70,7 +70,11 @@
                         <div class="material-details">
                           <span class="material-code">编号: {{ material.materialCode }}</span>
                           <span v-if="material.materialType" class="material-type">类型: {{ material.materialType }}</span>
-                          <span v-if="material.supplier" class="material-supplier">供应商: {{ material.supplier }}</span>
+                          <span v-if="material.materialGrade || material.batchNumber" class="material-grade-batch">
+                            <span v-if="material.materialGrade">等级: {{ material.materialGrade }}</span>
+                            <span v-if="material.materialGrade && material.batchNumber"> | </span>
+                            <span v-if="material.batchNumber">批次号: {{ material.batchNumber }}</span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -640,6 +644,7 @@ const searchMaterials = (keyword) => {
           materialCode: transaction.materialCode,
           materialType: transaction.materialType || '',
           materialGrade: transaction.materialGrade || '',
+          batchNumber: transaction.batchNumber || '',
           unit: transaction.unit || 'kg',
           supplier: transaction.supplier || transaction.supplierName || ''
         })
@@ -664,6 +669,7 @@ const selectMaterial = async (material) => {
   formData.materialCode = material.materialCode
   formData.materialType = material.materialType
   formData.materialGrade = material.materialGrade
+  formData.batchNumber = material.batchNumber
   formData.unit = material.unit
   formData.supplier = material.supplier
   

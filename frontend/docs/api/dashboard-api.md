@@ -203,7 +203,7 @@ export const calculateGrowthRate = (currentValue, previousValue) => {
 ### 数据处理逻辑
 1. **最近7天数据**：获取从6天前到今天的所有交易记录
 2. **收入计算**：累加所有OUTBOUND类型交易的amount字段（销售收入）
-3. **支出计算**：累加所有INBOUND类型交易的amount字段（采购成本）
+3. **支出计算**：累加所有INBOUND类型交易的amount字段（采购成本，支出）
 4. **利润计算**：收入 - 支出
 5. **今日数据**：单独获取当前日期的交易记录进行计算
 

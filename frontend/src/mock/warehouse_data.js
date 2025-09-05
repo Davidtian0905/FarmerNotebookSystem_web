@@ -1,5 +1,5 @@
 /**
- * 仓库管理模拟数据 - 包含完整的物料信息、供应商、客户等数据
+ * 仓库管理模拟数据 - 包含完整的物料信息、供应商等数据
  */
 
 import { getAllTransactions } from './database_flow.js'
@@ -20,7 +20,7 @@ export const MATERIAL_GRADES = [
   '一级',
   '二级', 
   '三级',
-  'C级',
+  'A级',
   'D级'
 ]
 
@@ -79,86 +79,12 @@ export const SUPPLIERS = {
   }
 }
 
-// 客户信息
-export const CUSTOMERS = {
-  CUS001: {
-    id: 'CUS001',
-    name: '李茶庄',
-    code: 'LCZ001',
-    contact: '李老板',
-    phone: '13900139001',
-    address: '广州市天河区',
-    category: '零售商',
-    grade: 'VIP',
-    cooperationYears: 4
-  },
-  CUS002: {
-    id: 'CUS002',
-    name: '茶香阁',
-    code: 'CXG002',
-    contact: '陈经理',
-    phone: '13900139002',
-    address: '深圳市南山区',
-    category: '批发商',
-    grade: 'A级',
-    cooperationYears: 2
-  },
-  CUS003: {
-    id: 'CUS003',
-    name: '品茗轩',
-    code: 'PMX003',
-    contact: '刘总',
-    phone: '13900139003',
-    address: '上海市浦东新区',
-    category: '连锁店',
-    grade: 'A级',
-    cooperationYears: 3
-  }
-}
-
-// 物料信息
-export const MATERIALS = {
-  MAT001: {
-    id: 'MAT001',
-    name: '铁观音',
-    code: 'TGY001',
-    type: '茶叶',
-    grade: '特级',
-    unit: '斤',
-    specification: '500g/包',
-    origin: '福建安溪',
-    shelfLife: 24, // 月
-    storageConditions: '阴凉干燥，避光保存'
-  },
-  MAT002: {
-    id: 'MAT002',
-    name: '大红袍',
-    code: 'DHP002',
-    type: '茶叶',
-    grade: '一级',
-    unit: '斤',
-    specification: '500g/包',
-    origin: '福建武夷山',
-    shelfLife: 36,
-  },
-  MAT003: {
-    id: 'MAT003',
-    name: '茶叶包装盒',
-    code: 'CYBZH003',
-    type: '包装材料',
-    grade: '标准',
-    unit: '个',
-    specification: '20cm×15cm×8cm',
-    origin: '广东东莞',
-    shelfLife: null,
-  }
-}
-
 
 
 // 根据类型获取交易记录
 export const getTransactionsByType = (type) => {
-  return WAREHOUSE_TRANSACTIONS.filter(transaction => transaction.type === type)
+  const allTransactions = getAllTransactions()
+  return allTransactions.filter(transaction => transaction.type === type)
 }
 
 // 获取入库记录
@@ -188,10 +114,6 @@ export const getTransactionsBySupplier = (supplierId) => {
   return WAREHOUSE_TRANSACTIONS.filter(transaction => transaction.supplierId === supplierId)
 }
 
-// 根据客户获取记录
-export const getTransactionsByCustomer = (customerId) => {
-  return WAREHOUSE_TRANSACTIONS.filter(transaction => transaction.customerId === customerId)
-}
 
 // 获取库存统计
 export const getInventoryStatistics = () => {
@@ -253,10 +175,7 @@ export const getSupplierOptions = () => {
   }))
 }
 
-// 获取客户选项
-export const getCustomerOptions = () => {
-  return Object.values(CUSTOMERS)
-}
+
 
 // 获取仓库位置选项
 export const getWarehouseLocationOptions = () => {
@@ -287,67 +206,6 @@ export const getQualityStatusOptions = () => {
   return QUALITY_STATUS
 }
 
-// 获取商品组合数据
-export const getProductCombos = () => {
-  return [
-    {
-      id: 'COMBO001',
-      name: '铁观音礼盒装',
-      code: 'TC001',
-      materials: [
-        { 
-          id: 'MAT001', 
-          materialId: 'MAT001', 
-          name: '铁观音茶叶',
-          quantity: 2, 
-          unit: '斤',
-          unitCost: 280.00
-        },
-        { 
-          id: 'MAT003', 
-          materialId: 'MAT003', 
-          name: '精装礼盒',
-          quantity: 1, 
-          unit: '个',
-          unitCost: 120.00
-        }
-      ],
-      totalCost: 680.00,
-      price: 880.00,
-      profitRate: 22.73,
-      productCount: 1,
-      description: '精装铁观音茶叶礼盒'
-    },
-    {
-      id: 'COMBO002', 
-      name: '大红袍套装',
-      code: 'TC002',
-      materials: [
-        { 
-          id: 'MAT002', 
-          materialId: 'MAT002', 
-          name: '大红袍茶叶',
-          quantity: 1, 
-          unit: '斤',
-          unitCost: 320.00
-        },
-        { 
-          id: 'MAT003', 
-          materialId: 'MAT003', 
-          name: '精装礼盒',
-          quantity: 1, 
-          unit: '个',
-          unitCost: 120.00
-        }
-      ],
-      totalCost: 440.00,
-      price: 580.00,
-      profitRate: 24.14,
-      productCount: 1,
-      description: '武夷山大红袍茶叶套装'
-    }
-  ]
-}
 
 // 入库模板数据
 export const INBOUND_TEMPLATES = {

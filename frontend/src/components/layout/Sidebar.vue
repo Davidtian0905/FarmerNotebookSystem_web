@@ -27,7 +27,7 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <router-link to="/outbound-records" class="nav-link" :class="{ 'active': $route.path === '/outbound-records' }">
+          <router-link to="/outbound-records" class="nav-link" :class="{ 'active': $route.path === '/outbound-records'||$route.path === '/outbound-templates'||$route.path === '/outbound-form' ||$route.path === '/outbound-product-mix'}">
             <i class="nav-icon fas fa-arrow-up"></i>
             <span>出库记录</span>
           </router-link>

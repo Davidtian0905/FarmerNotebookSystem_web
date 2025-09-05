@@ -97,6 +97,33 @@ const routes = [
     }
   },
   {
+    path: '/outbound-form',
+    name: 'OutboundForm',
+    component: () => import('@/views/OutboundForm.vue'),
+    meta: {
+      title: '出库表单',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/outbound-product-mix',
+    name: 'OutboundProductMix',
+    component: () => import('@/views/OutboundProductMix.vue'),
+    meta: {
+      title: '商品组合',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/outbound-templates',
+    name: 'OutboundTemplates',
+    component: () => import('@/views/OutboundTemplates.vue'),
+    meta: {
+      title: '出库模板管理',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/inventory',
     name: 'Inventory',
     component: () => import('@/views/Inventory.vue'),
