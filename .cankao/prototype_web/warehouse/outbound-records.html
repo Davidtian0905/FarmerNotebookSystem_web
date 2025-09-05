@@ -219,7 +219,7 @@
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-camera text-green-600 text-2xl"></i>
                     </div>
-                    <h3 class="font-semibold text-gray-900 mb-2">自定义商品组合</h3>
+                    <h3 class="font-semibold text-gray-900 mb-2">商品组合</h3>
                     <p class="text-sm text-gray-600 mb-4">从物料中组合一个新商品，并用于出库销售</p>
                     <button class="quick-action-btn w-full" onclick="window.location.href='../records/product-composition.html'">
                         新增商品组合
@@ -232,10 +232,10 @@
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-cog text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="font-semibold text-gray-900 mb-2">商品组合模板</h3>
-                    <p class="text-sm text-gray-600 mb-4">管理商品组合模板，新增商品组合模板</p>
+                    <h3 class="font-semibold text-gray-900 mb-2">商品出库模板管理</h3>
+                    <p class="text-sm text-gray-600 mb-4">管理商品出库模板</p>
                     <button class="quick-action-btn w-full" onclick="window.location.href='../templates/product-templates.html'">
-                        新增商品组合模板            
+                        新增商品出库模板            
                     </button>
                 </div>
             </div>
@@ -247,12 +247,6 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">商品组合列表</h3>
-                <div class="flex items-center space-x-2">
-                    <button class="btn btn-primary btn-sm" onclick="window.location.href='../records/product-composition.html'">
-                        <i class="fas fa-plus mr-2"></i>
-                        新增商品组合
-                    </button>
-                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -474,7 +468,7 @@
             <!-- 分页 -->
             <div class="p-4 border-t border-gray-100 flex items-center justify-between">
                 <div class="text-sm text-gray-600">
-                    显示 1-4 条，共 12 条商品组合
+                    显示 1-10 条，共 12 条商品组合
                 </div>
                 <div class="flex items-center space-x-2">
                     <button class="btn-icon text-gray-400 cursor-not-allowed">
@@ -489,175 +483,6 @@
                 </div>
             </div>
         </div>
-
-            <!-- 分页 -->
-            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
-                <div class="text-sm text-gray-600">
-                    显示 1-4 条，共 12 条商品组合
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button class="btn-icon text-gray-400 cursor-not-allowed">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="w-8 h-8 bg-green-500 text-white rounded-md flex items-center justify-center">1</button>
-                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">2</button>
-                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">3</button>
-                    <button class="btn-icon text-gray-600 hover:bg-gray-100">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 出库记录列表 -->
-        <div class="card mt-7">
-            <div class="card-header">
-                <h3 class="card-title">出库记录列表</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">商品名称</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出库时间</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数量</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单价</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总金额</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">利润</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">客户</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">销售渠道</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-leaf text-green-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">铁观音礼盒装</div>
-                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">2025-07-16</div>
-                                <div class="text-sm text-gray-500">10:30</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">5套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">¥240.00/套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">¥1,200.00</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-green-600">¥300.00</div>
-                                <div class="text-sm text-gray-500">25%</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">李茶庄</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">线下门店</div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-leaf text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">龙井茶散装</div>
-                                        <div class="text-sm text-gray-500">一级 · 绿茶</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">2025-07-16</div>
-                                <div class="text-sm text-gray-500">15:20</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">8套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">¥180.00/套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">¥1,440.00</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-green-600">¥480.00</div>
-                                <div class="text-sm text-gray-500">50%</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">王茶叶店</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">电商平台</div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-leaf text-red-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">大红袍精品装</div>
-                                        <div class="text-sm text-gray-500">特级 · 乌龙茶</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">2025-07-15</div>
-                                <div class="text-sm text-gray-500">16:45</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">3套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">¥400.00/套</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">¥1,200.00</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-green-600">¥360.00</div>
-                                <div class="text-sm text-gray-500">43%</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">张批发商</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">批发渠道</div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 分页 -->
-            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
-                <div class="text-sm text-gray-600">
-                    显示 1-10 条，共 89 条记录
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button class="btn-icon text-gray-400 cursor-not-allowed">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="w-8 h-8 bg-green-500 text-white rounded-md flex items-center justify-center">1</button>
-                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">2</button>
-                    <button class="w-8 h-8 text-gray-600 hover:bg-gray-100 rounded-md flex items-center justify-center">3</button>
-                    <button class="btn-icon text-gray-600 hover:bg-gray-100">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </main>
 
