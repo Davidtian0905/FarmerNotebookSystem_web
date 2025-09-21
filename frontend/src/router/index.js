@@ -142,6 +142,15 @@ const routes = [
     }
   },
   {
+    path: '/customers/add',
+    name: 'CustomerAdd',
+    component: () => import('@/views/CustomerAdd.vue'),
+    meta: {
+      title: '添加客户',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/suppliers',
     name: 'Suppliers',
     component: () => import('@/views/Suppliers.vue'),
