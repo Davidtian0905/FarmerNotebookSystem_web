@@ -97,7 +97,13 @@ export const createInboundRecord = async (data) => {
       qualityStatus: data.qualityStatus || 'pending',
       inspector: data.inspector || null,
       inspectionDate: data.inspectionDate || null,
-      remark: data.remark || ''
+      remark: data.remark || '',
+      // 添加供应商评分数据
+      quality: data.quality || 0,
+      delivery: data.delivery || 0,
+      price: data.price || 0,
+      service: data.service || 0,
+      overall: data.overall || 0
     }
     
     // 添加到数据库

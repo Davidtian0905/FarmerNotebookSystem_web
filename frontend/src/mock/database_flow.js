@@ -188,14 +188,14 @@ const queryByCompositeIndex = (fields, values) => {
 
 // 默认交易数据 - 模拟真实的入库和出库记录
 const DEFAULT_TRANSACTIONS = [
-  // 来自warehouse_data.js的详细仓库交易记录
+  // 来自inbound_data.js的详细仓库交易记录
 
  {
     type: "OUTBOUND",
-    date: "2025-08-22",
+    date: "2025-09-22",
     time: "09:30:00",
     productName: '铁观音套装',
-    productCode: 'P_TGY20250820093000',
+    productCode: 'P_TGY20250922093000',
     unit: '盒',
     quantity: 50,
     unitPrice: 280.00,
@@ -225,7 +225,11 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unit: "斤",
     unitPrice: 100,
-    supplier: "福建安溪茶园",
+    supplierId: 'SUP002',
+        "quality": 2.0,
+        "delivery": 3.7,
+        "price": 3.6,
+        "service": 2.0,
     expiryDate: "2027-01-15",
     shelfLifeDays: 730,
     warehouseLocation: "仓库A区",
@@ -248,7 +252,11 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 50,
     unit: "斤",
     unitPrice: 100,
-    supplier: "福建安溪茶园",
+    supplierId: 'SUP001',
+        "quality": 4.9,
+        "delivery": 4.7,
+        "price": 4.6,
+        "service": 3.0,
     expiryDate: "2027-01-15",
     shelfLifeDays: 730,
     warehouseLocation: "仓库A区",
@@ -271,7 +279,11 @@ const DEFAULT_TRANSACTIONS = [
     quantity: 60,
     unit: "斤",
     unitPrice: 100,
-    supplier: "福建安溪茶园",
+    supplierId: 'SUP002',
+        "quality": 4.9,
+        "delivery": 4.7,
+        "price": 4.6,
+        "service": 5.0,
     expiryDate: "2027-01-15",
     shelfLifeDays: 730,
     warehouseLocation: "仓库A区",
@@ -1799,7 +1811,7 @@ export const debugTransactionData = () => {
   })
 }
 // 导出 getWeekNumber 函数
-// 兼容性函数 - 为了保持与warehouse_data.js的兼容性
+// 兼容性函数 - 为了保持与inbound_data.js的兼容性
 export const getWarehouseData = () => {
   return {
     records: getAllTransactions()

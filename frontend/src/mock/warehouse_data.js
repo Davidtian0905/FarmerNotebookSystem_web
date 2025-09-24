@@ -3,6 +3,7 @@
  */
 
 import { getAllTransactions } from './database_flow.js'
+import { SUPPLIERS } from './data/suppliers_data.js'
 
 // 物料类型配置 - 简化为字符串数组
 export const MATERIAL_TYPES = [
@@ -42,42 +43,7 @@ export const WAREHOUSE_LOCATIONS = [
   'D区仓库'
 ]
 
-// 供应商信息
-export const SUPPLIERS = {
-  SUP001: {
-    id: 'SUP001',
-    name: '福建安溪茶园',
-    code: 'FJAX001',
-    contact: '张师傅',
-    phone: '13800138001',
-    address: '福建省泉州市安溪县',
-    category: '茶叶供应商',
-    grade: 'A级',
-    cooperationYears: 5
-  },
-  SUP002: {
-    id: 'SUP002',
-    name: '武夷山茶业公司',
-    code: 'WYSC002',
-    contact: '李经理',
-    phone: '13800138002',
-    address: '福建省南平市武夷山市',
-    category: '茶叶供应商',
-    grade: 'A级',
-    cooperationYears: 3
-  },
-  SUP003: {
-    id: 'SUP003',
-    name: '包装材料有限公司',
-    code: 'BZCL003',
-    contact: '王总',
-    phone: '13800138003',
-    address: '广东省东莞市',
-    category: '包装供应商',
-    grade: 'B级',
-    cooperationYears: 2
-  }
-}
+// 供应商信息已从 suppliers_data.js 导入
 
 
 
@@ -162,17 +128,24 @@ export const getMaterialOptions = () => {
 
 // 获取供应商选项
 export const getSupplierOptions = () => {
-  return Object.values(SUPPLIERS).map(supplier => ({
-    value: supplier.id,
-    label: supplier.name,
-    code: supplier.code,
-    contact: supplier.contact,
-    phone: supplier.phone,
-    address: supplier.address,
-    category: supplier.category,
-    grade: supplier.grade,
-    cooperationYears: supplier.cooperationYears
-  }))
+  return Object.values(SUPPLIERS).map(supplier => {
+    // 只返回实际存在的属性
+    const option = {
+      value: supplier.id,
+      label: supplier.name
+    }
+    
+    // 有条件地添加其他属性
+    if (supplier.phone) option.phone = supplier.phone
+    if (supplier.address) option.address = supplier.address
+    if (supplier.contact) option.contact = supplier.contact
+    if (supplier.code) option.code = supplier.code
+    if (supplier.category) option.category = supplier.category
+    if (supplier.grade) option.grade = supplier.grade
+    if (supplier.cooperationYears) option.cooperationYears = supplier.cooperationYears
+    
+    return option
+  })
 }
 
 

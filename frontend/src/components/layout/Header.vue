@@ -68,13 +68,8 @@
           </button>
 
           <!-- 用户下拉菜单 -->
-          <van-popup
-            v-model:show="showUserMenu"
-            position="bottom"
-            :overlay="true"
-            class="user-menu-popup"
-          >
-            <div class="user-menu">
+          <div v-if="showUserMenu" class="user-dropdown">
+            <div class="user-dropdown-content">
               <div class="user-info">
                 <img
                   :src="userAvatar"
@@ -87,34 +82,20 @@
                 </div>
               </div>
               
-              <van-cell-group class="menu-items">
-                <van-cell 
-                  title="个人中心" 
-                  icon="user-o"
-                  @click="navigateToProfile"
-                />
-                <van-cell 
-                  title="设置" 
-                  icon="setting-o"
-                  @click="navigateToSettings"
-                />
-                <van-cell 
-                  title="帮助" 
-                  icon="question-o"
-                  @click="showHelp"
-                />
-              </van-cell-group>
+              <div class="dropdown-divider"></div>
               
-              <van-button 
-                type="danger" 
-                block 
-                @click="handleLogout"
-                class="logout-btn"
-              >
-                退出登录
-              </van-button>
+              <div class="dropdown-menu-items">
+                <div class="dropdown-item" @click="navigateToSettings">
+                  <i class="fas fa-cog"></i>
+                  <span>设置</span>
+                </div>
+                <div class="dropdown-item logout" @click="handleLogout">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>退出登录</span>
+                </div>
+              </div>
             </div>
-          </van-popup>
+          </div>
         </div>
       </div>
     </div>
@@ -122,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { showToast, showConfirmDialog } from 'vant'
@@ -177,6 +158,29 @@ const showNotifications = () => {
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
 }
+
+// 点击外部关闭用户菜单
+const closeUserMenu = (event) => {
+  const userMenuBtn = document.querySelector('.user-menu-btn')
+  const userDropdown = document.querySelector('.user-dropdown')
+  
+  if (showUserMenu.value && 
+      userMenuBtn && 
+      userDropdown && 
+      !userMenuBtn.contains(event.target) && 
+      !userDropdown.contains(event.target)) {
+    showUserMenu.value = false
+  }
+}
+
+// 添加点击外部关闭菜单的事件监听
+onMounted(() => {
+  document.addEventListener('click', closeUserMenu)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeUserMenu)
+})
 
 const navigateTo = (path) => {
   router.push(path)
@@ -293,7 +297,6 @@ const handleLogout = async () => {
 .notification-btn {
   position: relative;
 }
-
 .notification-badge {
   position: absolute;
   top: -4px;
@@ -345,21 +348,29 @@ const handleLogout = async () => {
   color: var(--text-muted);
 }
 
-.user-menu-popup {
-  border-radius: 12px 12px 0 0;
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
-.user-menu {
-  padding: 20px;
+.user-dropdown-content {
+  padding: 0;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 16px;
+  padding: 16px;
+  background-color: var(--bg-color);
 }
 
 .user-avatar-large {
@@ -386,20 +397,47 @@ const handleLogout = async () => {
   margin: 0;
 }
 
-.menu-items {
-  margin-bottom: 16px;
-  
-  :deep(.van-cell) {
-    padding: 12px 0;
-    
-    &:hover {
-      background: var(--border-light);
-    }
-  }
+.dropdown-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0;
 }
 
-.logout-btn {
-  margin-top: 8px;
+.dropdown-menu-items {
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--text-secondary);
+  
+  i {
+    width: 16px;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  span {
+    font-size: 14px;
+  }
+  
+  &:hover {
+    background-color: var(--border-light);
+    color: var(--text-primary);
+  }
+  
+  &.logout {
+    color: var(--error-color);
+    
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+  }
 }
 
 // 响应式设计
@@ -416,4 +454,4 @@ const handleLogout = async () => {
     width: 200px;
   }
 }
-</style> 
+</style>

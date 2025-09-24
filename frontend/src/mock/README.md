@@ -10,8 +10,18 @@
 mock/
 ├── api/                    # API层模块
 │   ├── assetsApi.js       # 资产相关API
+│   ├── customersApi.js    # 客户管理API
 │   ├── index.js           # API统一入口
 │   └── transactionsApi.js # 交易记录API
+├── data/                   # 数据模型层
+│   ├── ProductCombos_data.js  # 产品组合数据
+│   ├── customers_data.js      # 客户数据
+│   ├── flow_data.js           # 流水数据
+│   ├── inbound_data.js        # 入库数据
+│   ├── inboundtemp_data.js    # 入库模板数据
+│   ├── outbound_data.js       # 出库数据
+│   ├── outboundtemp_data.js   # 出库模板数据
+│   └── suppliers_data.js      # 供应商数据
 ├── utils/                  # 工具函数模块
 │   ├── calculations.js    # 计算相关工具
 │   ├── dataFilters.js     # 数据过滤工具

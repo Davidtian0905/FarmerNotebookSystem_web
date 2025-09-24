@@ -408,39 +408,9 @@
 }
 ```
 
-### 10. 获取客户列表
 
-**接口地址：** `GET /api/customers`
 
-**请求参数：**
-
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| search | string | 否 | 搜索关键词（客户名称或手机号） |
-
-**响应数据：**
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": [
-    {
-      "id": "C001",
-      "name": "李茶庄",
-      "phone": "13800138001",
-      "address": "福建省厦门市思明区茶叶街123号",
-      "category": "批发商",
-      "grade": "VIP",
-      "cooperationYears": 3,
-      "discountRate": 0.1,
-      "createdAt": "2025-01-10T10:00:00Z"
-    }
-  ]
-}
-```
-
-### 11. 获取销售渠道选项
+### 10. 获取销售渠道选项
 
 **接口地址：** `GET /api/sales-channels`
 
@@ -471,7 +441,7 @@
 }
 ```
 
-### 12. 搜索物料
+### 11. 搜索物料
 
 **接口地址：** `GET /api/materials/search`
 
@@ -536,10 +506,10 @@
 | unit | string | 销售单位 |
 | unit_price | decimal | 销售单价 |
 | total_price | decimal | 销售总价 |
-| customer_id | string | 客户ID |
-| customer_name | string | 客户姓名 |
-| customer_phone | string | 联系电话 |
-| customer_address | string | 客户地址 |
+| customerId | string | 客户ID |
+| customername | string | 客户姓名 |
+| customerphone | string | 联系电话 |
+| customeraddress | string | 客户地址 |
 | customer_discount_rate | decimal | 客户折扣率 |
 | discount_amount | decimal | 折扣金额 |
 | final_amount | decimal | 最终金额 |
@@ -572,20 +542,7 @@
 | created_at | datetime | 创建时间 |
 | updated_at | datetime | 更新时间 |
 
-### 客户表 (customers)
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | string | 客户ID |
-| name | string | 客户姓名 |
-| phone | string | 手机号码 |
-| address | string | 地址 |
-| category | string | 客户类别 |
-| grade | string | 客户等级 |
-| cooperation_years | integer | 合作年限 |
-| discount_rate | decimal | 默认折扣率 |
-| created_at | datetime | 创建时间 |
-| updated_at | datetime | 更新时间 |
 
 ## 前端字段映射
 

@@ -994,10 +994,16 @@ const handleSubmit = async () => {
     // 保存图片到本地路径
     const savedImages = await saveImagesToLocal()
     
-    // 准备提交数据，包含图片路径信息
+    // 准备提交数据，包含图片路径信息和供应商评分
     const submitData = {
       ...formData,
-      images: savedImages
+      images: savedImages,
+      // 添加供应商评分数据
+      quality: ratings.quality,
+      delivery: ratings.delivery,
+      price: ratings.price,
+      service: ratings.service,
+      overall: overallRating.value
     }
     
     const response = await createInboundRecord(submitData)
@@ -1081,6 +1087,8 @@ onMounted(() => {
               supplier.label === templateData[key] || supplier.value === templateData[key]
             )
             formData[key] = supplierOption ? supplierOption.value : templateData[key]
+            // 同时设置 supplierId 字段，确保与 database_flow.js 中的字段匹配
+            formData.supplierId = supplierOption ? supplierOption.value : templateData[key]
           } else {
             formData[key] = templateData[key]
           }

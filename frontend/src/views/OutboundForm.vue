@@ -405,7 +405,8 @@ import {
   getQualityStatusOptions,
   getAllTemplateIds 
 } from '@/mock/warehouse_data.js'
-import { getCustomerOptions, getSalesChannelOptions, saveOutboundTemplate, createOutboundRecord } from '@/mock/outbound_data.js'
+import { getCustomerOptions } from '@/mock/data/customers_data.js'
+import { getSalesChannelOptions, saveOutboundTemplate, createOutboundRecord } from '@/mock/outbound_data.js'
 import { getAllTransactions } from '@/mock/database_flow.js'
 
 const router = useRouter()

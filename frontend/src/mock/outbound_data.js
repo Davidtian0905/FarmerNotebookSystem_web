@@ -197,13 +197,10 @@ export const getCustomerOptions = () => {
   return Object.values(CUSTOMERS).map(customer => ({
     value: customer.id,
     label: customer.name,
-    code: customer.code,
-    contact: customer.contact,
     phone: customer.phone,
     address: customer.address,
-    category: customer.category,
-    grade: customer.grade,
-    cooperationYears: customer.cooperationYears
+    discountRate: customer.discountRate,
+    contactPerson: customer.contactPerson
   }))
 }
 

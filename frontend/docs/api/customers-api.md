@@ -1,6 +1,6 @@
 # 客户管理 API
 
-本文档描述了客户管理模块的API接口，包括客户列表获取、客户详情、添加客户、编辑客户等功能。
+本文档描述了客户管理模块的API接口，包括客户列表获取、客户详情、添加客户、编辑客户，删除客户等功能。
 
 ## 基础信息
 
@@ -49,6 +49,7 @@ GET /api/customers
 | status | String | 否 | 客户状态筛选，可选值：new(新增)、active(活跃)、normal(一般)、inactive(待激活)、disabled(已停用) |
 | sortField | String | 否 | 排序字段，默认为createTime |
 | sortOrder | String | 否 | 排序方式，可选值：asc(升序)、desc(降序)，默认为desc |
+| search | string | 否 | 搜索关键词（客户名称或手机号） |
 
 **响应**
 
@@ -62,16 +63,16 @@ GET /api/customers
     "pageSize": 10,
     "list": [
       {
-        "id": "c12345",
-        "name": "张三",
-        "phone": "13800138000",
-        "address": "北京市朝阳区xxx街道",
+        "customerId": "c12345",
+        "customername": "张三",
+        "customerphone": "13800138000",
+        "customeraddress": "北京市朝阳区xxx街道",
         "discountRate": 0.95,
         "contactPerson": "李四",
         "email": "zhangsan@example.com",
         "createTime": "2023-01-01 12:00:00",
         "updateTime": "2023-01-10 15:30:00",
-        "status": "active",
+        "customerStatus": "active",
         "transactionCount": 25,
         "transactionAmount": 12500.00,
         "lastTransactionTime": "2023-05-20 14:30:00",
@@ -80,6 +81,28 @@ GET /api/customers
       // ...更多客户
     ]
   }
+}
+```
+
+**简化响应**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": "C001",
+      "name": "李茶庄",
+      "phone": "13800138001",
+      "address": "福建省厦门市思明区茶叶街123号",
+      "category": "批发商",
+      "grade": "VIP",
+      "cooperationYears": 3,
+      "discountRate": 0.1,
+      "createdAt": "2025-01-10T10:00:00Z"
+    }
+  ]
 }
 ```
 
@@ -97,7 +120,7 @@ GET /api/customers/{id}
 
 | 参数名 | 类型 | 必填 | 描述 |
 |-------|------|------|------|
-| id | String | 是 | 客户ID |
+| customerId | String | 是 | 客户ID |
 
 **响应**
 
@@ -106,16 +129,16 @@ GET /api/customers/{id}
   "code": 200,
   "message": "success",
   "data": {
-    "id": "c12345",
-    "name": "张三",
-    "phone": "13800138000",
-    "address": "北京市朝阳区xxx街道",
+    "customerId": "c12345",
+    "customername": "张三",
+    "customerphone": "13800138000",
+    "customeraddress": "北京市朝阳区xxx街道",
     "discountRate": 0.95,
     "contactPerson": "李四",
     "email": "zhangsan@example.com",
     "createTime": "2023-01-01 12:00:00",
     "updateTime": "2023-01-10 15:30:00",
-    "status": "active",
+    "customerStatus": "active",
     "transactionCount": 25,
     "transactionAmount": 12500.00,
     "lastTransactionTime": "2023-05-20 14:30:00",
@@ -151,14 +174,14 @@ POST /api/customers
 
 ```json
 {
-  "name": "张三",
-  "phone": "13800138000",
-  "address": "北京市朝阳区xxx街道",
+  "customername": "张三",
+  "customerphone": "13800138000",
+  "customeraddress": "北京市朝阳区xxx街道",
   "discountRate": 0.95,
   "contactPerson": "李四",
   "email": "zhangsan@example.com",
   "remark": "重要客户",
-  "status": "active"
+  "customerStatus": "active"
 }
 ```
 
@@ -166,14 +189,14 @@ POST /api/customers
 
 | 参数名 | 类型 | 必填 | 描述 |
 |-------|------|------|------|
-| name | String | 是 | 客户名称，最大长度50个字符 |
-| phone | String | 是 | 客户电话，格式为有效的电话号码 |
-| address | String | 是 | 客户地址，最大长度200个字符 |
+| customername | String | 是 | 客户名称，最大长度50个字符 |
+| customerphone | String | 是 | 客户电话，格式为有效的电话号码 |
+| customeraddress | String | 是 | 客户地址，最大长度200个字符 |
 | discountRate | Number | 否 | 客户折扣率，范围0.1-1.0，默认为1.0 |
 | contactPerson | String | 否 | 联系人姓名，最大长度50个字符 |
 | email | String | 否 | 电子邮箱，格式为有效的邮箱地址 |
 | remark | String | 否 | 备注信息，最大长度500个字符 |
-| status | String | 否 | 客户状态，可选值：active(活跃)、disabled(已停用)，默认为active |
+| customerStatus | String | 否 | 客户状态，可选值：active(活跃)、disabled(已停用)，默认为active |
 
 **响应**
 
@@ -398,6 +421,15 @@ GET /api/customers/statistics
 - **待激活**：最近三个月没有交易
 - **已停用**：在客户管理中手动设置为停用状态
 
+## 交易数据筛选逻辑
+
+系统在计算客户交易统计数据时，使用以下筛选逻辑：
+
+1. 只筛选类型为 `OUTBOUND`（出库）的交易记录
+2. 确保交易记录中的 `customerId` 字段存在且不为 `undefined`
+3. 将交易记录的 `customerId` 与客户ID进行字符串比较，确保匹配的一致性
+4. 计算匹配交易记录的数量、总金额和最后交易时间
+
 ## Mock 数据支持
 
 在开发环境中，系统提供了完整的Mock数据支持，可以通过以下方式获取Mock数据：
@@ -410,3 +442,20 @@ GET /api/customers/statistics
 
 - 当前版本：v1.0.0
 - 最后更新：2023-06-01
+
+## 数据库结构
+
+### 客户表 (customers)
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| customerId | string | 客户ID |
+| customername | string | 客户姓名 |
+| customerphone | string | 手机号码 |
+| customeraddress | string | 地址 |
+| customcategory | string | 客户类别 |
+| grade | string | 客户等级 |
+| cooperation_years | integer | 合作年限 |
+| discount_rate | decimal | 默认折扣率（如0.9表示9折，0.7表示7折） |
+| created_at | datetime | 创建时间 |
+| updated_at | datetime | 更新时间 |

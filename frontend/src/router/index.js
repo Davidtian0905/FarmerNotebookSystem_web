@@ -151,11 +151,38 @@ const routes = [
     }
   },
   {
+    path: '/customer/edit/:id',
+    name: 'CustomerEdit',
+    component: () => import('@/views/CustomerAdd.vue'),
+    meta: {
+      title: '编辑客户',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/suppliers',
     name: 'Suppliers',
     component: () => import('@/views/Suppliers.vue'),
     meta: {
       title: '供应商管理',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/suppliers/add',
+    name: 'SuppliersAdd',
+    component: () => import('@/views/SuppliersAdd.vue'),
+    meta: {
+      title: '添加供应商',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/suppliers/edit/:id',
+    name: 'SupplierEdit',
+    component: () => import('@/views/SuppliersAdd.vue'),
+    meta: {
+      title: '编辑供应商',
       requiresAuth: true
     }
   },

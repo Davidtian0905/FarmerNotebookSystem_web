@@ -3,21 +3,21 @@
     <div class="customer-add-page">
       <!-- 页面头部 -->
       <div class="page-header">
-        <div class="header-left">
-          <h1 class="page-title">客户管理</h1>
-          <p class="page-subtitle">添加新客户</p>
-        </div>
-        <div class="header-right">
-          <button class="btn btn-secondary" @click="$router.push('/customers')">
-            <i class="icon-arrow-left"></i>
-            返回列表
-          </button>
-          <button class="btn btn-primary" @click="handleSave">
-            <i class="icon-save"></i>
-            保存客户
-          </button>
-        </div>
-      </div>
+    <div class="header-left">
+      <h1 class="page-title">客户管理</h1>
+      <p class="page-subtitle">{{ isEditMode ? '编辑客户' : '添加新客户' }}</p>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-secondary" @click="$router.push('/customers')">
+        <i class="icon-arrow-left"></i>
+        返回列表
+      </button>
+      <button class="btn btn-primary" @click="handleSave">
+        <i class="icon-save"></i>
+        {{ isEditMode ? '保存修改' : '保存客户' }}
+      </button>
+    </div>
+  </div>
 
       <!-- 表单内容 -->
       <form @submit.prevent="handleSubmit" class="space-y-6">
@@ -38,6 +38,8 @@
                   required
                 >
               </div>
+
+
               
               <div class="form-group">
                 <label class="form-label">客户编码</label>
@@ -47,7 +49,9 @@
                   placeholder="系统自动生成" 
                   class="form-input"
                   disabled
+                  :style="isEditMode ? 'background-color: #f3f4f6;' : ''"
                 >
+                <small v-if="isEditMode" class="text-gray-500">客户编码不可修改</small>
               </div>
 
               <div class="form-group">
@@ -133,6 +137,48 @@
           </div>
         </div>
 
+        <!-- 业务信息 -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3 class="section-title">业务信息</h3>
+          </div>
+          <div class="section-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label">客户来源</label>
+                <select v-model="formData.source" class="form-select" style="background-color: white; color: #374151;">
+                  <option value="" style="color: #9ca3af; background-color: white;">请选择客户来源</option>
+                  <option 
+                    v-for="source in customerSources" 
+                    :key="source"
+                    :value="source"
+                    style="color: #374151; background-color: white;"
+                  >
+                    {{ source }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">折扣率</label>
+                <div class="flex items-center">
+                  <input 
+                    v-model.number="displayDiscountRate" 
+                    type="number" 
+                    placeholder="请输入折扣数字" 
+                    class="form-input"
+                    min="1"
+                    max="10"
+                    step="0.1"
+                    @input="updateDiscountRate"
+                  >
+                  <span class="ml-2 text-gray-500">折</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 其他信息 -->
         <div class="form-section">
           <div class="section-header">
@@ -141,17 +187,6 @@
           <div class="section-content">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-group">
-                <label class="form-label">合作年限</label>
-                <input 
-                  v-model.number="formData.cooperationYears" 
-                  type="number" 
-                  placeholder="请输入合作年限" 
-                  class="form-input"
-                  min="0"
-                >
-              </div>
-
-              <div class="form-group">
                 <label class="form-label">备注</label>
                 <textarea 
                   v-model="formData.notes" 
@@ -159,6 +194,20 @@
                   class="form-textarea"
                   rows="3"
                 ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">状态</label>
+                <div class="flex space-x-6">
+                  <label class="flex items-center">
+                    <input type="radio" v-model="formData.status" value="active" class="mr-2">
+                    <span>启用</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="radio" v-model="formData.status" value="inactive" class="mr-2">
+                    <span>停用</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -176,15 +225,28 @@
 
 <script setup>
 import Layout from '@/components/layout/Layout.vue'
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { showToast, showSuccessToast } from '@/utils/toast'
+import { mockCustomersApi } from '@/mock/api/customersApi'
 
 const router = useRouter()
+const route = useRoute()
+
+// 判断是否为编辑模式
+const isEditMode = computed(() => {
+  return route.path.includes('/customer/edit')
+})
+
+// 获取客户ID（如果是编辑模式）
+const customerId = computed(() => {
+  return route.params.id
+})
 
 // 客户类型和等级
 const customerTypes = ['零售商', '批发商', '连锁店', '个人', '企业', '其他']
 const customerGrades = ['VIP', 'A级', 'B级', 'C级', '普通']
+const customerSources = ['网络推广', '朋友推荐', '老客户介绍', '展会', '广告', '其他']
 
 // 表单数据
 const formData = reactive({
@@ -195,10 +257,20 @@ const formData = reactive({
   address: '',
   category: '',
   grade: '',
-  cooperationYears: 0,
+  source: '',
+  discountRate: 0.1,
   notes: '',
-  status: 'new' // 新客户默认状态
+  status: 'active' // 默认启用状态
 })
+
+// 显示用的折扣率（几折）
+const displayDiscountRate = ref(10)
+
+// 更新实际折扣率
+const updateDiscountRate = () => {
+  // 将显示的折扣数转换为实际折扣率（例：9折 -> 0.9）
+  formData.discountRate = displayDiscountRate.value / 10
+}
 
 // 生成客户编码
 const generateCustomerCode = () => {
@@ -214,6 +286,38 @@ const generateCustomerCode = () => {
   formData.code = `${nameInitials}${timestamp}`
 }
 
+// 获取客户详情
+const fetchCustomerDetail = async (id) => {
+  try {
+    const response = await mockCustomersApi.getDetail({ id })
+    if (response.error === 0 && response.body) {
+      // 将客户数据填充到表单
+      const customer = response.body
+      formData.name = customer.customername || ''
+      formData.code = customer.customerId || ''
+      formData.contact = customer.contactPerson || ''
+      formData.phone = customer.customerphone || ''
+      formData.address = customer.customeraddress || ''
+      formData.category = customer.customcategory || ''
+      formData.grade = customer.grade || ''
+      formData.source = customer.source || ''
+      formData.discountRate = customer.discountRate || 0.1
+      formData.notes = customer.remark || ''
+      formData.status = customer.customerStatus || 'active'
+      
+      // 更新显示的折扣率
+      displayDiscountRate.value = formData.discountRate * 10
+    } else {
+      showToast(response.message || '获取客户信息失败')
+      router.push('/customers')
+    }
+  } catch (error) {
+    console.error('获取客户详情失败:', error)
+    showToast('获取客户信息失败，请重试')
+    router.push('/customers')
+  }
+}
+
 // 保存客户信息
 const handleSave = async () => {
   try {
@@ -223,16 +327,52 @@ const handleSave = async () => {
       return
     }
     
-    // 生成客户编码
-    if (formData.code === '系统自动生成') {
+    // 如果是新增模式，生成客户编码
+    if (!isEditMode.value && formData.code === '系统自动生成') {
       generateCustomerCode()
     }
     
-    // 模拟API请求
-    console.log('保存客户信息:', formData)
+    // 准备提交的数据
+    const submitData = {
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      discountRate: formData.discountRate,
+      contactPerson: formData.contact,
+      remark: formData.notes,
+      status: formData.status,
+      customcategory: formData.category,
+      grade: formData.grade,
+      source: formData.source
+    }
     
-    // 显示成功提示
-    showSuccessToast('客户添加成功')
+    let response
+    
+    // 根据模式选择添加或更新API
+    if (isEditMode.value) {
+      // 编辑模式，调用更新API
+      response = await mockCustomersApi.update({
+        id: customerId.value,
+        ...submitData
+      })
+      
+      if (response.error === 0) {
+        showSuccessToast('客户信息更新成功')
+      } else {
+        showToast(response.message || '更新失败')
+        return
+      }
+    } else {
+      // 新增模式，调用添加API
+      response = await mockCustomersApi.add(submitData)
+      
+      if (response.error === 0) {
+        showSuccessToast('客户添加成功')
+      } else {
+        showToast(response.message || '添加失败')
+        return
+      }
+    }
     
     // 跳转到客户列表页
     router.push('/customers')
@@ -249,7 +389,13 @@ const handleSubmit = () => {
 
 // 页面加载时执行
 onMounted(() => {
-  // 可以在这里加载初始数据
+  // 如果是编辑模式，获取客户详情
+  if (isEditMode.value && customerId.value) {
+    fetchCustomerDetail(customerId.value)
+  } else {
+    // 初始化显示的折扣率
+    displayDiscountRate.value = formData.discountRate * 10
+  }
 })
 </script>
 

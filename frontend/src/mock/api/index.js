@@ -5,11 +5,15 @@
 
 import { mockAssetsApi } from './assetsApi.js'
 import { mockTransactionsApi } from './transactionsApi.js'
+import { mockCustomersApi } from './customersApi.js'
+import { mockSuppliersApi } from './suppliersApi.js'
 // 导入工具函数
 import { createErrorResponse, ERROR_CODES, logger } from '../utils/index.js'
 
 export { mockAssetsApi } from './assetsApi.js'
 export { mockTransactionsApi } from './transactionsApi.js'
+export { mockCustomersApi } from './customersApi.js'
+export { mockSuppliersApi } from './suppliersApi.js'
 
 /**
  * Mock API路由映射
@@ -32,7 +36,14 @@ export const mockApiRouter = {
   '/api/transactions/add': (params) => mockTransactionsApi.add(params),
   '/api/transactions/update': (params) => mockTransactionsApi.update(params.id, params.updates),
   '/api/transactions/delete': (params) => mockTransactionsApi.delete(params.id),
-  '/api/transactions/statistics': (params) => mockTransactionsApi.getStatistics(params)
+  '/api/transactions/statistics': (params) => mockTransactionsApi.getStatistics(params),
+  
+  // 供应商相关API
+  '/api/suppliers/list': (params) => mockSuppliersApi.getList(params),
+  '/api/suppliers/detail': (params) => mockSuppliersApi.getDetail(params),
+  '/api/suppliers/add': (params) => mockSuppliersApi.add(params),
+  '/api/suppliers/update': (params) => mockSuppliersApi.update(params),
+  '/api/suppliers/statistics': (params) => mockSuppliersApi.getStatistics(params)
 }
 
 /**

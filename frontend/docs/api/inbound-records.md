@@ -401,7 +401,7 @@ GET /api/materials
 | unitPrice | Number | 是 | 单价 | unit_price | unitPrice |
 | amount | Number | 是 | 总金额 | amount | amount |
 | supplierId | String | 是 | 供应商ID | supplier_id | supplierId |
-| supplier | String | 是 | 供应商名称 | supplier | supplier |
+| suppliername | String | 是 | 供应商名称 | supplier | suppliername |
 | warehouseLocation | String | 是 | 仓库位置ID | warehouse_location | warehouseLocation |
 | inboundTime | DateTime | 是 | 入库时间（ISO格式） | inbound_time | inboundTime |
 | date | String | 是 | 入库日期 | inbound_date | date |
@@ -519,7 +519,7 @@ GET /api/materials
 
 ### 数据源文件
 - `database_flow.js`: 主要数据源，包含所有入库记录
-- `warehouse_data.js`: 基础数据，包含物料类型、等级、供应商等
+- `inbound_data.js`: 基础数据，包含物料类型、等级、供应商等
 
 ### 状态管理
 - 使用 Vue 3 Composition API
@@ -582,7 +582,8 @@ GET /api/materials
 | unit_price | unitPrice | number | 单价 |
 | amount | amount | number | 总金额 |
 | batch_number | batchNumber | string | 批次号 |
-| supplier | supplier | string | 供应商 |
+| supplierId | supplierId | string | 供应商ID |
+
 | warehouse_location | warehouseLocation | string | 仓库位置 |
 | date | date | string | 入库日期（YYYY-MM-DD） |
 | time | time | string | 入库时间（HH:mm:ss） |
