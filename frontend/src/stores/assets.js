@@ -34,11 +34,8 @@ export const useAssetsStore = defineStore('assets', {
     // 当前时间筛选维度
     currentPeriod: 'year',
 
-    // 图表数据
-    chartData: {
-      assetTrend: null,
-      incomeExpense: null
-    },
+    // 图表数据（已由计算属性替代，保留向后兼容）
+    chartData: null,
 
     // 加载状态
     loading: false,
@@ -231,7 +228,7 @@ export const useAssetsStore = defineStore('assets', {
     },
 
     /**
-     * 获取资产统计数据
+     * 获取资产统计数据（用于高级分析，非基础视图使用）
      */
     async fetchAssetStatistics(params = {}) {
       try {

@@ -50,7 +50,7 @@ export const calculateNetProfit = (transactions) => {
 export const calculateTotalIncome = (transactions) => {
   return transactions
     .filter(t => t.type === 'OUTBOUND')  // OUTBOUND = 出库/销售 = 收入
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + (t.totalPrice || 0), 0)
 }
 
 /**
@@ -61,7 +61,7 @@ export const calculateTotalIncome = (transactions) => {
 export const calculateTotalExpense = (transactions) => {
   return transactions
     .filter(t => t.type === 'INBOUND')   // INBOUND = 入库/采购 = 支出
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + (t.totalPrice || 0), 0)
 }
 
 /**

@@ -192,10 +192,10 @@ const DEFAULT_TRANSACTIONS = [
 
  {
     type: "OUTBOUND",
-    date: "2025-09-22",
+    date: "2025-09-25",
     time: "09:30:00",
     productName: '铁观音套装',
-    productCode: 'P_TGY20250922093000',
+    productCode: 'P_TGY20250925093000',
     unit: '盒',
     quantity: 50,
     unitPrice: 280.00,
@@ -214,14 +214,15 @@ const DEFAULT_TRANSACTIONS = [
   },
    {
     type: "INBOUND",
-    date: "2025-08-23",
+    date: "2025-09-25",
     time: "09:30:00",
     materialName: "大红袍01",
-    materialCode: "M_DHP20250820093001",
+    materialCode: "M_DHP20250925093001",
     batchNumber: "第二批春茶",
     materialType: "茶叶",
     materialGrade: "A级",
     amount: 5000,
+    totalPrice: 5000,
     quantity: 50,
     unit: "斤",
     unitPrice: 100,
@@ -241,14 +242,15 @@ const DEFAULT_TRANSACTIONS = [
   },
   {
     type: "INBOUND",
-    date: "2025-08-20",
+    date: "2025-09-24",
     time: "09:30:00",
     materialName: "大红袍",
-    materialCode: "M_DHP20250820093000",
+    materialCode: "M_DHP20250924093000",
     batchNumber: "第一批春茶",
     materialType: "茶叶",
     materialGrade: "特级",
     amount: 5000,
+    totalPrice: 5000,
     quantity: 50,
     unit: "斤",
     unitPrice: 100,
@@ -268,14 +270,43 @@ const DEFAULT_TRANSACTIONS = [
   },
     {
     type: "INBOUND",
-    date: "2025-08-21",
+    date: "2025-09-24",
     time: "09:30:00",
     materialName: "大红袍",
-    materialCode: "M_DHP20250820093000",
+    materialCode: "M_DHP20250924093000",
     batchNumber: "第一批春茶",
     materialType: "茶叶",
     materialGrade: "特级",
     amount: 6000,
+    totalPrice: 6000,
+    quantity: 60,
+    unit: "斤",
+    unitPrice: 100,
+    supplierId: 'SUP002',
+        "quality": 4.9,
+        "delivery": 4.7,
+        "price": 4.6,
+        "service": 5.0,
+    expiryDate: "2027-01-15",
+    shelfLifeDays: 730,
+    warehouseLocation: "仓库A区",
+    description: "特级铁观音，需保存在阴凉处，避免阳光直射",
+    qualityStatus: "合格",
+    inspector: "质检员A",
+    inspectionDate: "2025-01-15",
+    qualityRemarks: "质检通过，无异常",
+  },
+      {
+    type: "INBOUND",
+    date: "2024-09-24",
+    time: "09:30:00",
+    materialName: "大红袍",
+    materialCode: "M_DHP20240924093000",
+    batchNumber: "第一批春茶",
+    materialType: "茶叶",
+    materialGrade: "特级",
+    amount: 6000,
+    totalPrice: 6000,
     quantity: 60,
     unit: "斤",
     unitPrice: 100,
@@ -1795,21 +1826,36 @@ export const debugTransactionData = () => {
   
   console.log('本年入库金额:', currentYearInbound.reduce((sum, t) => sum + t.amount, 0))
   console.log('本年出库金额:', currentYearOutbound.reduce((sum, t) => sum + t.amount, 0))
-  
-  // 显示最近的几条交易记录（按时间倒序排列）
-  console.log('最近的交易记录:')
-  const sortedTransactions = transactions
-    .sort((a, b) => {
-      const dateTimeA = new Date(`${a.date}T${a.time}`)
-      const dateTimeB = new Date(`${b.date}T${b.time}`)
-      return dateTimeB - dateTimeA // 倒序排列，最新的在前
-    })
-    .slice(0, 5) // 取前6条最新记录
-  
-  sortedTransactions.forEach(t => {
-    console.log(`  ${t.date} ${t.time} ${t.type} ${t.productName} ¥${t.amount}`)
-  })
 }
+
+/**
+ * 获取简化的交易记录
+ * 只返回type、time和totalPrice字段
+ * @param {Array} transactions - 原始交易记录数组
+ * @returns {Array} 简化后的交易记录数组
+ */
+export const getSimplifiedTransactions = (transactions) => {
+  return transactions.map(transaction => ({
+    id: transaction.id,
+    type: transaction.type,
+    date: transaction.date,
+    time: transaction.time,
+    totalPrice: transaction.type === 'INBOUND' 
+      ? (transaction.totalPrice || transaction.amount || 0)  // 兼容旧数据
+      : (transaction.totalPrice || 0)
+  }));
+};
+
+/**
+ * 获取简化的最近7天交易记录
+ * @param {Date} endDate - 结束日期（默认为今天）
+ * @returns {Array} 简化后的最近7天交易记录
+ */
+export const getSimplifiedRecentWeekTransactions = (endDate = new Date()) => {
+  const transactions = getRecentWeekTransactions(endDate);
+  return getSimplifiedTransactions(transactions);
+};
+
 // 导出 getWeekNumber 函数
 // 兼容性函数 - 为了保持与inbound_data.js的兼容性
 export const getWarehouseData = () => {

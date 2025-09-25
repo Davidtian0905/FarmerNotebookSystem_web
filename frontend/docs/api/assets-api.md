@@ -23,8 +23,8 @@
 ### 字段映射关系
 | 计算变量 | 字段名 | 说明 | 计算公式 |
 |----------|--------|------|----------|
-| 【收入总额】 | totalIncome | 指定时间范围内的总收入 | SUM(OUTBOUND.amount) |
-| 【支出总额】 | totalExpense | 指定时间范围内的总支出 | SUM(INBOUND.amount) |
+| 【收入总额】 | totalIncome | 指定时间范围内的总收入 | SUM(OUTBOUND.totalPrice) |
+| 【支出总额】 | totalExpense | 指定时间范围内的总支出 | SUM(INBOUND.totalPrice) |
 | 【净资产】 | netAssets | 收入减去支出的净额 | totalIncome - totalExpense |
 | 【交易笔数】 | transactionCount | 指定时间范围内的交易总数 | COUNT(transactions) |
 | 【入库笔数】 | inboundCount | 指定时间范围内的入库交易数 | COUNT(INBOUND) |
@@ -137,8 +137,8 @@ const assetData = {
 - `month` (可选): 指定月份，默认为当前月份
 
 **计算逻辑**:
-- 【收入总额】 = 指定时间范围内所有OUTBOUND交易的amount总和
-- 【支出总额】 = 指定时间范围内所有INBOUND交易的amount总和
+- 【收入总额】 = 指定时间范围内所有OUTBOUND交易的totalPrice总和
+- 【支出总额】 = 指定时间范围内所有INBOUND交易的totalPrice总和
 - 【净资产】 = 【收入总额】 - 【支出总额】
 - 【月度数据】 = 按月份分组计算每月的收入、支出、净资产
 
@@ -286,8 +286,8 @@ const assetData = {
 ```
 
 **计算逻辑**:
-- 【收入数据】 = 按时间维度分组计算OUTBOUND交易的amount总和
-- 【支出数据】 = 按时间维度分组计算INBOUND交易的amount总和
+- 【收入数据】 = 按时间维度分组计算OUTBOUND交易的totalPrice总和
+- 【支出数据】 = 按时间维度分组计算INBOUND交易的totalPrice总和
 - 【标签数据】 = 根据时间维度生成对应的标签数组
 
 **响应示例**:
@@ -348,7 +348,7 @@ const assetData = {
 ```
 
 **计算逻辑**:
-- 【收入结构】 = 按产品类别分组统计OUTBOUND交易的amount总和
+- 【收入结构】 = 按产品类别分组统计OUTBOUND交易的totalPrice总和
 - 【占比计算】 = 各类别收入 / 总收入 * 100%
 - 【颜色配置】 = 预设的图表颜色方案
 
@@ -414,7 +414,7 @@ const assetData = {
 ```
 
 **计算逻辑**:
-- 【成本结构】 = 按支出类别分组统计INBOUND交易的amount总和
+- 【成本结构】 = 按支出类别分组统计INBOUND交易的totalPrice总和
 - 【占比计算】 = 各类别支出 / 总支出 * 100%
 - 【颜色配置】 = 预设的图表颜色方案
 
@@ -480,8 +480,6 @@ const assetData = {
 ```
 
 **计算逻辑**:
-- 【平均日收入】 = 总收入 / 时间范围天数
-- 【平均日支出】 = 总支出 / 时间范围天数
 - 【增长率】 = (当前期间净资产 - 上期净资产) / 上期净资产 * 100%
 
 **响应示例**:
@@ -492,12 +490,8 @@ const assetData = {
     "totalIncome": 128560,
     "totalExpense": 89240,
     "netAssets": 39320,
-    "avgDailyIncome": 10713,
-    "avgDailyExpense": 7437,
     "growthRate": 12.5,
     "statistics": {
-      "averageDailyIncome": 500,
-      "averageDailyExpense": 300,
       "growthRate": 15.5,
       "totalTransactions": 120,
       "activeCategories": 8,
@@ -730,7 +724,7 @@ const fetchAssetData = async (period = 'year') => {
   type: "INBOUND|OUTBOUND",       // 交易类型：支出/收入
   date: "2025-08-01",            // 交易日期
   time: "09:30:00",              // 交易时间
-  amount: 4000,                   // 交易金额
+  totalPrice: 4000,               // 交易金额
   quantity: 50,                   // 交易数量
   unitPrice: 80,                  // 单价
   productName|materialName: "铁观音",          // 物料名称/产品名称
@@ -757,10 +751,10 @@ const fetchAssetData = async (period = 'year') => {
 **计算逻辑**:
 ```javascript
 // 收入计算
-const totalIncome = outboundTransactions.reduce((sum, t) => sum + t.amount, 0)
+const totalIncome = outboundTransactions.reduce((sum, t) => sum + (t.totalPrice || 0), 0)
 
 // 支出计算  
-const totalExpense = inboundTransactions.reduce((sum, t) => sum + t.amount, 0)
+const totalExpense = inboundTransactions.reduce((sum, t) => sum + (t.totalPrice || 0), 0)
 
 // 净资产计算
 const netAssets = totalIncome - totalExpense

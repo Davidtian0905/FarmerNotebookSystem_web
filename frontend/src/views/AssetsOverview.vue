@@ -143,7 +143,7 @@
           </div>
           <div class="w-3/5">
             <div class="pie-chart-container">
-              <canvas ref="costChart"></canvas>
+              <canvas ref="costStructureChart"></canvas>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ const activeTab = ref('year')
 const assetTrendChart = ref(null)
 const incomeExpenseChart = ref(null)
 const incomeStructureChart = ref(null)
-const costChart = ref(null)
+const costStructureChart = ref(null)
 
 // 资产数据
 const assetData = ref({
@@ -185,7 +185,7 @@ const costStructure = ref([])
 let assetTrendChartInstance = null
 let incomeExpenseChartInstance = null
 let incomeStructureChartInstance = null
-let costChartInstance = null
+let costStructureChartInstance = null
 
 // 格式化数字
 const formatNumber = (num) => {
@@ -394,7 +394,8 @@ const updateChartsFromStore = () => {
     // 更新收支趋势图表
     if (incomeExpenseChartInstance && incomeExpenseData) {
       // 处理收支趋势数据，支持不同时间维度
-      const labels = incomeExpenseData.income?.map(item => item.month) || []
+      const timeKey = activeTab.value === 'week' ? 'day' : 'month'
+      const labels = incomeExpenseData.income?.map(item => item[timeKey]) || []
       const incomeData = incomeExpenseData.income?.map(item => item.value) || []
       const expenseData = incomeExpenseData.expense?.map(item => item.value) || []
       
@@ -461,12 +462,12 @@ const updatePieCharts = () => {
     incomeStructureChartInstance.update()
   }
   
-  // 更新成本结构饼图
-  if (costChartInstance) {
-    costChartInstance.data.labels = costStructure.value.map(item => item.name)
-    costChartInstance.data.datasets[0].data = costStructure.value.map(item => item.percentage)
-    costChartInstance.data.datasets[0].backgroundColor = costStructure.value.map(item => item.color)
-    costChartInstance.update()
+  // 更新饼图
+  if (costStructureChartInstance) {
+    costStructureChartInstance.data.labels = costStructure.value.map(item => item.name)
+    costStructureChartInstance.data.datasets[0].data = costStructure.value.map(item => item.percentage)
+    costStructureChartInstance.data.datasets[0].backgroundColor = costStructure.value.map(item => item.color)
+    costStructureChartInstance.update()
   }
 }
 
@@ -646,13 +647,13 @@ const initIncomeStructureChart = () => {
 }
 
 // 初始化成本结构分析饼图
-const initCostChart = () => {
-  const ctx = costChart.value.getContext('2d')
+const initCostStructureChart = () => {
+  const ctx = costStructureChart.value.getContext('2d')
   const config = createPieChartConfig(costStructure, function(context) {
     const item = costStructure.value[context.dataIndex]
     return `${item.name}: ¥${formatNumber(item.value)} (${item.percentage}%)`
   })
-  costChartInstance = new Chart(ctx, config)
+  costStructureChartInstance = new Chart(ctx, config)
 }
 
 // 组件挂载后初始化图表
@@ -665,7 +666,7 @@ onMounted(async () => {
     initAssetTrendChart()
     initIncomeExpenseChart()
     initIncomeStructureChart()
-    initCostChart()
+    initCostStructureChart()
     
     // 初始化数据
     const now = new Date()

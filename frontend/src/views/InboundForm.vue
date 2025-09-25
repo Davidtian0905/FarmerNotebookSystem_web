@@ -1083,8 +1083,8 @@ onMounted(() => {
         if (formData.hasOwnProperty(key)) {
     if (key === 'supplier' && templateData[key]) {
             // 查找对应的供应商ID
-            const supplierOption = baseData.suppliers.find(supplier => 
-              supplier.label === templateData[key] || supplier.value === templateData[key]
+            const supplierOption = baseData.suppliers.find(supplierId => 
+              supplierId.label === templateData[key] || supplierId.value === templateData[key]
             )
             formData[key] = supplierOption ? supplierOption.value : templateData[key]
             // 同时设置 supplierId 字段，确保与 database_flow.js 中的字段匹配
