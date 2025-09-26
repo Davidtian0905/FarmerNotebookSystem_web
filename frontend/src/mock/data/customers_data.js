@@ -9,46 +9,46 @@ export const CUSTOMERS = {
     customerId: 'CUS001',
     customername: '李茶庄',
     customcategory: '零售商',
-    grade: 'VIP',
+    customergrade: 'VIP',
     customerphone: '13800138001',
     customeraddress: '福建省厦门市思明区茶叶街230号',
     discountRate: 0.9, // 9折
-    contactPerson: '李老板',
-    email: 'licha@example.com',
+    customercontact: '李老板',
+    customsource: '网络推广',
     createTime: '2023-01-01 12:00:00',
     updateTime: '2023-01-10 15:30:00',
     customerStatus: 'active',
-    remark: '重要客户'
+    notes: '重要客户'
   },
   CUS002: {
     customerId: 'CUS002',
     customername: '茶香阁',
     customcategory: '批发商',
-    grade: '普通',
+    customergrade: '普通',
     customerphone: '13900139002',
     customeraddress: '福建省泉州市鲤城区茶叶批发市场B区12号',
     discountRate: 0.95, // 9.5折
-    contactPerson: '王经理',
-    email: 'chaxiang@example.com',
+    customercontact: '王经理',
+    customsource: '朋友推荐',
     createTime: '2023-02-15 10:20:00',
     updateTime: '2023-03-10 14:30:00',
     customerStatus: 'active',
-    remark: '批发客户'
+    notes: '批发客户'
   },
   CUS003: {
     customerId: 'CUS003',
     customername: '品茗轩',
     customcategory: '高级茶馆',
-    grade: '高级',
+    customergrade: '高级',
     customerphone: '13800138003',
     customeraddress: '浙江省杭州市西湖区茶艺街45号',
     discountRate: 0.97, // 97折
-    contactPerson: '张总',
-    email: 'pinming@example.com',
+    customercontact: '张总',
+    customsource: '展会',
     createTime: '2023-03-01 09:15:00',
     updateTime: '2023-03-20 16:45:00',
     customerStatus: 'disabled',
-    remark: '高级客户'
+    notes: '高级客户'
   }
 }
 
@@ -79,7 +79,7 @@ export const getCustomerOptions = () => {
     label: customer.customername,
     phone: customer.customerphone,
     address: customer.customeraddress,
-    category: customer.customcategory,
+    customcategory: customer.customcategory,
     grade: customer.grade,
     discountRate: customer.discountRate || 1
   }))

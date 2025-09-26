@@ -324,6 +324,21 @@ const DEFAULT_TRANSACTIONS = [
     inspectionDate: "2025-01-15",
     qualityRemarks: "质检通过，无异常",
   },
+  {
+    type: "OUTBOUND",
+    date: "2024-03-25",
+    time: "09:30:00",
+    productName: '铁观音套装',
+    productCode: 'P_TGY20250925093000',
+    unit: '盒',
+    quantity: 50,
+    unitPrice: 280.00,
+    totalPrice: 14000.00,
+    customerId: 'CUS002',
+    channel: '线上',
+    tags: ['VIP客户', '礼品'],
+    notes: '客户要求包装精美'
+  },
 ]
 
 /**

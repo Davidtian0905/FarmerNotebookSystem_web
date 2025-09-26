@@ -2,7 +2,7 @@
 export const SUPPLIERS = {
   SUP001: {
     supplierId: 'SUP001',
-    suppliername: '福建安溪茶园',
+    suppliername: '福建安溪茶厂',
     supplierContact: '张师傅',
     supplierPhone: '13800138001',
     address: '福建省泉州市安溪县',
@@ -16,7 +16,7 @@ export const SUPPLIERS = {
   },
   SUP002: {
     supplierId: 'SUP002',
-    suppliername: '武夷山茶业公司',
+    suppliername: '武夷山茶业厂',
     supplierContact: '李经理',
     supplierPhone: '13800138002',
     address: '福建省南平市武夷山市',

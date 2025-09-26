@@ -209,14 +209,14 @@
           <div class="section-content space-y-6">
             <div class="form-group">
               <label class="form-label required">供应商</label>
-              <select v-model="formData.supplier" class="form-select" @change="showSupplierRating = !!formData.supplier">
+              <select v-model="formData.supplier" class="form-select" @change="handleSupplierChange">
                 <option value="">请选择供应商</option>
                 <option 
                   v-for="supplier in baseData.suppliers" 
                   :key="supplier.value" 
                   :value="supplier.value"
                 >
-                  {{ supplier.label }}
+                  {{ supplier.label }} ({{ supplier.value }})
                 </option>
               </select>
             </div>
@@ -956,7 +956,7 @@ const loadBaseData = async () => {
     baseData.suppliers = getSupplierOptions()
     baseData.qualityStatuses = getQualityStatusOptions()
     
-    console.log('基础数据加载完成')
+    console.log('基础数据加载完成', baseData.suppliers)
   } catch (error) {
     console.error('加载基础数据失败:', error)
     // 即使API失败，也要确保基础选项可用
@@ -965,6 +965,8 @@ const loadBaseData = async () => {
     baseData.warehouseLocations = getWarehouseLocationOptions()
     baseData.suppliers = getSupplierOptions()
     baseData.qualityStatuses = getQualityStatusOptions()
+    
+    console.log('基础数据加载失败后重试', baseData.suppliers)
   }
 }
 
@@ -1050,6 +1052,13 @@ const saveImagesToLocal = async () => {
 
 // 删除了loadMaterialImages函数，因为它包含无效的模拟数据且不符合实际需求
 
+// 处理供应商选择变化
+const handleSupplierChange = () => {
+  console.log('供应商选择变化:', formData.supplier)
+  showSupplierRating.value = !!formData.supplier
+  console.log('显示供应商评价:', showSupplierRating.value)
+}
+
 // 处理保存操作
 const handleSave = async () => {
   await handleSubmit()
@@ -1083,12 +1092,15 @@ onMounted(() => {
         if (formData.hasOwnProperty(key)) {
     if (key === 'supplier' && templateData[key]) {
             // 查找对应的供应商ID
-            const supplierOption = baseData.suppliers.find(supplierId => 
-              supplierId.label === templateData[key] || supplierId.value === templateData[key]
+            const supplierOption = baseData.suppliers.find(supplier => 
+              supplier.label === templateData[key] || supplier.value === templateData[key]
             )
+            // 只存储supplierId，因为suppliername可能会发生变化
             formData[key] = supplierOption ? supplierOption.value : templateData[key]
             // 同时设置 supplierId 字段，确保与 database_flow.js 中的字段匹配
             formData.supplierId = supplierOption ? supplierOption.value : templateData[key]
+            
+            console.log('设置供应商:', formData[key], formData.supplierId, supplierOption)
           } else {
             formData[key] = templateData[key]
           }
@@ -1098,6 +1110,7 @@ onMounted(() => {
       // 如果有供应商数据，显示供应商评价
       if (templateData.supplier) {
         showSupplierRating.value = true
+        console.log('显示供应商评价:', templateData.supplier, formData.supplier, showSupplierRating.value)
       }
       
       // 如果有保质期时长数据，自动计算保质期日期

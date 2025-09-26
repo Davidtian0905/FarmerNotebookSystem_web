@@ -93,18 +93,17 @@
     <!-- 流水明细列表 -->
     <div v-else class="card rounded-2xl shadow overflow-hidden">
       <div class="card-header flex justify-between items-center p-5 bg-white border-b">
-        <h3 class="card-title font-semibold text-gray-900 flex items-center">
-          <i class="fas fa-list-ul text-green-600 mr-2"></i>
+        <h3 class="card-title font-semibold text-gray-900">
           流水明细
         </h3>
-        <div class="flex items-center space-x-6">
-          <div class="flex items-center space-x-2">
-            <div class="w-3 h-3 bg-green-600 rounded-full shadow-sm"></div>
-            <span class="text-sm text-gray-700 font-medium">收入</span>
+        <div class="legend flex items-center space-x-6">
+          <div class="legend-item flex items-center space-x-2">
+            <div class="legend-dot income-dot w-3 h-3 bg-green-600 rounded-full shadow-sm"></div>
+            <span class="legend-text text-sm text-gray-700 font-medium">收入</span>
           </div>
-          <div class="flex items-center space-x-2">
-            <div class="w-3 h-3 bg-red-600 rounded-full shadow-sm"></div>
-            <span class="text-sm text-gray-700 font-medium">支出</span>
+          <div class="legend-item flex items-center space-x-2">
+            <div class="legend-dot expense-dot w-3 h-3 bg-red-600 rounded-full shadow-sm"></div>
+            <span class="legend-text text-sm text-gray-700 font-medium">支出</span>
           </div>
         </div>
       </div>
@@ -113,7 +112,6 @@
         <template v-if="paginatedRecords.length > 0">
           <div v-for="(group, index) in paginatedRecords" :key="index" class="mb-2">
             <div class="date-divider px-4 py-3 bg-gray-50 border-l-4 border-green-500 flex items-center">
-              <i class="fas fa-calendar-day text-green-600 mr-2"></i>
               <span class="text-sm font-medium text-gray-800">{{ formatDate(group.date) }}</span>
             </div>
             <div class="space-y-0">
@@ -129,11 +127,12 @@
                       record.type === 'INBOUND' ? 'bg-green-100' : 'bg-red-100'
                     ]"
                   >
-                    <i 
+                    <div 
                       :class="[
-                        record.type === 'INBOUND' ? 'fas fa-leaf text-green-600' : 'fas fa-box text-red-600'
+                        'w-4 h-4 rounded-full',
+                        record.type === 'INBOUND' ? 'bg-green-600' : 'bg-red-600'
                       ]"
-                    ></i>
+                    ></div>
                   </div>
                   <div>
                     <div class="font-medium text-gray-900">{{ record.productName || record.materialName }}</div>
@@ -147,7 +146,6 @@
                         {{ record.type === 'INBOUND' ? '收入' : '支出' }}
                       </span>
                       <span class="ml-2 flex items-center">
-                        <i class="fas fa-cubes text-gray-500 mr-1 text-xs"></i>
                         {{ record.quantity }} {{ record.unit }}
                       </span>
                     </div>
@@ -163,7 +161,6 @@
                     {{ record.type === 'INBOUND' ? '+' : '-' }} {{ formatCurrency(record.totalPrice || record.amount) }}
                   </div>
                   <div class="text-xs text-gray-500 flex items-center justify-end mt-1">
-                    <i class="fas fa-clock text-gray-500 mr-1"></i>
                     {{ record.time.substring(0, 5) }}
                   </div>
                 </div>
@@ -187,7 +184,7 @@
       <!-- 分页控件 -->
       <div v-if="groupedRecords.length > 0" class="pagination bg-white border-t border-gray-200 p-4 flex justify-between items-center">
         <div class="pagination-info text-sm text-gray-600">
-          显示 {{ paginatedRecords.length }} 组记录中的第 {{ currentPage }}/{{ totalPages }} 页
+          每页显示1-{{ pageSize }}条，共{{ filteredRecords.length }}条记录
         </div>
         <div class="pagination-controls flex items-center space-x-2">
           <button 
@@ -459,7 +456,7 @@ const applyFilters = () => {
 // 重置筛选
 const resetFilters = () => {
   filters.value = {
-    timeRange: 'week',
+    timeRange: 'all',
     type: 'all',
     productType: 'all',
     amountRange: 'all',

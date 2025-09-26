@@ -242,7 +242,7 @@
               </td>
               <td class="unit-price">¥{{ (summary.totalAmount / summary.totalQuantity).toFixed(2) }}</td>
               <td class="total-price">¥{{ summary.totalAmount.toFixed(2) }}</td>
-              <td class="supplier">{{ getSupplierName(summary.supplier) }}</td>
+              <td class="supplier">{{ getSupplierName(summary.supplierId) }}</td>
               <td class="warehouse-location">{{ getWarehouseLocationName(summary.warehouseLocation) }}</td>
               <td class="expiry-date">{{ formatDate(summary.expiryDate) }}</td>
               <td class="quality-status">
@@ -361,6 +361,7 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getWarehouseData } from '@/mock/database_flow.js'
 import { getMaterialTypeOptions, getMaterialGradeOptions, getWarehouseLocationOptions, getSupplierOptions } from '@/mock/warehouse_data.js'
+import { SUPPLIERS } from '@/mock/data/suppliers_data.js'
 import InboundForm from '@/views/InboundForm.vue'
 import Layout from '@/components/layout/Layout.vue'
 
@@ -458,6 +459,7 @@ const materialImagesCache = ref({})
             totalQuantity: 0,
             totalAmount: 0,
             supplier: record.supplier,
+            supplierId: record.supplierId,
             warehouseLocation: record.warehouseLocation,
             latestDate: record.date,
             latestTime: record.time,
@@ -478,6 +480,7 @@ const materialImagesCache = ref({})
           summary[materialCode].expiryDate = record.expiryDate
           summary[materialCode].qualityStatus = record.qualityStatus
           summary[materialCode].supplier = record.supplier
+          summary[materialCode].supplierId = record.supplierId
           summary[materialCode].warehouseLocation = record.warehouseLocation
         }
       })
@@ -559,9 +562,11 @@ const materialImagesCache = ref({})
       return gradeName || '未知等级'
     }
 
-    const getSupplierName = (supplier) => {
-      // 直接返回供应商名称，因为数据中supplier字段存储的是供应商名称
-      return supplier || '未知供应商'
+    const getSupplierName = (supplierId) => {
+      // 根据supplierId从SUPPLIERS对象中获取供应商名称
+      if (!supplierId) return '未知供应商'
+      const supplier = SUPPLIERS[supplierId]
+      return supplier ? supplier.suppliername : '未知供应商'
     }
 
     const getWarehouseLocationName = (locationId) => {
