@@ -54,7 +54,7 @@
                     <th class="th-cell">联系方式</th>
                     <th class="th-cell">交易次数</th>
                     <th class="th-cell">交易金额</th>
-                    <th class="th-cell">最后交易</th>
+                    <th class="th-cell">最后交易时间</th>
                     <th class="th-cell">状态</th>
                     <th class="th-cell">操作</th>
                   </tr>

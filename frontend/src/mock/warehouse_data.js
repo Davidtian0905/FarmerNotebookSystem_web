@@ -135,7 +135,7 @@ export const getSupplierOptions = () => {
       label: supplier.suppliername,
       contact: supplier.supplierContact,
       phone: supplier.supplierPhone,
-      address: supplier.address,
+      address: supplier.supplieraddress,
       category: supplier.supplierCategory,
       grade: supplier.supplierGrade,
       status: supplier.supplierStatus

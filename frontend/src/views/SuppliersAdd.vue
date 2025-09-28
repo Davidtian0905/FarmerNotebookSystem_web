@@ -84,7 +84,7 @@
           <div class="form-group">
             <label class="form-label">详细地址</label>
             <textarea 
-              v-model="supplierForm.address" 
+              v-model="supplierForm.supplieraddress" 
               placeholder="请输入详细地址" 
               class="form-textarea"
               rows="3"
@@ -186,7 +186,7 @@
           <div class="form-group">
             <label class="form-label">备注</label>
             <textarea 
-              v-model="supplierForm.remark" 
+              v-model="supplierForm.notes" 
               placeholder="请输入备注信息" 
               class="form-textarea"
               rows="4"
@@ -227,18 +227,22 @@ const supplierId = computed(() => {
 
 // 供应商类别和等级选项
 const categoryOptions = [
-  { value: 'manufacturer', label: '生产厂家' },
-  { value: 'wholesaler', label: '批发商' },
-  { value: 'distributor', label: '经销商' },
-  { value: 'agent', label: '代理商' },
-  { value: 'other', label: '其他' }
+  { value: '茶叶供应商', label: '茶叶供应商' },
+  { value: '包装供应商', label: '包装供应商' },
+  { value: '茶具供应商', label: '茶具供应商' },
+  { value: '生产厂家', label: '生产厂家' },
+  { value: '批发商', label: '批发商' },
+  { value: '经销商', label: '经销商' },
+  { value: '代理商', label: '代理商' },
+  { value: '其他', label: '其他' }
 ]
 
 const gradeOptions = [
-  { value: 'A', label: 'A级' },
-  { value: 'B', label: 'B级' },
-  { value: 'C', label: 'C级' },
-  { value: 'D', label: 'D级' }
+  { value: '特级', label: '特级' },
+  { value: 'A级', label: 'A级' },
+  { value: 'B级', label: 'B级' },
+  { value: 'C级', label: 'C级' },
+  { value: 'D级', label: 'D级' }
 ]
 
 // 表单数据
@@ -247,13 +251,13 @@ const supplierForm = reactive({
   supplierId: '系统自动生成',
   supplierContact: '',
   supplierPhone: '',
-  address: '',
+  supplieraddress: '',
   mainProducts: '',
   supplierCategory: '',
   supplierGrade: '',
   cooperationYears: 0,
   supplierStatus: 'active',
-  remark: ''
+  notes: ''
 })
 
 // 生成供应商编码
@@ -270,17 +274,17 @@ const getSupplierDetail = async (id) => {
     if (response.error === 0 && response.body) {
       // 将供应商数据填充到表单
       const supplier = response.body
-      supplierForm.suppliername = supplier.name || ''
-      supplierForm.supplierId = supplier.id || ''
-      supplierForm.supplierContact = supplier.contact || ''
-      supplierForm.supplierPhone = supplier.phone || ''
-      supplierForm.address = supplier.address || ''
+      supplierForm.suppliername = supplier.suppliername || ''
+      supplierForm.supplierId = supplier.supplierId || ''
+      supplierForm.supplierContact = supplier.supplierContact || ''
+      supplierForm.supplierPhone = supplier.supplierPhone || ''
+      supplierForm.supplieraddress = supplier.supplieraddress || ''
       supplierForm.mainProducts = supplier.mainProducts || ''
-      supplierForm.supplierCategory = supplier.category || ''
-      supplierForm.supplierGrade = supplier.grade || ''
+      supplierForm.supplierCategory = supplier.supplierCategory || ''
+      supplierForm.supplierGrade = supplier.supplierGrade || ''
       supplierForm.cooperationYears = supplier.cooperationYears || 0
-      supplierForm.supplierStatus = supplier.status || 'active'
-      supplierForm.remark = supplier.remark || ''
+      supplierForm.supplierStatus = supplier.supplierStatus || 'active'
+      supplierForm.notes = supplier.notes || ''
     } else {
       showToast(response.message || '获取供应商信息失败')
       router.push('/suppliers')
@@ -312,13 +316,13 @@ const saveSupplier = async () => {
       supplierId: supplierForm.supplierId,
       supplierContact: supplierForm.supplierContact,
       supplierPhone: supplierForm.supplierPhone,
-      address: supplierForm.address,
+      supplieraddress: supplierForm.supplieraddress,
       mainProducts: supplierForm.mainProducts,
       supplierCategory: supplierForm.supplierCategory,
       supplierGrade: supplierForm.supplierGrade,
       cooperationYears: supplierForm.cooperationYears,
       supplierStatus: supplierForm.supplierStatus,
-      remark: supplierForm.remark
+      notes: supplierForm.notes
     }
     
     let response
