@@ -108,12 +108,12 @@
 
 ————————————————————————————————————————————————
 ## 字段改进建议
-- 建议统一注册API与前端表单字段，增加传递`confirmPassword`、`nickname`、`agreeTerms`。
-- 建议统一用户信息命名，前端使用`user`而API返回`userInfo`，建议统一。
-- 建议忘记密码流程在重置时携带并校验`resetToken`，前端完善接入。
-- 建议在认证Store中增加`error`字段，统一错误状态管理与展示。
+- ✅ 建议统一注册API与前端表单字段，增加传递`confirmPassword`、`nickname`、`agreeTerms`。
+- ✅ 建议统一用户信息命名，前端使用`user`而API返回`userInfo`，建议统一。
+- ✅ 建议忘记密码流程在重置时携带并校验`resetToken`，前端完善接入。
+- ✅ 建议在认证Store中增加`error`字段，统一错误状态管理与展示。
 - 建议用户信息接口补充`avatar`与`status`字段，满足UI展示需求。
 - 建议刷新令牌接口增加`issuedAt`或`refreshAt`，便于提示过期时间。
 - 建议在请求层统一注入`auth`头并校验，确保接口安全性。
 - 建议表单字段增加去空格与格式校验（如用户名规则、邮箱长度）。
-- 建议API层兼容`remember`与`rememberMe`字段命名差异，减少前端适配。
+- ✅ 建议API层兼容`remember`与`rememberMe`字段命名差异，减少前端适配。

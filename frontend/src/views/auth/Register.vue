@@ -188,12 +188,15 @@ const handleRegister = async () => {
     const response = await register({
       username: form.username,
       email: form.email,
-      password: form.password
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+      nickname: form.username,
+      agreeTerms: form.agreeTerms
     })
     
     // 保存登录状态
     authStore.setToken(response.token)
-    authStore.setUser(response.user)
+    authStore.setUser(response.userInfo)
     
     showToast('注册成功')
     router.push('/dashboard')
@@ -391,4 +394,4 @@ const showPrivacy = () => {
     font-size: 20px;
   }
 }
-</style> 
+</style>

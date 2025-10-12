@@ -163,6 +163,7 @@ const router = useRouter()
 const form = reactive({
   email: '',
   verifyCode: '',
+  resetToken: '',
   newPassword: '',
   confirmPassword: ''
 })
@@ -216,10 +217,13 @@ const handleVerifyEmail = async () => {
   loading.value = true
   
   try {
-    await verifyCode({
+    const response = await verifyCode({
       email: form.email,
       code: form.verifyCode
     })
+    
+    // 保存重置令牌，用于后续重置密码
+    form.resetToken = response.resetToken
     
     showToast('邮箱验证成功')
     currentStep.value = 1
@@ -243,8 +247,9 @@ const handleResetPassword = async () => {
   try {
     await resetPassword({
       email: form.email,
-      code: form.verifyCode,
-      newPassword: form.newPassword
+      resetToken: form.resetToken,
+      newPassword: form.newPassword,
+      confirmPassword: form.confirmPassword
     })
     
     showToast('密码重置成功')
@@ -444,4 +449,4 @@ const goToLogin = () => {
     font-size: 20px;
   }
 }
-</style> 
+</style>
