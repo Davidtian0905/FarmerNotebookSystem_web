@@ -54,7 +54,7 @@ const routes = [
   {
     path: '/records',
     name: 'Records',
-    component: () => import('@/views/Records.vue'),
+    component: () => import('@/views/Flow.vue'),
     meta: {
       title: '流水记录',
       requiresAuth: true
@@ -202,24 +202,6 @@ const routes = [
     meta: {
       title: 'VIP功能',
       requiresAuth: true
-    }
-  },
-  {
-    path: '/test-mock',
-    name: 'DashboardTestMock',
-    component: () => import('@/views/DashboardTestMock.vue'),
-    meta: {
-      title: 'Mock数据测试',
-      requiresAuth: false
-    }
-  },
-  {
-    path: '/assets-test-mock',
-    name: 'AssetsTestMock',
-    component: () => import('@/views/AssetsTestMock.vue'),
-    meta: {
-      title: '资产总览Mock测试',
-      requiresAuth: false
     }
   },
   {

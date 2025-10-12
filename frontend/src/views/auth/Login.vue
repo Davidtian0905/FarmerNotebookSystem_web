@@ -45,7 +45,7 @@
 
         <!-- 记住密码和忘记密码 -->
         <div class="form-options">
-          <van-checkbox v-model="form.remember">记住密码</van-checkbox>
+          <van-checkbox v-model="form.rememberMe">记住密码</van-checkbox>
           <van-button type="primary" size="small" @click="goToForgotPassword">
             忘记密码？
           </van-button>
@@ -94,7 +94,7 @@ console.log('Login组件开始加载')
 const form = reactive({
   username: '',
   password: '',
-  remember: false
+  rememberMe: false
 })
 
 // 加载状态
@@ -118,7 +118,7 @@ const handleLogin = async () => {
     const response = await login({
       username: form.username,
       password: form.password,
-      rememberMe: form.remember
+      rememberMe: form.rememberMe
     })
     
     console.log('登录响应:', response)
@@ -133,7 +133,7 @@ const handleLogin = async () => {
     console.log('用户信息已保存:', response.userInfo)
     
     // 记住密码
-    if (form.remember) {
+    if (form.rememberMe) {
       localStorage.setItem('remembered_username', form.username)
     } else {
       localStorage.removeItem('remembered_username')
@@ -165,7 +165,7 @@ const initRememberedUser = () => {
   const rememberedUsername = localStorage.getItem('remembered_username')
   if (rememberedUsername) {
     form.username = rememberedUsername
-    form.remember = true
+    form.rememberMe = true
   }
 }
 
@@ -313,4 +313,4 @@ onMounted(() => {
     font-size: 20px;
   }
 }
-</style> 
+</style>
