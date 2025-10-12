@@ -2,7 +2,7 @@
 
 ## 概述
 
-仪表板API提供基于系统时间的财务数据概览，包括最近7天的收入、支出、利润数据，以及趋势分析。**数据来源从database_flow.js获取真实交易记录，利润和增长率计算在前端进行**，确保数据一致性和实时性。
+仪表板API提供基于系统时间的财务数据概览，包括最近7天的收入、支出、利润数据，以及趋势分析。**数据来源从database_flow.js获取真实交易记录，利润和增长率计算在前端进行**，确保数据一致性和实时性。系统现已优化数据结构，通过简化的交易记录接口提供更高效的数据传输。
 
 ## 基础信息
 
@@ -26,6 +26,7 @@
 - **今日数据**：实时获取当前日期的收支数据计算利润
 - **网络延迟**：模拟0.6-0.8秒的网络请求延迟
 - **数据完整性**：确保7天数据完整，无数据日期显示为0
+- **简化数据**：使用getSimplifiedTransactions函数提供精简的交易数据结构
 
 ## 前端计算逻辑
 
@@ -167,19 +168,73 @@
 
 ## 前端计算函数
 
+### 核心计算函数
+所有计算函数现已集中在 `@/stores/dashboard_Calculations.js` 文件中，避免重复定义。
+
 ### 利润计算函数
 ```javascript
-export const calculateNetProfit = (totalIncome, totalExpense) => {
-  return totalIncome - totalExpense
-}
+export const calculateNetProfit = (income, expense) => {
+  return income - expense;
+};
 ```
 
 ### 增长率计算函数
 ```javascript
 export const calculateGrowthRate = (currentValue, previousValue) => {
-  if (previousValue === 0) return 0
-  return ((currentValue - previousValue) / Math.abs(previousValue) * 100).toFixed(1)
-}
+  if (previousValue === 0) return 0;
+  return parseFloat(((currentValue - previousValue) / Math.abs(previousValue) * 100).toFixed(1));
+};
+```
+
+### 收入支出计算函数
+```javascript
+export const calculateTotalIncome = (transactions) => {
+  return transactions
+    .filter(t => t.type === 'OUTBOUND')
+    .reduce((sum, t) => sum + (t.totalPrice || 0), 0);
+};
+
+export const calculateTotalExpense = (transactions) => {
+  return transactions
+    .filter(t => t.type === 'INBOUND')
+    .reduce((sum, t) => sum + (t.totalPrice || 0), 0);
+};
+```
+
+### 汇总数据计算函数
+```javascript
+export const calculateSummary = (data) => {
+  const totalIncome = data.reduce((sum, item) => sum + item.total_income, 0);
+  const totalExpense = data.reduce((sum, item) => sum + item.total_expense, 0);
+  const netProfit = calculateNetProfit(totalIncome, totalExpense);
+  
+  return {
+    total_income: totalIncome,
+    total_expense: totalExpense,
+    net_profit: netProfit,
+    // 其他汇总数据...
+  };
+};
+```
+
+### 增长率分析函数
+```javascript
+export const calculateGrowthAnalysis = (data) => {
+  // 获取最近两天的数据进行比较
+  const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const todayData = sortedData[0];
+  const yesterdayData = sortedData[1];
+  
+  // 计算各项增长率
+  return {
+    income_growth_rate: calculateGrowthRate(todayData.total_income, yesterdayData.total_income),
+    expense_growth_rate: calculateGrowthRate(todayData.total_expense, yesterdayData.total_expense),
+    profit_growth_rate: calculateGrowthRate(
+      calculateNetProfit(todayData.total_income, todayData.total_expense),
+      calculateNetProfit(yesterdayData.total_income, yesterdayData.total_expense)
+    )
+  };
+};
 ```
 
 ## 错误码说明
@@ -196,16 +251,29 @@ export const calculateGrowthRate = (currentValue, previousValue) => {
 
 ### database_flow.js数据结构
 - **交易类型**：INBOUND(入库/采购) 和 OUTBOUND(出库/销售)
-- **数据字段**：包含id、type、date、amount、quantity、unit_price、product_name等
+- **核心数据字段**：id、type、date、time、totalPrice
 - **数据获取**：通过getTransactionsByDateRange和getTransactionsByDate函数获取
+- **简化数据获取**：通过getSimplifiedTransactions和getSimplifiedRecentWeekTransactions函数获取精简数据
 - **数据处理**：自动按日期分组并累加同类型交易金额
+
+### 简化的交易记录结构
+```javascript
+{
+  id: "交易ID",
+  type: "INBOUND或OUTBOUND",
+  date: "YYYY-MM-DD",
+  time: "HH:MM:SS",
+  totalPrice: 1000  // 统一使用totalPrice表示交易金额
+}
+```
 
 ### 数据处理逻辑
 1. **最近7天数据**：获取从6天前到今天的所有交易记录
-2. **收入计算**：累加所有OUTBOUND类型交易的amount字段（销售收入）
-3. **支出计算**：累加所有INBOUND类型交易的amount字段（采购成本，支出）
+2. **收入计算**：累加所有OUTBOUND类型交易的totalPrice字段（销售收入）
+3. **支出计算**：累加所有INBOUND类型交易的totalPrice字段（采购成本，支出）
 4. **利润计算**：收入 - 支出
 5. **今日数据**：单独获取当前日期的交易记录进行计算
+6. **数据简化**：使用getSimplifiedTransactions函数提取核心字段，减少数据传输量
 
 ## 注意事项
 
@@ -219,3 +287,4 @@ export const calculateGrowthRate = (currentValue, previousValue) => {
 8. 金额数据统一使用数字类型，单位为元
 9. 日期格式统一使用ISO 8601格式 (YYYY-MM-DD)
 10. **无交易数据的日期显示为0**，确保7天数据完整性
+11. **交易金额字段统一**：所有交易类型均使用totalPrice字段表示金额

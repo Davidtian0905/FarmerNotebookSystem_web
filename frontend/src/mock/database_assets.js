@@ -15,7 +15,13 @@ import {
   calculateNetAssets,
   calculateTransactionStats,
   formatAmount,
-  formatDate
+  formatDate,
+  // 添加缺失的导入
+  filterTransactionsByYear,
+  filterTransactionsByMonth,
+  filterTransactionsByWeek,
+  getIncomeTransactions,
+  getExpenseTransactions
 } from './utils/index.js'
 
 const logger = createLogger('DB_ASSETS')
@@ -43,7 +49,7 @@ export const calculateSummaryFromTransactions = (transactions, period, params = 
       id: t.id,
       date: t.date,
       type: t.type,
-      amount: t.amount
+      totalPrice: t.totalPrice || 0
     }))
   })
   
@@ -56,7 +62,7 @@ export const calculateSummaryFromTransactions = (transactions, period, params = 
       id: t.id,
       date: t.date,
       type: t.type,
-      amount: t.amount
+      totalPrice: t.totalPrice || 0
     }))
   })
   
@@ -239,9 +245,9 @@ const generateWeekChartData = (transactions, year, currentInfo) => {
       transactionsCount: dayTransactions.length,
       transactions: dayTransactions.map(t => ({
         date: t.date,
-        type: t.type,
-        amount: t.amount,
-        productName: t.productName
+      type: t.type,
+      totalPrice: t.totalPrice || 0,
+      productName: t.productName
       }))
     })
     
@@ -388,7 +394,7 @@ export const getAssetDataByPeriod = (period, params = {}) => {
     sampleTransactions: transactions.slice(0, 3).map(t => ({
       date: t.date,
       type: t.type,
-      amount: t.amount,
+      totalPrice: t.totalPrice || 0,
       productName: t.productName
     }))
   })
@@ -424,10 +430,49 @@ export const getAssetOverview = (params = {}) => {
   const { period = 'year' } = params
   const data = getAssetDataByPeriod(period, params)
   
-  // 计算总览数据
-  const totalIncome = data.incomeExpense.datasets[0].data.reduce((sum, val) => sum + val, 0)
-  const totalExpense = data.incomeExpense.datasets[1].data.reduce((sum, val) => sum + val, 0)
+  // 获取所有交易记录
+  const allTransactions = getAllTransactions()
+  
+  // 根据时间维度筛选交易记录
+  let filteredTransactions = allTransactions
+  
+  // 根据不同的时间维度筛选交易
+  if (period !== 'total') {
+    const { year = new Date().getFullYear(), month, week } = params
+    
+    switch (period) {
+      case 'year':
+        filteredTransactions = filterTransactionsByYear(allTransactions, year)
+        break
+      case 'month':
+        filteredTransactions = filterTransactionsByMonth(allTransactions, year, month)
+        break
+      case 'week':
+        // 获取当前周数
+        const currentDate = new Date()
+        const currentWeek = params.week || getWeekNumber(currentDate)
+        filteredTransactions = filterTransactionsByWeek(allTransactions, year, currentWeek)
+        break
+    }
+  }
+  
+  // 计算筛选后的交易数据的总收入和总支出
+  const incomeTransactions = getIncomeTransactions(filteredTransactions)
+  const expenseTransactions = getExpenseTransactions(filteredTransactions)
+  
+  const totalIncome = incomeTransactions.reduce((sum, t) => sum + (t.totalPrice || 0), 0)
+  const totalExpense = expenseTransactions.reduce((sum, t) => sum + (t.totalPrice || 0), 0)
   const netAssets = totalIncome - totalExpense
+  
+  console.log('🔍 getAssetOverview - 筛选后的数据:', {
+    period,
+    filteredCount: filteredTransactions.length,
+    incomeCount: incomeTransactions.length,
+    expenseCount: expenseTransactions.length,
+    totalIncome,
+    totalExpense,
+    netAssets
+  })
   
   return {
     totalIncome,
@@ -517,7 +562,8 @@ export const getIncomeStructure = (params = {}) => {
     if (!productStats[t.productName]) {
       productStats[t.productName] = 0
     }
-    productStats[t.productName] += t.amount
+    // 使用totalPrice字段而不是amount字段
+    productStats[t.productName] += t.totalPrice || 0
   })
   
   // 转换为数组格式
@@ -547,10 +593,12 @@ export const getCostStructure = (params = {}) => {
   // 按产品分类统计
   const productStats = {}
   inboundTransactions.forEach(t => {
-    if (!productStats[t.productName]) {
-      productStats[t.productName] = 0
+    const productName = t.materialName || t.productName // 使用materialName或productName
+    if (!productStats[productName]) {
+      productStats[productName] = 0
     }
-    productStats[t.productName] += t.amount
+    // 统一使用totalPrice字段
+    productStats[productName] += t.totalPrice || 0
   })
   
   // 转换为数组格式
@@ -589,9 +637,7 @@ export const getAssetStatistics = (params = {}) => {
     netAssets,
     profitRate: parseFloat(profitRate),
     period,
-    dataPoints: data.labels.length,
-    averageIncome: totalIncome / data.labels.length,
-    averageExpense: totalExpense / data.labels.length
+    dataPoints: data.labels.length
   }
 }
 

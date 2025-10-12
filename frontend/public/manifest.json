@@ -1,0 +1,16 @@
+{
+  "name": "Farmer Notebook System",
+  "short_name": "FarmerNotebook",
+  "description": "茶农系统",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1989fa",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+} 

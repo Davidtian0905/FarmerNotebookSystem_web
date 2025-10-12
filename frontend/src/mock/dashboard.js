@@ -12,12 +12,15 @@ import {
 
 import {
   getDashboardData,
-  getTodayDashboardData,
-  calculateSummary,
-  generateChartData,
-  calculateGrowthAnalysis,
-  calculateNetProfit
+  getTodayDashboardData
 } from './database.js'
+
+import {
+  calculateNetProfit,
+  calculateGrowthRate,
+  calculateSummary,
+  calculateGrowthAnalysis
+} from '@/stores/dashboard_Calculations.js'
 
 // 获取系统当前日期
 const getCurrentDate = () => {
@@ -40,7 +43,7 @@ export const mockGet7dayData = () => {
 export const mockGetRecentWeekData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const currentDate = new Date();
+      const currentDate = new Date(getCurrentDate());
       
       // 使用优化的函数直接获取最近7天的交易数据
       const transactions = getRecentWeekTransactions(currentDate);
@@ -73,15 +76,30 @@ export const mockGetRecentWeekData = () => {
         
         if (transaction.type === 'INBOUND') {
           // INBOUND = 入库/采购 = 支出
-          totalExpense += transaction.amount;
-          dailyData[date].expense += transaction.amount;
+          // 使用amount字段或totalPrice字段作为金额
+          const amount = transaction.amount || transaction.totalPrice || 0;
+          totalExpense += amount;
+          
+          // 如果日期在预构建的7天范围内，更新dailyData
+          if (dailyData[date]) {
+            dailyData[date].expense += amount;
+          }
         } else if (transaction.type === 'OUTBOUND') {
           // OUTBOUND = 出库/销售 = 收入
-          totalIncome += transaction.amount;
-          dailyData[date].income += transaction.amount;
+          // 使用amount字段或totalPrice字段作为金额
+          const amount = transaction.amount || transaction.totalPrice || 0;
+          totalIncome += amount;
+          
+          // 如果日期在预构建的7天范围内，更新dailyData
+          if (dailyData[date]) {
+            dailyData[date].income += amount;
+          }
         }
         
-        dailyData[date].net_profit = dailyData[date].income - dailyData[date].expense;
+        // 更新净利润
+        if (dailyData[date]) {
+          dailyData[date].net_profit = dailyData[date].income - dailyData[date].expense;
+        }
       });
       
       // 更新weekData数组
@@ -160,10 +178,12 @@ export const mockGetTodayData = () => {
       todayTransactions.forEach(transaction => {
         if (transaction.type === 'INBOUND') {
           // INBOUND = 入库/采购 = 支出
-          totalExpense += transaction.amount;
+          // 使用amount字段或totalPrice字段作为金额
+          totalExpense += transaction.amount || transaction.totalPrice || 0;
         } else if (transaction.type === 'OUTBOUND') {
           // OUTBOUND = 出库/销售 = 收入
-          totalIncome += transaction.amount;
+          // 使用amount字段或totalPrice字段作为金额
+          totalIncome += transaction.amount || transaction.totalPrice || 0;
         }
       });
       

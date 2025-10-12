@@ -56,19 +56,21 @@
                     <th class="th-cell">最后交易时间</th>
                     <th class="th-cell">评分</th>
                     <th class="th-cell">状态</th>
+                    <th class="th-cell">备注</th>
                     <th class="th-cell">操作</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="supplier in supplierList" :key="supplier.id" class="table-row">
+                  <tr v-for="supplier in supplierList" :key="supplier.supplierId" class="table-row">
                     <td class="supplier-info">
-                      <div class="supplier-name">{{ supplier.name }}</div>
-                      <div class="supplier-category">类型: {{ supplier.category || '未设置' }}</div>
-                      <div class="supplier-grade">等级: {{ supplier.grade || '未设置' }}</div>
+                      <div class="supplier-name">{{ supplier.suppliername }}</div>
+                      <div class="supplier-category">类型: {{ supplier.supplierCategory || '未设置' }}</div>
+                      <div class="supplier-grade">等级: {{ supplier.supplierGrade || '未设置' }}</div>
                     </td>
                     <td class="supplier-contact">
-                      <div>{{ supplier.phone }}</div>
-                      <div class="supplier-address">{{ supplier.address }}</div>
+                      <div class="supplier-contact-person">联系人: {{ supplier.supplierContact || '未设置' }}</div>
+                      <div>{{ supplier.supplierPhone }}</div>
+                      <div class="supplier-address">{{ supplier.supplieraddress }}</div>
                     </td>
                     <td class="main-products">
                       {{ supplier.mainProducts || '未设置' }}
@@ -86,12 +88,15 @@
                       {{ supplier.rating || 0 }}
                     </td>
                     <td class="supplier-status">
-                      <van-tag :type="getStatusTagType(supplier.status)">{{ getStatusText(supplier.status) }}</van-tag>
+                      <van-tag :type="getStatusTagType(supplier.supplierstatus)">{{ getStatusText(supplier.supplierstatus) }}</van-tag>
+                    </td>
+                    <td class="supplier-notes">
+                      <div class="van-ellipsis">{{ supplier.notes || '无备注' }}</div>
                     </td>
                     <td class="supplier-actions">
                       <div class="action-buttons">
-                        <van-button type="primary" size="small" icon="edit" @click="editSupplier(supplier.id)">编辑</van-button>
-                        <van-button type="info" size="small" icon="cart-o" @click="purchaseFromSupplier(supplier.id)">采购</van-button>
+                        <van-button type="primary" size="small" icon="edit" @click="editSupplier(supplier.supplierId)">编辑</van-button>
+                        <van-button type="info" size="small" icon="cart-o" @click="purchaseFromSupplier(supplier.supplierId)">采购</van-button>
                       </div>
                     </td>
                   </tr>
@@ -121,6 +126,7 @@ import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { mockSuppliersApi } from '@/mock/api/suppliersApi.js'
 import { getAllTransactions } from '@/mock/database_flow.js'
+import { calculateSuppliersWithStats, supplierStatusText, supplierStatusTagType } from '@/stores/Supplier_Calculations.js'
 
 const router = useRouter()
 const searchText = ref('')
@@ -174,40 +180,8 @@ const fetchSupplierData = async () => {
       // 获取所有交易记录
       const allTransactions = getAllTransactions()
       
-      // 更新供应商列表
-      supplierList.value = response.body.list.map(supplier => {
-        // 获取该供应商的所有交易记录
-        const supplierTransactions = allTransactions.filter(t => t.supplierId === supplier.id)
-        
-        // 筛选出有评分的交易记录
-        const ratedTransactions = supplierTransactions.filter(t => 
-          t.quality !== undefined && t.delivery !== undefined && 
-          t.price !== undefined && t.service !== undefined
-        )
-        
-        // 计算评分
-        let rating = 0
-        if (ratedTransactions.length > 0) {
-          const totalQuality = ratedTransactions.reduce((sum, t) => sum + t.quality, 0)
-          const totalDelivery = ratedTransactions.reduce((sum, t) => sum + t.delivery, 0)
-          const totalPrice = ratedTransactions.reduce((sum, t) => sum + t.price, 0)
-          const totalService = ratedTransactions.reduce((sum, t) => sum + t.service, 0)
-          
-          const avgQuality = totalQuality / ratedTransactions.length
-          const avgDelivery = totalDelivery / ratedTransactions.length
-          const avgPrice = totalPrice / ratedTransactions.length
-          const avgService = totalService / ratedTransactions.length
-          
-          // 四个维度的平均值作为最终评分
-          rating = Number(((avgQuality + avgDelivery + avgPrice + avgService) / 4).toFixed(1))
-        }
-        
-        // 更新供应商评分
-        return {
-          ...supplier,
-          rating
-        }
-      })
+      // 使用前端计算逻辑处理供应商数据
+      supplierList.value = calculateSuppliersWithStats(response.body.list, allTransactions)
       
       // 更新分页信息
       const total = response.body.total
@@ -263,26 +237,12 @@ const onLoad = () => {
 
 // 获取状态标签类型
 const getStatusTagType = (status) => {
-  const types = {
-    new: 'primary',
-    active: 'success',
-    normal: 'warning',
-    pending: 'danger',
-    disabled: 'default'
-  }
-  return types[status] || 'default'
+  return supplierStatusTagType[status] || 'default'
 }
 
 // 获取状态文本
 const getStatusText = (status) => {
-  const texts = {
-    new: '新增',
-    active: '活跃',
-    normal: '一般',
-    pending: '待审核',
-    disabled: '已停用'
-  }
-  return texts[status] || '未知'
+  return supplierStatusText[status] || '未知'
 }
 
 // 格式化价格
@@ -305,14 +265,14 @@ const editSupplier = (id) => {
 // 从供应商采购
 const purchaseFromSupplier = (id) => {
   // 获取供应商详情
-  const supplier = supplierList.value.find(s => s.id === id)
+  const supplier = supplierList.value.find(s => s.supplierId === id)
   
   // 跳转到入库表单页面，并传递供应商信息
   router.push({
     path: '/inbound-form',
     query: { 
       supplierId: id,
-      supplierName: supplier?.name || ''
+      supplierName: supplier?.suppliername || ''
     }
   })
 }
@@ -534,6 +494,17 @@ const goToAnalysis = () => {
 .supplier-status {
   width: 80px;
   text-align: center;
+}
+
+.supplier-notes {
+  width: 150px;
+  max-width: 150px;
+}
+
+.van-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .supplier-actions {

@@ -31,7 +31,7 @@
               <div class="form-group">
                 <label class="form-label required">客户名称</label>
                 <input 
-                  v-model="formData.name" 
+                  v-model="formData.customername" 
                   type="text" 
                   placeholder="请输入客户名称" 
                   class="form-input"
@@ -44,7 +44,7 @@
               <div class="form-group">
                 <label class="form-label">客户编码</label>
                 <input 
-                  v-model="formData.code" 
+                  v-model="formData.customerId" 
                   type="text" 
                   placeholder="系统自动生成" 
                   class="form-input"
@@ -57,7 +57,7 @@
               <div class="form-group">
                 <label class="form-label required">联系人</label>
                 <input 
-                  v-model="formData.contact" 
+                  v-model="formData.customercontact" 
                   type="text" 
                   placeholder="请输入联系人姓名" 
                   class="form-input"
@@ -68,7 +68,7 @@
               <div class="form-group">
                 <label class="form-label required">联系电话</label>
                 <input 
-                  v-model="formData.phone" 
+                  v-model="formData.customerphone" 
                   type="tel" 
                   placeholder="请输入联系电话" 
                   class="form-input"
@@ -88,7 +88,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-group">
                 <label class="form-label">客户类型</label>
-                <select v-model="formData.category" class="form-select" style="background-color: white; color: #374151;">
+                <select v-model="formData.customcategory" class="form-select" style="background-color: white; color: #374151;">
                   <option value="" style="color: #9ca3af; background-color: white;">请选择客户类型</option>
                   <option 
                     v-for="type in customerTypes" 
@@ -103,7 +103,7 @@
 
               <div class="form-group">
                 <label class="form-label">客户等级</label>
-                <select v-model="formData.grade" class="form-select" style="background-color: white; color: #374151;">
+                <select v-model="formData.customgrade" class="form-select" style="background-color: white; color: #374151;">
                   <option value="" style="color: #9ca3af; background-color: white;">请选择客户等级</option>
                   <option 
                     v-for="grade in customerGrades" 
@@ -126,14 +126,14 @@
           </div>
           <div class="section-content">
             <div class="form-group">
-              <label class="form-label">详细地址</label>
-              <textarea 
-                v-model="formData.address" 
-                placeholder="请输入详细地址" 
-                class="form-textarea"
-                rows="3"
-              ></textarea>
-            </div>
+                <label class="form-label">详细地址</label>
+                <textarea 
+                  v-model="formData.customeraddress" 
+                  placeholder="请输入详细地址" 
+                  class="form-textarea"
+                  rows="3"
+                ></textarea>
+              </div>
           </div>
         </div>
 
@@ -146,15 +146,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-group">
                 <label class="form-label">客户来源</label>
-                <select v-model="formData.source" class="form-select" style="background-color: white; color: #374151;">
+                <select v-model="formData.customsource" class="form-select" style="background-color: white; color: #374151;">
                   <option value="" style="color: #9ca3af; background-color: white;">请选择客户来源</option>
                   <option 
-                    v-for="source in customerSources" 
-                    :key="source"
-                    :value="source"
+                    v-for="customsource in customerSources" 
+                    :key="customsource"
+                    :value="customsource"
                     style="color: #374151; background-color: white;"
                   >
-                    {{ source }}
+                    {{ customsource }}
                   </option>
                 </select>
               </div>
@@ -200,11 +200,11 @@
                 <label class="form-label">状态</label>
                 <div class="flex space-x-6">
                   <label class="flex items-center">
-                    <input type="radio" v-model="formData.status" value="active" class="mr-2">
+                    <input type="radio" v-model="formData.customerStatus" value="active" class="mr-2">
                     <span>启用</span>
                   </label>
                   <label class="flex items-center">
-                    <input type="radio" v-model="formData.status" value="inactive" class="mr-2">
+                    <input type="radio" v-model="formData.customerStatus" value="inactive" class="mr-2">
                     <span>停用</span>
                   </label>
                 </div>
@@ -250,17 +250,17 @@ const customerSources = ['网络推广', '朋友推荐', '老客户介绍', '展
 
 // 表单数据
 const formData = reactive({
-  name: '',
-  code: '系统自动生成',
-  contact: '',
-  phone: '',
-  address: '',
-  category: '',
-  grade: '',
-  source: '',
+  customername: '',
+  customerId: '系统自动生成',
+  customercontact: '',
+  customerphone: '',
+  customeraddress: '',
+  customcategory: '',
+  customgrade: '',
+  customsource: '',
   discountRate: 0.1,
   notes: '',
-  status: 'active' // 默认启用状态
+  customerStatus: 'active' // 默认启用状态
 })
 
 // 显示用的折扣率（几折）
@@ -274,16 +274,16 @@ const updateDiscountRate = () => {
 
 // 生成客户编码
 const generateCustomerCode = () => {
-  if (!formData.name) return
+  if (!formData.customername) return
   
   // 提取客户名称拼音首字母（这里简化处理，实际应该使用拼音库）
-  const nameInitials = formData.name.substring(0, 2).toUpperCase()
+  const nameInitials = formData.customername.substring(0, 2).toUpperCase()
   
   // 生成时间戳
   const timestamp = new Date().getTime().toString().substring(6)
   
   // 组合编码
-  formData.code = `${nameInitials}${timestamp}`
+  formData.customerId = `${nameInitials}${timestamp}`
 }
 
 // 获取客户详情
@@ -293,17 +293,17 @@ const fetchCustomerDetail = async (id) => {
     if (response.error === 0 && response.body) {
       // 将客户数据填充到表单
       const customer = response.body
-      formData.name = customer.customername || ''
-      formData.code = customer.customerId || ''
-      formData.contact = customer.contactPerson || ''
-      formData.phone = customer.customerphone || ''
-      formData.address = customer.customeraddress || ''
-      formData.category = customer.customcategory || ''
-      formData.grade = customer.grade || ''
-      formData.source = customer.source || ''
+      formData.customername = customer.customername || ''
+      formData.customerId = customer.customerId || ''
+      formData.customercontact = customer.customercontact || ''
+      formData.customerphone = customer.customerphone || ''
+      formData.customeraddress = customer.customeraddress || ''
+      formData.customcategory = customer.customcategory || ''
+      formData.customgrade = customer.customgrade || ''
+      formData.customsource = customer.customsource || ''
       formData.discountRate = customer.discountRate || 0.1
-      formData.notes = customer.remark || ''
-      formData.status = customer.customerStatus || 'active'
+      formData.notes = customer.notes || ''
+      formData.customerStatus = customer.customerStatus || 'active'
       
       // 更新显示的折扣率
       displayDiscountRate.value = formData.discountRate * 10
@@ -322,28 +322,28 @@ const fetchCustomerDetail = async (id) => {
 const handleSave = async () => {
   try {
     // 表单验证
-    if (!formData.name || !formData.contact || !formData.phone) {
+    if (!formData.customername || !formData.customercontact || !formData.customerphone) {
       showToast('请填写必填项')
       return
     }
     
     // 如果是新增模式，生成客户编码
-    if (!isEditMode.value && formData.code === '系统自动生成') {
+    if (!isEditMode.value && formData.customerId === '系统自动生成') {
       generateCustomerCode()
     }
     
     // 准备提交的数据
     const submitData = {
-      name: formData.name,
-      phone: formData.phone,
-      address: formData.address,
+      customername: formData.customername,
+      customerphone: formData.customerphone,
+      customeraddress: formData.customeraddress,
       discountRate: formData.discountRate,
-      contactPerson: formData.contact,
-      remark: formData.notes,
-      status: formData.status,
-      customcategory: formData.category,
-      grade: formData.grade,
-      source: formData.source
+      customercontact: formData.customercontact,
+      notes: formData.notes,
+      customerStatus: formData.customerStatus,
+      customcategory: formData.customcategory,
+      customgrade: formData.customgrade,
+      customsource: formData.customsource
     }
     
     let response

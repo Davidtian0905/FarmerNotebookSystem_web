@@ -129,22 +129,17 @@ export const getMaterialOptions = () => {
 // 获取供应商选项
 export const getSupplierOptions = () => {
   return Object.values(SUPPLIERS).map(supplier => {
-    // 只返回实际存在的属性
-    const option = {
-      value: supplier.id,
-      label: supplier.name
+    // 返回正确的属性名称
+    return {
+      value: supplier.supplierId,
+      label: supplier.suppliername,
+      contact: supplier.supplierContact,
+      phone: supplier.supplierPhone,
+      address: supplier.supplieraddress,
+      category: supplier.supplierCategory,
+      grade: supplier.supplierGrade,
+      status: supplier.supplierStatus
     }
-    
-    // 有条件地添加其他属性
-    if (supplier.phone) option.phone = supplier.phone
-    if (supplier.address) option.address = supplier.address
-    if (supplier.contact) option.contact = supplier.contact
-    if (supplier.code) option.code = supplier.code
-    if (supplier.category) option.category = supplier.category
-    if (supplier.grade) option.grade = supplier.grade
-    if (supplier.cooperationYears) option.cooperationYears = supplier.cooperationYears
-    
-    return option
   })
 }
 

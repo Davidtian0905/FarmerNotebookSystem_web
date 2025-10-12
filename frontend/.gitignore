@@ -87,7 +87,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -96,3 +95,8 @@ public
 # Temporary folders
 tmp/
 temp/ 
+
+# Auto-generated files
+components.d.ts
+auto-imports.d.ts
+.eslintrc-auto-import.json

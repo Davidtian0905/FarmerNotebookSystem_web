@@ -169,13 +169,13 @@
               <div class="preview-item">
                 <span class="preview-label">供应商:</span>
                 <div v-if="editingTemplateId === template.id" class="edit-field">
-                  <select v-model="editForm.supplier" class="edit-select" @click.stop>
+                  <select v-model="editForm.supplierId" class="edit-select" @click.stop>
                     <option v-for="supplier in supplierOptions" :key="supplier.value" :value="supplier.value">
                       {{ supplier.label }}
                     </option>
                   </select>
                 </div>
-                <span v-else class="preview-value">{{ getSupplierName(template.supplier) }}</span>
+                <span v-else class="preview-value">{{ getSupplierName(template.supplierId) }}</span>
               </div>
 
               <div class="preview-item">
@@ -369,7 +369,7 @@
                 <h4 class="section-title">供应商信息</h4>
                 <div class="form-group">
                   <label class="form-label">供应商</label>
-                  <select v-model="templateForm.supplier" class="form-select">
+                  <select v-model="templateForm.supplierId" class="form-select">
                     <option value="">请选择供应商</option>
                     <option v-for="supplier in supplierOptions" :key="supplier.value" :value="supplier.value">
                       {{ supplier.label }}
@@ -471,7 +471,7 @@ const editForm = ref({
   quantity: 0,
   unit: 'kg',
   totalPrice: 0,
-  supplier: '',
+  supplierId: '',
   warehouseLocation: '',
   shelfLifeDays: 365,
   qualityStatus: '待检测'
@@ -502,7 +502,7 @@ const templateForm = ref({
   batchNumber: '',
   materialCode: '',
   unitPrice: 0,
-  supplier: '',
+  supplierId: '',
   date: new Date().toISOString().split('T')[0],
   time: new Date().toTimeString().split(' ')[0],
   expiryDate: '',
@@ -556,9 +556,10 @@ const goBack = () => {
   router.push('/inbound-records')
 }
 
-const getSupplierName = (supplier) => {
-  // 直接返回供应商名称，因为模板数据中supplier字段存储的是供应商名称
-  return supplier || '未知供应商'
+const getSupplierName = (supplierId) => {
+  if (!supplierId) return '未设置'
+  const supplier = supplierOptions.value.find(s => s.value === supplierId)
+  return supplier ? supplier.label : supplierId
 }
 
 const getShelfLifeText = (days) => {

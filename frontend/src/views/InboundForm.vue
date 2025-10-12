@@ -188,7 +188,7 @@
                 <div class="relative">
                   <span class="absolute left-3 top-3 text-gray-500">¥</span>
                   <input 
-                    :value="amount" 
+                    :value="totalPrice" 
                     type="number" 
                     placeholder="0.00" 
                     step="0.01" 
@@ -209,14 +209,14 @@
           <div class="section-content space-y-6">
             <div class="form-group">
               <label class="form-label required">供应商</label>
-              <select v-model="formData.supplier" class="form-select" @change="showSupplierRating = !!formData.supplier">
+              <select v-model="formData.supplierId" class="form-select" @change="handleSupplierChange">
                 <option value="">请选择供应商</option>
                 <option 
                   v-for="supplier in baseData.suppliers" 
                   :key="supplier.value" 
                   :value="supplier.value"
                 >
-                  {{ supplier.label }}
+                  {{ supplier.label }} ({{ supplier.value }})
                 </option>
               </select>
             </div>
@@ -513,6 +513,7 @@ const fileInput = ref(null)
 
 // 表单数据
 const formData = reactive({
+  id: '', // 唯一标识符
   materialName: '',
   materialType: '',
   quantity: 0,
@@ -521,7 +522,7 @@ const formData = reactive({
   batchNumber: '',
   materialCode: '',
   unitPrice: 0,
-  supplier: '',
+  supplierId: '',
   // 其他信息字段
   date: new Date().toISOString().split('T')[0],
   time: new Date().toTimeString().split(' ')[0],
@@ -569,7 +570,7 @@ const searchResults = ref([])
 const searchKeyword = ref('')
 
 // 计算属性
-const amount = computed(() => {
+const totalPrice = computed(() => {
   const qty = Number(formData.quantity) || 0
   const price = Number(formData.unitPrice) || 0
   return (qty * price).toFixed(2)
@@ -671,7 +672,7 @@ const selectMaterial = async (material) => {
   formData.materialGrade = material.materialGrade
   formData.batchNumber = material.batchNumber
   formData.unit = material.unit
-  formData.supplier = material.supplier
+  formData.supplierId = material.supplier
   
   // 自动导入对应物料编码的图片
   await loadMaterialImages(material.materialCode)
@@ -915,7 +916,7 @@ const confirmSaveTemplate = async () => {
       batchNumber: formData.batchNumber,
       materialCode: formData.materialCode,
       unitPrice: formData.unitPrice,
-      supplier: formData.supplier,
+      supplier: formData.supplierId,
       date: formData.date,
       time: formData.time,
       expiryDate: formData.expiryDate,
@@ -956,7 +957,7 @@ const loadBaseData = async () => {
     baseData.suppliers = getSupplierOptions()
     baseData.qualityStatuses = getQualityStatusOptions()
     
-    console.log('基础数据加载完成')
+    console.log('基础数据加载完成', baseData.suppliers)
   } catch (error) {
     console.error('加载基础数据失败:', error)
     // 即使API失败，也要确保基础选项可用
@@ -965,6 +966,8 @@ const loadBaseData = async () => {
     baseData.warehouseLocations = getWarehouseLocationOptions()
     baseData.suppliers = getSupplierOptions()
     baseData.qualityStatuses = getQualityStatusOptions()
+    
+    console.log('基础数据加载失败后重试', baseData.suppliers)
   }
 }
 
@@ -991,6 +994,12 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
+    // 生成唯一标识符 inbound+date
+    const currentDate = new Date();
+    const dateStr = currentDate.toISOString().split('T')[0].replace(/-/g, '');
+    const timeStr = currentDate.toTimeString().split(' ')[0].replace(/:/g, '').substring(0, 6);
+    formData.id = `inbound${dateStr}${timeStr}`;
+    
     // 保存图片到本地路径
     const savedImages = await saveImagesToLocal()
     
@@ -1003,8 +1012,12 @@ const handleSubmit = async () => {
       delivery: ratings.delivery,
       price: ratings.price,
       service: ratings.service,
-      overall: overallRating.value
+      overall: overallRating.value,
+      // 确保使用totalPrice而不是amount
+      totalPrice: Number(totalPrice.value)
     }
+    
+    console.log('提交的入库记录数据:', submitData) // 添加日志，查看生成的id
     
     const response = await createInboundRecord(submitData)
     
@@ -1050,6 +1063,13 @@ const saveImagesToLocal = async () => {
 
 // 删除了loadMaterialImages函数，因为它包含无效的模拟数据且不符合实际需求
 
+// 处理供应商选择变化
+const handleSupplierChange = () => {
+  console.log('供应商选择变化:', formData.supplierId)
+  showSupplierRating.value = !!formData.supplierId
+  console.log('显示供应商评价:', showSupplierRating.value)
+}
+
 // 处理保存操作
 const handleSave = async () => {
   await handleSubmit()
@@ -1081,14 +1101,17 @@ onMounted(() => {
       // 填充表单数据
       Object.keys(templateData).forEach(key => {
         if (formData.hasOwnProperty(key)) {
-    if (key === 'supplier' && templateData[key]) {
-            // 查找对应的供应商ID
-            const supplierOption = baseData.suppliers.find(supplier => 
-              supplier.label === templateData[key] || supplier.value === templateData[key]
-            )
+            if (key === 'supplierId' && templateData[key]) {
+              // 查找对应的供应商ID
+              const supplierOption = baseData.suppliers.find(supplier => 
+                supplier.label === templateData[key] || supplier.value === templateData[key]
+              )
+              // 只存储supplierId，因为suppliername可能会发生变化
             formData[key] = supplierOption ? supplierOption.value : templateData[key]
             // 同时设置 supplierId 字段，确保与 database_flow.js 中的字段匹配
             formData.supplierId = supplierOption ? supplierOption.value : templateData[key]
+            
+            console.log('设置供应商:', formData[key], formData.supplierId, supplierOption)
           } else {
             formData[key] = templateData[key]
           }
@@ -1098,6 +1121,7 @@ onMounted(() => {
       // 如果有供应商数据，显示供应商评价
       if (templateData.supplier) {
         showSupplierRating.value = true
+        console.log('显示供应商评价:', templateData.supplier, formData.supplier, showSupplierRating.value)
       }
       
       // 如果有保质期时长数据，自动计算保质期日期

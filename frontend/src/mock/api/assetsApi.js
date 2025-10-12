@@ -293,9 +293,9 @@ const generateYearlyTrend = (transactions, year) => {
     })
     
     const income = monthTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = monthTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     data.push(income - expense) // 净资产
   }
@@ -334,9 +334,9 @@ const generateMonthlyTrend = (transactions, params) => {
     })
     
     const income = dayTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = dayTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     data.push(income - expense) // 净资产
   }
@@ -373,9 +373,9 @@ const generateWeeklyTrend = (transactions, params) => {
     })
     
     const income = dayTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = dayTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     data.push(income - expense) // 净资产
   }
@@ -434,9 +434,9 @@ const generateYearlyIncomeExpenseTrend = (transactions, year) => {
     })
     
     const income = monthTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = monthTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     incomeData.push(income)
     expenseData.push(expense)
@@ -481,9 +481,9 @@ const generateMonthlyIncomeExpenseTrend = (transactions, params) => {
     })
     
     const income = dayTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = dayTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     incomeData.push(income)
     expenseData.push(expense)
@@ -526,9 +526,9 @@ const generateWeeklyIncomeExpenseTrend = (transactions, params) => {
     })
     
     const income = dayTransactions.filter(t => t.type === 'OUTBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     const expense = dayTransactions.filter(t => t.type === 'INBOUND')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.totalPrice, 0)
     
     incomeData.push(income)
     expenseData.push(expense)

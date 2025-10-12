@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import dashboardApi from '@/api/dashboard.js'
-import { calculateNetProfit, calculateGrowthRate } from '@/mock/database.js'
+import { calculateNetProfit, calculateGrowthRate } from '@/stores/dashboard_Calculations.js'
 
 export const useDashboardStore = defineStore('dashboard', () => {
   // 状态

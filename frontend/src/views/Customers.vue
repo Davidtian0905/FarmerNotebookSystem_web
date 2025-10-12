@@ -1,3 +1,5 @@
+
+
 <template>
   <Layout>
     <div class="customers-page">
@@ -52,7 +54,7 @@
                     <th class="th-cell">联系方式</th>
                     <th class="th-cell">交易次数</th>
                     <th class="th-cell">交易金额</th>
-                    <th class="th-cell">最后交易</th>
+                    <th class="th-cell">最后交易时间</th>
                     <th class="th-cell">状态</th>
                     <th class="th-cell">操作</th>
                   </tr>
@@ -62,7 +64,7 @@
                     <td class="customer-info">
                       <div class="customer-name">{{ customer.customername }}</div>
                       <div class="customer-category">类型: {{ customer.customcategory || '未设置' }}</div>
-                      <div class="customer-grade">等级: {{ customer.grade || '未设置' }}</div>
+                      <div class="customer-grade">等级: {{ customer.customergrade || '未设置' }}</div>
                     </td>
                     <td class="customer-contact">
                       <div>{{ customer.customerphone }}</div>
@@ -78,7 +80,7 @@
                       {{ formatDate(customer.lastTransactionTime) }}
                     </td>
                     <td class="customer-status">
-                      <van-tag :type="getStatusTagType(customer.customerStatus)">{{ getStatusText(customer.customerStatus) }}</van-tag>
+                      <van-tag :type="customerStatusTagType[customer.customerStatus]">{{ customerStatusText[customer.customerStatus] }}</van-tag>
                     </td>
                     <td class="customer-actions">
                       <div class="action-buttons">
@@ -112,6 +114,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { mockCustomersApi } from '@/mock/api/customersApi'
+import {  
+  calculateCustomerStatus, 
+  customerStatusText, 
+  customerStatusTagType 
+} from '@/stores/Customer_Calculations.js'
+
 
 const router = useRouter()
 const searchText = ref('')
@@ -123,7 +131,6 @@ const finished = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const customerList = ref([])
-const searchQuery = ref('')
 
 // 客户状态选项
 const statusOptions = [
@@ -208,66 +215,6 @@ const onLoad = () => {
     loadingMore.value = true
     page.value += 1
     fetchCustomerData()
-  }
-}
-
-// 获取状态标签类型
-const getStatusTagType = (status) => {
-  const types = {
-    new: 'primary',
-    active: 'success',
-    normal: 'warning',
-    inactive: 'danger',
-    disabled: 'default'
-  }
-  return types[status] || 'default'
-}
-
-// 获取状态文本
-const getStatusText = (status) => {
-  const texts = {
-    new: '新增',
-    active: '活跃',
-    normal: '一般',
-    inactive: '待激活',
-    disabled: '已停用'
-  }
-  return texts[status] || '未知'
-}
-
-// 计算客户状态
-const calculateCustomerStatus = (customer) => {
-  const now = new Date()
-  const threeMonthsAgo = new Date(now)
-  threeMonthsAgo.setMonth(now.getMonth() - 3)
-  
-  const oneMonthAgo = new Date(now)
-  oneMonthAgo.setMonth(now.getMonth() - 1)
-  
-  // 检查是否为新增客户（一个月内有交易）
-  if (customer.lastTransaction && new Date(customer.lastTransaction) >= oneMonthAgo) {
-    return 'new'
-  }
-  
-  // 检查是否已停用
-  if (customer.disabled) {
-    return 'disabled'
-  }
-  
-  // 如果没有交易记录或最后交易时间在三个月前
-  if (!customer.lastTransaction || new Date(customer.lastTransaction) < threeMonthsAgo) {
-    return 'inactive'
-  }
-  
-  // 检查三个月内交易次数
-  const recentTransactions = customer.transactions?.filter(t => 
-    new Date(t.date) >= threeMonthsAgo
-  ) || []
-  
-  if (recentTransactions.length >= 10) {
-    return 'active'
-  } else {
-    return 'normal'
   }
 }
 

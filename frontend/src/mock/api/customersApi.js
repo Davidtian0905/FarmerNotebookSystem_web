@@ -14,111 +14,15 @@ import {
   ERROR_CODES 
 } from '../utils/index.js'
 
+// 导入前端计算模块
+import { 
+  calculateCustomerStatus, 
+  calculateCustomerTransactionStats, 
+  calculateCustomersWithStats, 
+  getCustomerStatistics 
+} from '@/stores/Customer_Calculations.js'
+
 const logger = createLogger('CUSTOMERS_API')
-
-/**
- * 计算客户状态
- * @param {Object} customer - 客户基本信息
- * @param {Array} transactions - 该客户的交易记录
- * @returns {string} 客户状态
- */
-const calculateCustomerStatus = (customer, transactions, lastTransactionTime) => {
-  // 获取当前日期
-  const now = new Date()
-  const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-  
-  // 如果客户已手动设置为停用状态，则保持该状态
-  if (customer.customerStatus === 'disabled') {
-    return 'disabled'
-  }
-  
-  // 创建时间在一个月内的为新增客户
-  const createTime = new Date(customer.createTime)
-  if (createTime > oneMonthAgo) {
-    return 'new'
-  }
-  
-  // 没有交易记录或最后交易时间超过三个月的为待激活
-  if (!lastTransactionTime || new Date(lastTransactionTime) < threeMonthsAgo) {
-    return 'inactive'
-  }
-  
-  // 最近三个月的交易次数超过10次的为活跃客户
-  const recentTransactions = transactions.filter(t => 
-    new Date(t.date) >= threeMonthsAgo && 
-    String(t.customerId) === String(customer.customerId)
-  )
-  
-  if (recentTransactions.length >= 10) {
-    return 'active'
-  }
-  
-  // 其他情况为一般客户
-  return 'normal'
-}
-
-/**
- * 计算客户交易统计数据
- * @param {string} customerId - 客户ID
- * @param {Array} allTransactions - 所有交易记录
- * @returns {Object} 交易统计数据
- */
-const calculateCustomerTransactionStats = (customerId, allTransactions) => {
-  // 筛选该客户的所有出库交易记录
-  // 注意：transaction.customerId可能是字符串格式，需要确保比较的一致性
-  console.log(`正在筛选客户ID ${customerId} 的交易记录，总交易记录数:`, allTransactions.length);
-  console.log(`客户ID类型:`, typeof customerId);
-  
-  // 输出前5条交易记录的customerId字段，查看数据格式
-  console.log('前5条交易记录的customerId字段:');
-  allTransactions.slice(0, 5).forEach((t, i) => {
-    console.log(`交易${i+1}: type=${t.type}, customerId=${t.customerId}, 类型=${typeof t.customerId}`);
-  });
-  
-  // 修改筛选逻辑，只筛选OUTBOUND类型且customerId不为undefined的交易记录
-  const customerTransactions = allTransactions.filter(transaction => {
-    const isOutbound = transaction.type === 'OUTBOUND' || transaction.type === 'outbound';
-    const hasCustomerId = transaction.customerId !== undefined;
-    const isMatchingCustomer = hasCustomerId && String(transaction.customerId) === String(customerId);
-    
-    return isOutbound && isMatchingCustomer;
-  });
-  
-  // 调试日志，查看筛选结果
-  console.log(`找到客户ID ${customerId} 的交易记录:`, customerTransactions.length);
-  if (customerTransactions.length > 0) {
-    console.log('第一条匹配的交易记录:', customerTransactions[0]);
-  }
-  
-  // 计算交易次数
-  const transactionCount = customerTransactions.length
-  
-  // 计算交易总金额
-  const transactionAmount = customerTransactions.reduce((sum, transaction) => 
-    sum + (transaction.totalPrice || 0), 0
-  )
-  
-  // 获取最后交易时间
-  let lastTransactionTime = null
-  if (transactionCount > 0) {
-    // 按日期排序，获取最新的交易记录
-    const sortedTransactions = [...customerTransactions].sort((a, b) => {
-      const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`)
-      const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`)
-      return dateB - dateA
-    })
-    
-    const lastTransaction = sortedTransactions[0]
-    lastTransactionTime = `${lastTransaction.date} ${lastTransaction.time || '00:00:00'}`
-  }
-  
-  return {
-    transactionCount,
-    transactionAmount,
-    lastTransactionTime
-  }
-}
 
 /**
  * Mock客户管理API
@@ -135,7 +39,7 @@ export const mockCustomersApi = {
         page = 1, 
         pageSize = 10, 
         keyword = '', 
-        status = 'all', 
+        customerStatus = 'all', 
         sortField = 'createTime', 
         sortOrder = 'desc' 
       } = params
@@ -156,22 +60,22 @@ export const mockCustomersApi = {
         )
       }
       
+      // 计算所有客户的交易统计和状态
+      const customersWithStats = calculateCustomersWithStats(customerList, allTransactions)
+      
       // 状态筛选
-      if (status !== 'all') {
-        customerList = customerList.filter(customer => {
-          // 计算客户的实际交易统计
-          const stats = calculateCustomerTransactionStats(customer.customerId, allTransactions)
-          // 计算客户状态
-          const calculatedStatus = calculateCustomerStatus(customer, allTransactions, stats.lastTransactionTime)
-          return calculatedStatus === status
-        })
+      let filteredCustomers = customersWithStats
+      if (customerStatus !== 'all') {
+        filteredCustomers = customersWithStats.filter(customer => 
+          customer.customerStatus === customerStatus
+        )
       }
       
       // 计算总数
-      const total = customerList.length
+      const total = filteredCustomers.length
       
       // 排序
-      customerList.sort((a, b) => {
+      filteredCustomers.sort((a, b) => {
         let valueA = a[sortField]
         let valueB = b[sortField]
         
@@ -197,31 +101,13 @@ export const mockCustomersApi = {
       // 分页
       const startIndex = (page - 1) * pageSize
       const endIndex = startIndex + pageSize
-      const pagedCustomers = customerList.slice(startIndex, endIndex)
-      
-      // 为每个客户计算实际交易统计数据
-      const result = pagedCustomers.map(customer => {
-        // 计算客户的实际交易统计
-        const stats = calculateCustomerTransactionStats(customer.customerId, allTransactions)
-        
-        // 计算客户状态
-        const calculatedStatus = calculateCustomerStatus(customer, allTransactions, stats.lastTransactionTime)
-        
-        // 返回完整的客户信息，包括动态计算的交易统计
-        return {
-          ...customer,
-          transactionCount: stats.transactionCount,
-          transactionAmount: stats.transactionAmount,
-          lastTransactionTime: stats.lastTransactionTime,
-          customerStatus: calculatedStatus
-        }
-      })
+      const pagedCustomers = filteredCustomers.slice(startIndex, endIndex)
       
       return createSuccessResponse({
         total,
         page: parseInt(page),
         pageSize: parseInt(pageSize),
-        list: result
+        list: pagedCustomers
       }, '获取客户列表成功')
     } catch (error) {
       logger.error('获取客户列表失败:', error)
@@ -249,7 +135,7 @@ export const mockCustomersApi = {
       }
       
       // 获取客户详情
-      const customer = CUSTOMERS[id]
+      const customer = getCustomerById(id)
       
       if (!customer) {
         return createErrorResponse(
@@ -315,74 +201,12 @@ export const mockCustomersApi = {
       const rangeDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dateRange)
       
       // 计算每个客户的交易统计和状态
-      const customersWithStats = customerList.map(customer => {
-        // 计算客户的实际交易统计
-        const stats = calculateCustomerTransactionStats(customer.customerId, allTransactions)
-        
-        // 计算客户状态
-        const calculatedStatus = calculateCustomerStatus(customer, allTransactions, stats.lastTransactionTime)
-        
-        return {
-          ...customer,
-          transactionCount: stats.transactionCount,
-          transactionAmount: stats.transactionAmount,
-          lastTransactionTime: stats.lastTransactionTime,
-          status: calculatedStatus
-        }
-      })
+      const customersWithStats = calculateCustomersWithStats(customerList, allTransactions)
       
-      // 计算总客户数
-      const totalCustomers = customersWithStats.length
+      // 使用前端计算模块获取客户统计数据
+      const statistics = getCustomerStatistics(customersWithStats)
       
-      // 计算活跃客户数
-      const activeCustomers = customersWithStats.filter(c => c.status === 'active').length
-      
-      // 计算总交易次数
-      const totalTransactions = customersWithStats.reduce((sum, c) => sum + c.transactionCount, 0)
-      
-      // 计算总交易金额
-      const totalAmount = customersWithStats.reduce((sum, c) => sum + c.transactionAmount, 0)
-      
-      // 计算客户状态分布
-      const statusDistribution = {
-        new: customersWithStats.filter(c => c.status === 'new').length,
-        active: activeCustomers,
-        normal: customersWithStats.filter(c => c.status === 'normal').length,
-        inactive: customersWithStats.filter(c => c.status === 'inactive').length,
-        disabled: customersWithStats.filter(c => c.status === 'disabled').length
-      }
-      
-      // 按交易金额排序的前10名客户
-      const topCustomersByAmount = [...customersWithStats]
-        .sort((a, b) => b.transactionAmount - a.transactionAmount)
-        .slice(0, 10)
-        .map(c => ({
-          id: c.customerId,
-          name: c.customername,
-          transactionCount: c.transactionCount,
-          transactionAmount: c.transactionAmount
-        }))
-      
-      // 按交易次数排序的前10名客户
-      const topCustomersByCount = [...customersWithStats]
-        .sort((a, b) => b.transactionCount - a.transactionCount)
-        .slice(0, 10)
-        .map(c => ({
-          id: c.customerId,
-          name: c.customername,
-          transactionCount: c.transactionCount,
-          transactionAmount: c.transactionAmount
-        }))
-      
-      return createSuccessResponse({
-        totalCustomers,
-        activeCustomers,
-        totalTransactions,
-        totalAmount,
-        statusDistribution,
-        topCustomersByAmount,
-        topCustomersByCount
-      }, '获取客户统计数据成功')
+      return createSuccessResponse(statistics, '获取客户统计数据成功')
     } catch (error) {
       logger.error('获取客户统计数据失败:', error)
       return createErrorResponse(
@@ -400,18 +224,20 @@ export const mockCustomersApi = {
   add(params = {}) {
     try {
       const { 
-        name, 
-        phone, 
-        address, 
+        customername, 
+        customerphone, 
+        customeraddress, 
         discountRate = 1.0, 
-        contactPerson, 
-        email, 
-        remark, 
-        status = 'active' 
+        customercontact, 
+        customsource,
+        notes, 
+        customerStatus = 'active',
+        customcategory,
+        customergrade
       } = params
       
       // 参数验证
-      if (!name || !phone || !address) {
+      if (!customername || !customerphone || !customeraddress) {
         return createErrorResponse(
           ERROR_CODES.PARAM_ERROR,
           '客户名称、电话和地址不能为空'
@@ -419,25 +245,27 @@ export const mockCustomersApi = {
       }
       
       // 生成客户ID
-      const id = `CUS${Date.now().toString().slice(-6)}`
+      const customerId = `CUS${Date.now().toString().slice(-6)}`
       
       // 创建客户对象
       const now = new Date().toISOString().replace('T', ' ').slice(0, 19)
       const newCustomer = {
-        id,
-        name,
-        phone,
-        address,
+        customerId,
+        customername,
+        customerphone,
+        customeraddress,
         discountRate,
-        contactPerson,
-        email,
+        customercontact,
+        customsource,
+        customcategory,
+        customergrade,
         createTime: now,
         updateTime: now,
-        status,
+        customerStatus,
         transactionCount: 0,
         transactionAmount: 0,
         lastTransactionTime: null,
-        remark
+        notes
       }
       
       // 在实际应用中，这里会将客户信息保存到数据库
@@ -462,14 +290,16 @@ export const mockCustomersApi = {
     try {
       const { 
         id,
-        name, 
-        phone, 
-        address, 
+        customername, 
+        customerphone, 
+        customeraddress, 
         discountRate, 
-        contactPerson, 
-        email, 
-        remark, 
-        status 
+        customercontact, 
+        customsource,
+        notes, 
+        customerStatus,
+        customcategory,
+        customergrade
       } = params
       
       // 参数验证
@@ -499,14 +329,16 @@ export const mockCustomersApi = {
       // 更新客户信息
       const updatedCustomer = {
         ...customer,
-        name: name || customer.name,
-        phone: phone || customer.phone,
-        address: address || customer.address,
+        customername: customername || customer.customername,
+        customerphone: customerphone || customer.customerphone,
+        customeraddress: customeraddress || customer.customeraddress,
         discountRate: discountRate !== undefined ? discountRate : customer.discountRate,
-        contactPerson: contactPerson !== undefined ? contactPerson : customer.contactPerson,
-        email: email !== undefined ? email : customer.email,
-        remark: remark !== undefined ? remark : customer.remark,
-        status: status || customer.status,
+        customercontact: customercontact !== undefined ? customercontact : customer.customercontact,
+        customsource: customsource !== undefined ? customsource : customer.customsource,
+        customcategory: customcategory !== undefined ? customcategory : customer.customcategory,
+        customergrade: customergrade !== undefined ? customergrade : customer.customergrade,
+        notes: notes !== undefined ? notes : customer.notes,
+        customerStatus: customerStatus || customer.customerStatus,
         updateTime: new Date().toISOString().replace('T', ' ').slice(0, 19),
         // 使用动态计算的交易统计
         transactionCount: stats.transactionCount,
@@ -574,10 +406,10 @@ export const mockCustomersApi = {
    */
   updateStatus(params = {}) {
     try {
-      const { id, status } = params
+      const { id, customerStatus } = params
       
       // 参数验证
-      if (!id || !status) {
+      if (!id || !customerStatus) {
         return createErrorResponse(
           ERROR_CODES.PARAM_ERROR,
           '客户ID和状态不能为空'
@@ -585,7 +417,7 @@ export const mockCustomersApi = {
       }
       
       // 状态验证
-      if (!['active', 'disabled'].includes(status)) {
+      if (!['active', 'disabled'].includes(customerStatus)) {
         return createErrorResponse(
           ERROR_CODES.PARAM_ERROR,
           '状态值无效，只能为active或disabled'
@@ -610,7 +442,7 @@ export const mockCustomersApi = {
       
       return createSuccessResponse({
         id,
-        status,
+        customerStatus,
         updateTime: now
       }, '更新客户状态成功')
     } catch (error) {
