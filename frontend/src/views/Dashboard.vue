@@ -157,15 +157,15 @@ const quickActions = [
     description: '添加新的物料记录',
     icon: 'fas fa-plus',
     iconBgColor: '#10B981',
-    route: '/records/income'
+    route: '/inbound-form'
   },
   {
     id: 2,
     title: '销售记录',
     description: '添加新的交易记录',
-    icon: 'fas fa-minus',
+    icon: 'fas fa-plus',
     iconBgColor: '#EF4444',
-    route: '/records/sale'
+    route: '/outbound-form'
   },
   {
     id: 3,
@@ -173,7 +173,7 @@ const quickActions = [
     description: 'AI智能语音记录',
     icon: 'fas fa-microphone',
     iconBgColor: '#8B5CF6',
-    route: '/records/voice'
+    route: '/RecordAIVoice'
   },
   {
     id: 4,
@@ -181,7 +181,7 @@ const quickActions = [
     description: '拍照识别票据记账',
     icon: 'fas fa-camera',
     iconBgColor: '#F59E0B',
-    route: '/records/ocr'
+    route: '/RecordOCR'
   },
   {
     id: 5,
@@ -189,7 +189,7 @@ const quickActions = [
     description: '检查库存状态',
     icon: 'fas fa-clipboard-check',
     iconBgColor: '#EC4899',
-    route: '/inventory/check'
+    route: '/inventory'
   }
 ]
 

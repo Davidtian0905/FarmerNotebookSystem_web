@@ -65,14 +65,12 @@ FarmerNotebookSystem/
 │   │   ├── Home.vue       # 首页
 │   │   ├── Dashboard.vue  # 仪表板
 │   │   ├── AssetsOverview.vue # 资产总览（支持时间筛选：本年/本月/本周/总统计）
-│   │   ├── Records.vue    # 记录管理
+│   │   ├── Flow.vue    # 记录管理
 │   │   ├── Inventory.vue  # 库存管理
 │   │   ├── Customers.vue  # 客户管理
 │   │   ├── Suppliers.vue  # 供应商管理
 │   │   ├── Data.vue       # 数据管理
 │   │   ├── Vip.vue        # VIP功能
-│   │   ├── TestMock.vue   # Mock功能测试
-│   │   ├── AssetsTestMock.vue # 资产总览Mock测试
 │   │   └── NotFound.vue   # 404页面
 │   ├── mock/              # Mock数据
 │   │   ├── index.js       # Mock数据统一导出

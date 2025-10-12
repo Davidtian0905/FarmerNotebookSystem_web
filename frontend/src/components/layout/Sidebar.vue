@@ -52,7 +52,7 @@
         </li>
         <li class="nav-item">
           <router-link to="/data" class="nav-link" :class="{ 'active': $route.path === '/data' }">
-            <i class="nav-icon fas fa-truck"></i>
+            <i class="nav-icon fas fa-database"></i>
             <span>数据管理</span>
           </router-link>
         </li>

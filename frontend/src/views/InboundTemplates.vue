@@ -446,9 +446,9 @@ import {
   getMaterialGradeOptions,
   getQualityStatusOptions,
   getWarehouseLocationOptions,
-  deleteInboundTemplate,
-  SUPPLIERS
+  deleteInboundTemplate
 } from '@/mock/warehouse_data.js'
+import { SUPPLIERS } from '@/mock/data/suppliers_data.js'
 
 const router = useRouter()
 
