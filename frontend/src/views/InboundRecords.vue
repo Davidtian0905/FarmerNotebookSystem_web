@@ -471,7 +471,7 @@ const materialImagesCache = ref({})
         
         // 累加数量和金额
         summary[materialCode].totalQuantity += record.quantity || 0
-        summary[materialCode].totalAmount += record.amount || 0
+        summary[materialCode].totalAmount += record.totalPrice || 0
         
         // 更新最新日期
         if (new Date(record.date) > new Date(summary[materialCode].latestDate)) {

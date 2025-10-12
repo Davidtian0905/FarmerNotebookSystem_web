@@ -27,7 +27,7 @@
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "商品组合创建成功",
   "data": {
     "list": [
       {
@@ -201,7 +201,7 @@
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "查询成功",
   "data": {
     "list": [
       {
@@ -334,7 +334,7 @@
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "查询成功",
   "data": {
     "list": [
       {
@@ -419,7 +419,7 @@
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "查询成功",
   "data": [
     {
       "value": "ONLINE",
@@ -506,10 +506,10 @@
 | unit | string | 销售单位 |
 | unit_price | decimal | 销售单价 |
 | total_price | decimal | 销售总价 |
-| customerId | string | 客户ID |
-| customername | string | 客户姓名 |
-| customerphone | string | 联系电话 |
-| customeraddress | string | 客户地址 |
+| customer_id | string | 客户ID |
+| customer_name | string | 客户姓名 |
+| customer_phone | string | 联系电话 |
+| customer_address | string | 客户地址 |
 | customer_discount_rate | decimal | 客户折扣率 |
 | discount_amount | decimal | 折扣金额 |
 | final_amount | decimal | 最终金额 |

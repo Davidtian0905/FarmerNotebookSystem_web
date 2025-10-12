@@ -72,7 +72,7 @@ export const calculateSupplierTransactionStats = (supplierId, allTransactions) =
   
   // 计算交易总金额
   const transactionAmount = supplierTransactions.reduce((sum, transaction) => 
-    sum + (transaction.amount || 0), 0
+    sum + (transaction.totalPrice || 0), 0
   )
   
   // 获取最后交易时间

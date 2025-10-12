@@ -221,7 +221,6 @@ const DEFAULT_TRANSACTIONS = [
     batchNumber: "第二批春茶",
     materialType: "茶叶",
     materialGrade: "A级",
-    amount: 5000,
     totalPrice: 5000,
     quantity: 50,
     unit: "斤",
@@ -249,7 +248,6 @@ const DEFAULT_TRANSACTIONS = [
     batchNumber: "第一批春茶",
     materialType: "茶叶",
     materialGrade: "特级",
-    amount: 5000,
     totalPrice: 5000,
     quantity: 50,
     unit: "斤",
@@ -277,7 +275,6 @@ const DEFAULT_TRANSACTIONS = [
     batchNumber: "第一批春茶",
     materialType: "茶叶",
     materialGrade: "特级",
-    amount: 6000,
     totalPrice: 6000,
     quantity: 60,
     unit: "斤",
@@ -305,7 +302,6 @@ const DEFAULT_TRANSACTIONS = [
     batchNumber: "第一批春茶",
     materialType: "茶叶",
     materialGrade: "特级",
-    amount: 6000,
     totalPrice: 6000,
     quantity: 60,
     unit: "斤",
@@ -582,8 +578,8 @@ export const getTransactionStatistics = () => {
   const inboundTransactions = transactions.filter(t => t.type === 'INBOUND')
   const outboundTransactions = transactions.filter(t => t.type === 'OUTBOUND')
   
-  const totalInboundAmount = inboundTransactions.reduce((sum, t) => sum + t.amount, 0)
-  const totalOutboundAmount = outboundTransactions.reduce((sum, t) => sum + t.amount, 0)
+  const totalInboundAmount = inboundTransactions.reduce((sum, t) => sum + t.totalPrice, 0)
+  const totalOutboundAmount = outboundTransactions.reduce((sum, t) => sum + t.totalPrice, 0)
   
   return {
     totalTransactions,
@@ -1832,15 +1828,15 @@ export const debugTransactionData = () => {
   
   console.log('入库记录数:', inboundTransactions.length)
   console.log('出库记录数:', outboundTransactions.length)
-  console.log('总入库金额:', inboundTransactions.reduce((sum, t) => sum + t.amount, 0))
-  console.log('总出库金额:', outboundTransactions.reduce((sum, t) => sum + t.amount, 0))
+  console.log('总入库金额:', inboundTransactions.reduce((sum, t) => sum + t.totalPrice, 0))
+  console.log('总出库金额:', outboundTransactions.reduce((sum, t) => sum + t.totalPrice, 0))
   
   // 显示当前时间范围内的金额统计
   const currentYearInbound = currentYearTransactions.filter(t => t.type === 'INBOUND')
   const currentYearOutbound = currentYearTransactions.filter(t => t.type === 'OUTBOUND')
   
-  console.log('本年入库金额:', currentYearInbound.reduce((sum, t) => sum + t.amount, 0))
-  console.log('本年出库金额:', currentYearOutbound.reduce((sum, t) => sum + t.amount, 0))
+  console.log('本年入库金额:', currentYearInbound.reduce((sum, t) => sum + t.totalPrice, 0))
+  console.log('本年出库金额:', currentYearOutbound.reduce((sum, t) => sum + t.totalPrice, 0))
 }
 
 /**
